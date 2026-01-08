@@ -25,15 +25,43 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
+  // Spring Web / Security
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-security'
+  implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+  // Persistence
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+  // Validation (DTO 검증)
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+  //JWT
+  implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+  runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+  runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+  // DB
 	runtimeOnly 'org.postgresql:postgresql'
+
+  // DB Migration (Flyway)
+  implementation 'org.flywaydb:flyway-core'
+  runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+
+  //Lombok
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+  // Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootRun {
+        systemProperty 'spring.output.ansi.enabled', 'ALWAYS'
+    }
