@@ -15,7 +15,7 @@ import lombok.*;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_meeting_attendee_meeting_member",
-                        columnNames = {"meeting_id", "project_member_id"} // 조합 unique 반영
+                        columnNames = {"meeting_id", "attendee_id"} // 조합 unique 반영
                 )
         }
 )
