@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 public abstract class BaseEntity {
 
     @CreatedDate
-    @Column(name="created_at",nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     @LastModifiedDate
