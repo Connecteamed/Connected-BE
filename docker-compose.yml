@@ -1,15 +1,15 @@
 services:
   db:
     image: postgres:16
-    container_name: connected-be-db
+    container_name: connecteamed-be-db
     environment:
-      POSTGRES_DB: connected
-      POSTGRES_USER: connected
-      POSTGRES_PASSWORD: connected
+      POSTGRES_DB: connecteamed
+      POSTGRES_USER: connecteamed
+      POSTGRES_PASSWORD: connecteamed
     ports:
       - "5432:5432"
     volumes:
-      - connected-be-db:/var/lib/postgresql/data
+      - connecteamed-be-db:/var/lib/postgresql/data
 
 volumes:
-  connected-be-db:
+  connecteamed-be-db:
