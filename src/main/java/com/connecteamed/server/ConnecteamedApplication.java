@@ -1,17 +1,17 @@
-package com.connected.be;
+package com.connecteamed.server;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EntityScan(basePackages = "com.connecteamed.server")
 @EnableJpaAuditing
-public class ConnectedBeApplication {
+public class ConnecteamedApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ConnectedBeApplication.class, args);
+		Dotenv.load();
+		SpringApplication.run(ConnecteamedApplication.class, args);
 	}
 
 }
