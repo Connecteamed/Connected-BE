@@ -18,5 +18,11 @@ spring:
         highlight_sql: true
     open-in-view: false
 
+springdoc:
+  swagger-ui:
+    # Swagger UI 접속 경로를 /docs로 변경
+    # http://localhost:8080/docs 로 접속
+    path: /docs
+
 server:
   port: 8080
