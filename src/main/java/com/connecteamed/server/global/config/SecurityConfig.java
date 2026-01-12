@@ -19,6 +19,8 @@ public class SecurityConfig {
                         .requestMatchers("/docs", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         // API 경로로 이어지는 접근 허용
                         .requestMatchers("/api/**").permitAll()
+                        //기본 경로 접근 허용
+                        .requestMatchers("/").permitAll()
                         // 그 외의 요청은 인증 필요하도록 설정
                         .anyRequest().authenticated()
                 );
