@@ -1,13 +1,14 @@
-package com.connected.be;
+package com.connecteamed.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ConnectedBeApplication {
+public class ConnecteamedApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ConnectedBeApplication.class, args);
+		SpringApplication.run(ConnecteamedApplication.class, args);
 	}
 
 }
+
