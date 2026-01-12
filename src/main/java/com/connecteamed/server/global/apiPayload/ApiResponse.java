@@ -32,13 +32,13 @@ public class ApiResponse<T> {
         return new ApiResponse<>("success",data, null, null);
     }
 
-    //실패한 경우 - 데이터가 필요 없는 일반적인 경우({status,message,code} 구조)
+    //실패한 경우 onFailure1 - 데이터가 필요 없는 일반적인 경우({status,message,code} 구조)
     public static <T> ApiResponse<T> onFailure(BaseErrorCode code){
         return new ApiResponse<>("error",null, code.getMessage(), code.getCode());
     }
 
 
-    //실패한 경우 만약 데이터까지 내려주어야 할 경우
+    //실패한 경우 onFailure2 - 만약 데이터까지 내려주어야 할 경우
     public static <T> ApiResponse<T> onFailure(BaseErrorCode code, T data){
         return new ApiResponse<>("error",data, code.getMessage(), code.getCode());
     }

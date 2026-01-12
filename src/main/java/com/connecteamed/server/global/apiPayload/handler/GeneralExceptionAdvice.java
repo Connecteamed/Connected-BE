@@ -20,13 +20,12 @@ public class GeneralExceptionAdvice {
                 );
     }
 
-    //그 외 정의되지 않은 모든 예외 처리 우선은 data부분에 ex.getMessage() 전달-> 수정필요?
+    //사용자가 정의 하는 범위 외 발생 예외 처리- onFailure 1 구조를 따름
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<String>> handleException(Exception ex){
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex){
         BaseErrorCode code = GeneralErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity.status(code.getStatus())
-                .body(ApiResponse.onFailure(code,ex.getMessage()
-                )
+                .body(ApiResponse.onFailure(code)
                 );
 
     }
