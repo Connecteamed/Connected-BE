@@ -2,6 +2,7 @@ package com.connecteamed.server.domain.project.entity;
 
 
 import com.connecteamed.server.domain.member.entity.Member;
+import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +20,7 @@ uniqueConstraints = {
 )
         }
 )
-public class ProjectMember {
+public class ProjectMember extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
