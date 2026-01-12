@@ -45,8 +45,8 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 
   // DB Migration (Flyway)
-  implementation 'org.flywaydb:flyway-core'
-  runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+  //implementation 'org.flywaydb:flyway-core'
+  //runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 
   // Environment Variables (.env)
   implementation 'io.github.cdimascio:dotenv-java:3.0.0'
