@@ -46,7 +46,7 @@ public class ApiResponse<T> {
     }
 
     //실패 응답 2 : data가 필요 없는 일반적인 경우 + custom message 사용
-    public static <T> ApiResponse<T> onSuccess(BaseSuccessCode code, String customMessage){
+    public static <T> ApiResponse<T> onFailure(BaseErrorCode code, String customMessage){
         return new ApiResponse<>("error",null, customMessage, code.getCode());
     }
 
