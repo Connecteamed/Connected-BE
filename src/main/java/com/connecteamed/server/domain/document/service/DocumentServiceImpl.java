@@ -1,14 +1,13 @@
 package com.connecteamed.server.domain.document.service;
 
-// imports 추가
-import java.net.URI;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,9 @@ import com.connecteamed.server.domain.project.repository.ProjectMemberRepository
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
@@ -93,17 +94,28 @@ public class DocumentServiceImpl implements DocumentService {
             throw new IllegalArgumentException("TEXT 문서는 다운로드 대상이 아닙니다.");
         }
         if (d.getFileUrl() == null || d.getFileUrl().isBlank()) {
-            throw new IllegalArgumentException("파일 URL이 없습니다.");
+            throw new IllegalArgumentException("파일 key가 없습니다.");
         }
 
+        String key = d.getFileUrl();
+
         try {
-            Resource resource = new UrlResource(URI.create(d.getFileUrl()));
-            String encoded = URLEncoder.encode(d.getTitle(), StandardCharsets.UTF_8).replace("+", "%20");
+            InputStream in = s3StorageService.download(key);
+            Resource resource = new InputStreamResource(in);
+
+            // 다운로드 파일명: DB title 우선, 없으면 key에서 파일명 뽑기
+            String filename = (d.getTitle() != null && !d.getTitle().isBlank())
+                    ? d.getTitle()
+                    : key.substring(key.lastIndexOf('/') + 1);
+
+            String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
 
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encoded + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + encoded + "\"; filename*=UTF-8''" + encoded)
                     .body(resource);
+
         } catch (Exception e) {
             throw new IllegalArgumentException("파일 다운로드에 실패했습니다.");
         }
