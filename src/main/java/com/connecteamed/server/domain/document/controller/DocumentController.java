@@ -1,15 +1,30 @@
 package com.connecteamed.server.domain.document.controller;
 
-import com.connecteamed.server.domain.document.dto.*;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.connecteamed.server.domain.document.dto.DocumentCreateRes;
+import com.connecteamed.server.domain.document.dto.DocumentCreateTextReq;
+import com.connecteamed.server.domain.document.dto.DocumentDetailRes;
+import com.connecteamed.server.domain.document.dto.DocumentListRes;
+import com.connecteamed.server.domain.document.dto.DocumentUpdateTextReq;
+import com.connecteamed.server.domain.document.dto.DocumentUploadRes;
 import com.connecteamed.server.domain.document.enums.DocumentFileType;
 import com.connecteamed.server.domain.document.service.DocumentService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
 
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -55,7 +70,7 @@ public class DocumentController {
     @PostMapping("/projects/{projectId}/documents/text")
     public ApiResponse<DocumentCreateRes> createText(
             @PathVariable Long projectId,
-            @RequestBody DocumentCreateTextReq req
+            @Valid @RequestBody DocumentCreateTextReq req
     ) {
         Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
         return ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.createText(projectId, projectMemberId, req));
