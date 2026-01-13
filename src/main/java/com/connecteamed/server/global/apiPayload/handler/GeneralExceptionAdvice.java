@@ -13,14 +13,13 @@ public class GeneralExceptionAdvice {
 
     //애플리 케이션에서 발생하는 커스텀 예외 처리
     @ExceptionHandler(GeneralException.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(GeneralException ex){
-
+    public ResponseEntity<ApiResponse<?>> handleException(GeneralException ex){
         return ResponseEntity.status(ex.getCode().getStatus())
-                .body(ApiResponse.onFailure(ex.getCode())
+                .body(ApiResponse.onFailure(ex.getCode(),ex.getCustomMessage())
                 );
     }
 
-    //사용자가 정의 하는 범위 외 발생 예외 처리- onFailure 1 구조를 따름
+    //사용자가 정의 하는 범위 외 발생 예외 처리- 실패응답 1 구조를 따름
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception ex){
         BaseErrorCode code = GeneralErrorCode.INTERNAL_SERVER_ERROR;
