@@ -12,7 +12,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @JsonPropertyOrder({"status","data","message","code"})
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
     @JsonProperty("status")
@@ -27,18 +26,33 @@ public class ApiResponse<T> {
     @JsonProperty("code")
     private final String code;
 
-    //성공한 경우({status, data} 구조)
+    //성공 응답 (code는 NULL로 처리)
+
+    //성공 응답 1 : 에러 enum에 정의 된 메세지를 그대로 사용
     public static <T> ApiResponse<T> onSuccess(BaseSuccessCode code,T data){
-        return new ApiResponse<>("success",data, null, null);
+        return new ApiResponse<>("success",data, code.getMessage(), null);
     }
 
-    //실패한 경우 onFailure1 - 데이터가 필요 없는 일반적인 경우({status,message,code} 구조)
+    //성공 응답 2 : custom message 사용
+    public static <T> ApiResponse<T> onSuccess(BaseSuccessCode code,T data,String customMessage){
+        return new ApiResponse<>("success",data,customMessage,null);
+    }
+
+    //실패 응답 1,2  (data는 NULL로 처리)
+
+    //실패 응답 1 : data가 필요 없는 일반적인 경우 + 에러 enum에 정의 된 메세지를 그대로 사용
     public static <T> ApiResponse<T> onFailure(BaseErrorCode code){
         return new ApiResponse<>("error",null, code.getMessage(), code.getCode());
     }
 
+    //실패 응답 2 : data가 필요 없는 일반적인 경우 + custom message 사용
+    public static <T> ApiResponse<T> onSuccess(BaseSuccessCode code, String customMessage){
+        return new ApiResponse<>("error",null, customMessage, code.getCode());
+    }
 
-    //실패한 경우 onFailure2 - 만약 데이터까지 내려주어야 할 경우
+
+
+    //실패한 응답 3 : data까지 내려주어야 할 경우
     public static <T> ApiResponse<T> onFailure(BaseErrorCode code, T data){
         return new ApiResponse<>("error",data, code.getMessage(), code.getCode());
     }
