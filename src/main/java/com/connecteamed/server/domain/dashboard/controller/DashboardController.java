@@ -5,13 +5,16 @@ import com.connecteamed.server.domain.dashboard.service.DashboardService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,10 +27,16 @@ public class DashboardController {
 
     /**
      * 최근 회고 목록 조회
+     * 로그인 사용자가 작성한 회고만 최근순으로 조회
+     * @param authentication 로그인한 사용자 정보 (JWT 인증 시 사용)
+     * @param username 개발 환경 테스트용 사용자 ID (선택)
      * @return 회고 목록 응답
      */
     @GetMapping("/recent")
-    @Operation(summary = "최근 회고 목록 조회", description = "최근에 작성된 회고 목록을 조회합니다")
+    @Operation(
+            summary = "최근 회고 목록 조회",
+            description = "로그인한 사용자가 작성한 최근 회고 목록을 조회합니다. 개발 환경에서는 username 파라미터로 테스트 가능합니다."
+    )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
@@ -35,8 +44,24 @@ public class DashboardController {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    public ApiResponse<DashboardRes.RetrospectiveListRes> getRecentRetrospectives() {
-        DashboardRes.RetrospectiveListRes response = dashboardService.getRecentRetrospectives();
+    public ApiResponse<DashboardRes.RetrospectiveListRes> getRecentRetrospectives(
+            Authentication authentication,
+            @Parameter(description = "개발 환경 테스트용 사용자 로그인 ID (예: user@example.com)", example = "writer@example.com")
+            @RequestParam(required = false) String username
+    ) {
+        // 1순위: JWT 인증 정보에서 username 추출
+        // 2순위: 쿼리 파라미터로 받은 username 사용 (개발 환경 테스트용)
+        String userId = (authentication != null) ? authentication.getName() : username;
+
+        DashboardRes.RetrospectiveListRes response;
+        if (userId != null) {
+            // 특정 사용자의 회고만 조회
+            response = dashboardService.getRecentRetrospectives(userId);
+        } else {
+            // 사용자 정보가 없으면 모든 회고 조회
+            response = dashboardService.getRecentRetrospectives();
+        }
+
         return ApiResponse.onSuccess(
                 GeneralSuccessCode._OK,
                 response,
@@ -44,3 +69,4 @@ public class DashboardController {
         );
     }
 }
+
