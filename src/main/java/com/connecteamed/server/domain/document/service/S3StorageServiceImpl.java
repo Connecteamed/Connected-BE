@@ -3,6 +3,8 @@ package com.connecteamed.server.domain.document.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -12,6 +14,7 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class S3StorageServiceImpl implements S3StorageService {
 
@@ -45,6 +48,8 @@ public class S3StorageServiceImpl implements S3StorageService {
             s3Client.putObject(req, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
             return key; // DB에는 key 저장 권장
         } catch (Exception e) {
+            log.error("S3 upload failed. bucket={}, prefix={}, keyPrefix={}, filename={}, size={}",
+                bucket, prefix, keyPrefix, file.getOriginalFilename(), file.getSize(), e);
             throw new RuntimeException("S3 업로드 실패", e);
         }
     }
