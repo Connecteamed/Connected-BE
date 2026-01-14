@@ -18,6 +18,13 @@ spring:
         highlight_sql: true
     open-in-view: false
 
+jwt:
+  token:
+    secretKey: ZGh3YWlkc1F2ZXdhZXZ3b2EgMTM5ZXUgMDMxdWMyIHEyMiBAIDAgKTJFVio=
+    expiration:
+      access: 14400000
+
+
 springdoc:
   swagger-ui:
     # Swagger UI 접속 경로를 /docs로 변경
