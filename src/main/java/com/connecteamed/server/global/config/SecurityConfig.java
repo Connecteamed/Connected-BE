@@ -23,6 +23,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/index.html",
                                 "/document.html",
+                                "/member_role.html",
                                 "/css/**", "/js/**", "/images/**",
                                 "/favicon.ico",
                                 "/error"
