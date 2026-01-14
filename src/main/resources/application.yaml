@@ -20,7 +20,7 @@ spring:
 
 jwt:
   token:
-    secretKey: ZGh3YWlkc1F2ZXdhZXZ3b2EgMTM5ZXUgMDMxdWMyIHEyMiBAIDAgKTJFVio=
+    secretKey: ${JWT_SECRET_KEY}
     expiration:
       access: 14400000
 
