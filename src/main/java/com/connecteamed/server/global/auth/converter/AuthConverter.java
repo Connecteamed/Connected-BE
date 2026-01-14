@@ -17,7 +17,6 @@ public class AuthConverter {
                 .loginId(dto.loginId())
                 .password(encodedPassword)
                 .name(dto.name())
-                .publicId(UUID.randomUUID())
                 .socialType(SocialType.LOCAL)
                 .build();
     }
