@@ -2,6 +2,7 @@ package com.connecteamed.server.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,41 +12,45 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // local: API 전체 오픈
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // 개발/테스트 편의용(운영에서는 정책에 맞게 재설정)
-                .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults())
+    @Profile("local")
+    public SecurityFilterChain localFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+            .cors(Customizer.withDefaults())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/", "/index.html", "/document.html",
+                    "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error",
+                    "/docs", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**"
+                ).permitAll()
+                .requestMatchers("/api/**").permitAll()
+                .anyRequest().permitAll()
+            )
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable());
 
-                .authorizeHttpRequests(auth -> auth
-                        // 기본/정적 리소스
-                        .requestMatchers(
-                                "/", "/index.html",
-                                "/document.html",
-                                "/css/**", "/js/**", "/images/**",
-                                "/favicon.ico",
-                                "/error"
-                        ).permitAll()
+        return http.build();
+    }
 
-                        // Swagger (springdoc)
-                        // swagger-ui.path=/docs 라면 /docs, /docs/** 둘 다 열어주는게 안전합니다.
-                        .requestMatchers(
-                                "/docs", "/docs/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-
-                        // API (테스트용 전체 오픈)
-                        .requestMatchers("/api/**").permitAll()
-
-                        // 그 외는 인증 필요
-                        .anyRequest().authenticated()
-                )
-
-                // 리다이렉트/팝업 방지용(필요 없으면 제거 가능)
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable());
+    // dev/prod: API 보호
+    @Bean
+    @Profile("!local")
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+            .cors(Customizer.withDefaults())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/", "/index.html", "/document.html",
+                    "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error",
+                    "/docs", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**"
+                ).permitAll()
+                // 로그인/회원가입 같은 것만 예외로 오픈
+                .requestMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable());
 
         return http.build();
     }
