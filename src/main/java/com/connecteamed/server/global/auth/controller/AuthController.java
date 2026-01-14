@@ -4,7 +4,7 @@ package com.connecteamed.server.global.auth.controller;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.auth.dto.AuthReqDTO;
 import com.connecteamed.server.global.auth.dto.AuthResDTO;
-import com.connecteamed.server.global.auth.exception.code1.AuthSuccessCode;
+import com.connecteamed.server.global.auth.exception.code.AuthSuccessCode;
 import com.connecteamed.server.global.auth.service.AuthCommandService;
 import com.connecteamed.server.global.auth.service.AuthQueryService;
 import jakarta.validation.Valid;

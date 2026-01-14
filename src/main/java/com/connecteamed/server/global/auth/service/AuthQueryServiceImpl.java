@@ -10,7 +10,7 @@ import com.connecteamed.server.global.auth.converter.AuthConverter;
 import com.connecteamed.server.global.auth.dto.AuthReqDTO;
 import com.connecteamed.server.global.auth.dto.AuthResDTO;
 import com.connecteamed.server.global.auth.exception.AuthException;
-import com.connecteamed.server.global.auth.exception.code1.AuthErrorCode;
+import com.connecteamed.server.global.auth.exception.code.AuthErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -6,7 +6,7 @@ import com.connecteamed.server.global.auth.converter.AuthConverter;
 import com.connecteamed.server.global.auth.dto.AuthReqDTO;
 import com.connecteamed.server.global.auth.dto.AuthResDTO;
 import com.connecteamed.server.global.auth.exception.AuthException;
-import com.connecteamed.server.global.auth.exception.code1.AuthErrorCode;
+import com.connecteamed.server.global.auth.exception.code.AuthErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class AuthCommandServiceImpl implements AuthCommandService {
     @Override
     public AuthResDTO.JoinDTO signup(
             AuthReqDTO.JoinDTO dto
-    ){try {
+    ) {
         //중복 에러 처리
         if (memberRepository.existsByLoginId(dto.loginId())) {
             throw new AuthException(AuthErrorCode.DUPLICATE_LOGIN_ID);
@@ -40,12 +40,8 @@ public class AuthCommandServiceImpl implements AuthCommandService {
 
         // Entity -> Response DTO 변환 및 반환
         return AuthConverter.toJoinResultDTO(savedMember);
-    }
-        catch (Exception e) {
-            // 이 코드가 에러의 '진짜 이유'를 콘솔에 빨간 글씨로 뿌려줍니다.
-            e.printStackTrace();
-            throw e;
-        }
+
+
 
     }
 }
