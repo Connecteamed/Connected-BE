@@ -1,8 +1,7 @@
-package com.connecteamed.server.global.auth; // 실제 패키지 경로에 맞게 수정하세요.
+package com.connecteamed.server.global.auth;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
