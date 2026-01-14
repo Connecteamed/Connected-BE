@@ -9,6 +9,8 @@ import com.connecteamed.server.domain.meeting.repository.MeetingAttendeeReposito
 import com.connecteamed.server.domain.meeting.repository.MeetingRepository;
 import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
+import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +32,7 @@ public class MeetingService {
     @Transactional
     public MeetingCreateRes createMeeting(Long projectId, MeetingCreateReq request) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
         Meeting meeting = Meeting.builder()
                 .project(project)
                 .title(request.title())
@@ -68,7 +70,7 @@ public class MeetingService {
     @Transactional
     public MeetingDetailRes updateMeeting(Long meetingId, MeetingUpdateReq request) {
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNull(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("회의록을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
 
         // 기본 정보 업데이트
         meeting.update(request.title(), request.meetingDate());
@@ -100,7 +102,7 @@ public class MeetingService {
     // 회의록 상세 조회
     public MeetingDetailRes getMeeting(Long meetingId) {
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNull(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("회의록을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
 
         return new MeetingDetailRes(
                 meeting.getId(),
