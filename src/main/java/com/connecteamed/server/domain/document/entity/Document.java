@@ -7,6 +7,7 @@ import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -47,7 +48,7 @@ public class Document extends BaseEntity {
     private String content;
 
     @Column(name="deleted_at")
-    private OffsetDateTime deletedAt;
+    private LocalDateTime deletedAt;
 
     @PrePersist
     public void prePersist(){

@@ -5,6 +5,7 @@ import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -31,10 +32,10 @@ public class Meeting extends BaseEntity {
     private String title;
 
     @Column(name = "meeting_date", nullable = false)
-    private OffsetDateTime meetingDate;
+    private LocalDateTime meetingDate;
 
     @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
+    private LocalDateTime deletedAt;
 
     @PrePersist
     public void prePersist() {
