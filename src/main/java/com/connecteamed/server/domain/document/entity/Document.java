@@ -87,8 +87,15 @@ public class Document extends BaseEntity {
         if (this.fileType != DocumentFileType.TEXT) {
             throw new IllegalArgumentException("TEXT 문서만 수정할 수 있습니다.");
         }
-        this.title = title;
-        this.content = content;
+        if (title != null) {
+            if (title.isBlank()) {
+                throw new IllegalArgumentException("제목은 공백일 수 없습니다.");
+            }
+            this.title = title;
+        }
+        if (content != null) {
+            this.content = content;
+        }
     }
 
     public void softDelete() {
