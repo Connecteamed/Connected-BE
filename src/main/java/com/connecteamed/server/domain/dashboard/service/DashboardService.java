@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,7 @@ public class DashboardService {
                         .id(retrospective.getId())
                         .title(retrospective.getTitle())
                         .teamName(retrospective.getProject().getName())
-                        .writtenDate(retrospective.getCreatedAt().toLocalDate())
+                        .writtenDate(retrospective.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDate())
                         .build())
                 .collect(Collectors.toList());
 

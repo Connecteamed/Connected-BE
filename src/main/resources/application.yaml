@@ -26,3 +26,15 @@ springdoc:
 
 server:
   port: 8080
+
+app:
+  s3:
+    access-key: ${APP_S3_ACCESS_KEY:disabled}
+    secret-key: ${APP_S3_SECRET_KEY:disabled}
+    region: ${APP_S3_REGION:ap-northeast-2}
+    bucket: ${APP_S3_BUCKET:disabled}
+
+  # Test Configuration
+  test:
+    login-id: ${TEST_LOGIN_ID:test@example.com}
+    user-name: ${TEST_USER_NAME:테스트사용자}

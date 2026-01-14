@@ -22,15 +22,18 @@ public class Project extends BaseEntity {
     @Column(name="public_id",nullable = false,unique = true,columnDefinition = "UUID")
     private UUID publicId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="owner_id",nullable = false)
     private Member owner;
 
-    @Column(name="name",nullable = false)
+    @Column(name="name",nullable = false, unique = true)
     private String name;
 
     @Column(name="goal",nullable = false, columnDefinition = "TEXT")
     private String goal;
+
+    @Column(name="image_url")
+    private String imageUrl;
 
     @PrePersist
     public void prePersist(){
