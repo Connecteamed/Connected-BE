@@ -28,6 +28,8 @@ import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
+import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +73,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional(readOnly = true)
     public DocumentDetailRes detail(Long documentId) {
         Document d = documentRepository.findByIdAndDeletedAtIsNull(documentId)
-                .orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "문서를 찾을 수 없습니다."));
 
         return new DocumentDetailRes(
                 d.getId(),
