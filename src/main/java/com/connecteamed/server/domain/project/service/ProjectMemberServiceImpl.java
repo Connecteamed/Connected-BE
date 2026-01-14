@@ -1,20 +1,25 @@
 package com.connecteamed.server.domain.project.service;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.connecteamed.server.domain.project.dto.ProjectMemberRes;
 import com.connecteamed.server.domain.project.dto.ProjectMemberRoleUpdateReq;
+import com.connecteamed.server.domain.project.dto.ProjectRoleListRes;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.entity.ProjectMemberRole;
 import com.connecteamed.server.domain.project.entity.ProjectRole;
 import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
+import com.connecteamed.server.domain.project.repository.ProjectRequiredRoleRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRoleRepository;
 import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectRoleRepository projectRoleRepository;
+    private final ProjectRequiredRoleRepository projectRequiredRoleRepository;
 
     @Override
     public List<ProjectMemberRes> getProjectMembers(Long projectId) {
@@ -77,6 +83,21 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         projectMemberRepository.save(pm);
 
         return toRes(pm);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProjectRoleListRes getProjectRoles(Long projectId) {
+        List<Object[]> rows = projectRequiredRoleRepository.findRequiredRoles(projectId);
+
+        List<ProjectRoleListRes.RoleItem> roles = rows.stream()
+                .map(r -> new ProjectRoleListRes.RoleItem(
+                        (Long) r[0],
+                        (String) r[1]
+                ))
+                .toList();
+
+        return new ProjectRoleListRes(roles);
     }
 
     private ProjectMemberRes toRes(ProjectMember pm) {
