@@ -119,7 +119,7 @@ public class DocumentServiceImpl implements DocumentService {
                     .body(resource);
 
         } catch (Exception e) {
-            throw new IllegalArgumentException("파일 다운로드에 실패했습니다.");
+            throw new IllegalArgumentException("파일 다운로드에 실패했습니다.", e);
         }
     }
 
