@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -35,6 +37,19 @@ public class Meeting extends BaseEntity {
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MeetingAgenda> agendas = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MeetingAttendee> attendees = new ArrayList<>();
+
+    public void update(String title, String meetingDate) {
+        this.title = title;
+        this.meetingDate = OffsetDateTime.parse(meetingDate);
+    }
 
     @PrePersist
     public void prePersist() {
