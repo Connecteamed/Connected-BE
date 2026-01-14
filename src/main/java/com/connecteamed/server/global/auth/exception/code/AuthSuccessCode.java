@@ -1,4 +1,4 @@
-package com.connecteamed.server.global.auth.exception.code1;
+package com.connecteamed.server.global.auth.exception.code;
 
 import com.connecteamed.server.global.apiPayload.code.BaseSuccessCode;
 import lombok.AllArgsConstructor;
