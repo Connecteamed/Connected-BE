@@ -29,7 +29,11 @@ public class MeetingAttendee extends BaseEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attendee_id", nullable = false)
-    private ProjectMember projectMember;
+    // 기존 ProjectMember 대신 Long 타입 ID 필드 추가
+    @Column(name = "attendee_id", nullable = false)
+    private Long attendeeId;
+
+    //@ManyToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(name = "attendee_id", nullable = false)
+    //private ProjectMember projectMember;
 }
