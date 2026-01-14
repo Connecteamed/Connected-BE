@@ -2,6 +2,7 @@ package com.connecteamed.server.global.auth;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -44,10 +45,12 @@ public class JwtUtil {
 
     // [4] 토큰 유효성 확인
     public boolean isValid(String token) {
+        Logger log = null;
         try {
             getClaims(token);
             return true;
         } catch (JwtException e) {
+            log.error("유효하지 않은 토큰입니다: {}", e.getMessage());
             return false;
         }
     }

@@ -14,7 +14,8 @@ public enum AuthErrorCode implements BaseErrorCode {
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH4013", "토큰이 만료되었습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH4014", "유효하지 않은 토큰입니다."),
     // 회원가입 시 중복된 아이디가 있을 경우
-    DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "AUTH4091", "이미 존재하는 아이디입니다.")
+    DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "AUTH4091", "이미 존재하는 아이디입니다."),
+    EMPTY_AUTHENTICATION(HttpStatus.UNAUTHORIZED, "AUTH4011", "인증 정보가 존재하지 않습니다.")
     ;
 
     private final HttpStatus status;
