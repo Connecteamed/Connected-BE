@@ -23,6 +23,7 @@ public record MeetingDetailRes(
 
     public record AttendeeInfo(
             Long id,
-            Long attendeeId
+            Long attendeeId,
+            String name
     ) {}
 }

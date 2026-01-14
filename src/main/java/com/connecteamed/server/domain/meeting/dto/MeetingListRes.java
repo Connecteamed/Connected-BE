@@ -6,13 +6,14 @@ public record MeetingListRes (
     List<MeetingSummary> meetings
 ) {
     public record MeetingSummary(
-            String meetingId,
+            Long meetingId,
             String title,
             String meetingDate,
             List<AttendeeSummary> attendees
     ) {}
 
     public record AttendeeSummary(
-            Long attendeeId
+            Long attendeeId,
+            String name
     ) {}
 }
