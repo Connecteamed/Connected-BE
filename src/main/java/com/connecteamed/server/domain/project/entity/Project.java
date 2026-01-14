@@ -2,6 +2,8 @@ package com.connecteamed.server.domain.project.entity;
 
 
 import com.connecteamed.server.domain.member.entity.Member;
+import com.connecteamed.server.domain.project.enums.ProjectStatus;
+import com.connecteamed.server.domain.task.enums.TaskStatus;
 import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,6 +33,11 @@ public class Project extends BaseEntity {
 
     @Column(name="goal",nullable = false, columnDefinition = "TEXT")
     private String goal;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="status",nullable = false)
+    @Builder.Default
+    private ProjectStatus status=ProjectStatus.IN_PROGRESS;
 
     @PrePersist
     public void prePersist(){
