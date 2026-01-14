@@ -22,7 +22,7 @@ public class Project extends BaseEntity {
     @Column(name="public_id",nullable = false,unique = true,columnDefinition = "UUID")
     private UUID publicId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="owner_id",nullable = false)
     private Member owner;
 
