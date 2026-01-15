@@ -5,6 +5,7 @@ import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.project.code.ProjectErrorCode;
 import com.connecteamed.server.domain.project.dto.ProjectCreateReq;
 import com.connecteamed.server.domain.project.dto.ProjectRes;
+import com.connecteamed.server.domain.project.dto.ProjectUpdateReq;
 import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectRequiredRole;
 import com.connecteamed.server.domain.project.entity.ProjectRole;
@@ -147,6 +148,68 @@ public class ProjectService {
                 .name(project.getName())
                 .goal(project.getGoal())
                 .requiredRoleNames(requiredRoleNames)
+                .build();
+    }
+
+    /**
+     * 프로젝트 수정
+     * @param projectId 프로젝트 ID
+     * @param updateReq 프로젝트 수정 요청
+     * @return 수정된 프로젝트 정보
+     */
+    public ProjectRes.CreateResponse updateProject(Long projectId, ProjectUpdateReq updateReq) {
+        log.info("[ProjectService] updateProject called with projectId: {}", projectId);
+
+        // 1. 프로젝트 존재 여부 확인
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> {
+                    log.error("[ProjectService] Project not found with id: {}", projectId);
+                    return new GeneralException(ProjectErrorCode.PROJECT_NOT_FOUND);
+                });
+        log.info("[ProjectService] Project found: id={}, name={}", project.getId(), project.getName());
+
+        // 2. 프로젝트명 중복 체크 (다른 프로젝트와 중복 시)
+        if (updateReq.getName() != null && !updateReq.getName().equals(project.getName())) {
+            projectRepository.findByName(updateReq.getName()).ifPresent(existingProject -> {
+                log.error("[ProjectService] Project name already exists: {}", updateReq.getName());
+                throw new GeneralException(ProjectErrorCode.PROJECT_NAME_ALREADY_EXISTS);
+            });
+        }
+
+        // 3. 프로젝트 기본 정보 수정
+        project.updateProject(updateReq.getName(), updateReq.getGoal());
+        log.info("[ProjectService] Project basic info updated: name={}, goal={}", project.getName(), project.getGoal());
+
+        // 4. 기존 필요 역할 삭제
+        List<ProjectRequiredRole> existingRoles = projectRequiredRoleRepository.findByProjectId(projectId);
+        projectRequiredRoleRepository.deleteAll(existingRoles);
+        log.debug("[ProjectService] Existing required roles deleted: count={}", existingRoles.size());
+
+        // 5. 새로운 필요 역할 등록
+        if (updateReq.getRequiredRoleNames() != null && !updateReq.getRequiredRoleNames().isEmpty()) {
+            log.debug("[ProjectService] Registering new required roles: {}", updateReq.getRequiredRoleNames());
+            for (String roleName : updateReq.getRequiredRoleNames()) {
+                ProjectRole projectRole = projectRoleRepository.findByRoleName(roleName)
+                        .orElseThrow(() -> {
+                            log.error("[ProjectService] ProjectRole not found: {}", roleName);
+                            return new GeneralException(ProjectErrorCode.ROLE_NOT_FOUND);
+                        });
+
+                ProjectRequiredRole requiredRole = ProjectRequiredRole.builder()
+                        .project(project)
+                        .projectRole(projectRole)
+                        .build();
+
+                projectRequiredRoleRepository.save(requiredRole);
+                log.debug("[ProjectService] Required role registered: {}", roleName);
+            }
+        }
+
+        // 6. 응답 반환
+        log.info("[ProjectService] Returning CreateResponse: projectId={}", project.getId());
+        return ProjectRes.CreateResponse.builder()
+                .projectId(project.getId())
+                .createdAt(project.getCreatedAt())
                 .build();
     }
 }

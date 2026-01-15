@@ -4,6 +4,7 @@ import com.connecteamed.server.domain.project.code.ProjectErrorCode;
 import com.connecteamed.server.domain.project.code.ProjectSuccessCode;
 import com.connecteamed.server.domain.project.dto.ProjectCreateReq;
 import com.connecteamed.server.domain.project.dto.ProjectRes;
+import com.connecteamed.server.domain.project.dto.ProjectUpdateReq;
 import com.connecteamed.server.domain.project.service.ProjectService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
@@ -169,6 +170,82 @@ public class ProjectController {
                             ProjectSuccessCode.OK,
                             response,
                             "프로젝트 수정 화면 조회"
+                    )
+            );
+        } catch (GeneralException e) {
+            log.error("[ProjectController] GeneralException occurred: {}", e.getMessage(), e);
+            return ResponseEntity.status(e.getCode().getStatus())
+                    .body(ApiResponse.onFailure(e.getCode()));
+        } catch (Exception e) {
+            log.error("[ProjectController] Unexpected exception occurred: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.onFailure(ProjectErrorCode.INVALID_REQUEST));
+        }
+    }
+
+    /**
+     * 프로젝트 수정
+     * @param projectId 프로젝트 ID
+     * @param updateReq 프로젝트 수정 요청
+     * @return 수정된 프로젝트 정보
+     */
+    @PatchMapping("/{projectId}")
+    @Operation(
+            summary = "프로젝트 수정",
+            description = "프로젝트 ID로 프로젝트 정보를 수정합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "프로젝트 수정 성공",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "프로젝트를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "409",
+                    description = "프로젝트명 중복",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    public ResponseEntity<ApiResponse<ProjectRes.CreateResponse>> updateProject(
+            @PathVariable
+            @Parameter(description = "프로젝트 ID", example = "7")
+            Long projectId,
+
+            @RequestBody
+            @Parameter(description = "프로젝트 수정 요청")
+            ProjectUpdateReq updateReq
+    ) {
+        try {
+            log.info("[ProjectController] updateProject called with projectId: {}", projectId);
+
+            // 필수 필드 검증
+            if (updateReq.getName() == null || updateReq.getName().isBlank()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.onFailure(ProjectErrorCode.PROJECT_NAME_REQUIRED));
+            }
+
+            if (updateReq.getGoal() == null || updateReq.getGoal().isBlank()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.onFailure(ProjectErrorCode.PROJECT_GOAL_REQUIRED));
+            }
+
+            if (updateReq.getRequiredRoleNames() == null || updateReq.getRequiredRoleNames().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.onFailure(ProjectErrorCode.PROJECT_REQUIRED_ROLES_REQUIRED));
+            }
+
+            ProjectRes.CreateResponse response = projectService.updateProject(projectId, updateReq);
+
+            return ResponseEntity.ok(
+                    ApiResponse.onSuccess(
+                            ProjectSuccessCode.OK,
+                            response,
+                            "프로젝트 수정에 성공했습니다"
                     )
             );
         } catch (GeneralException e) {

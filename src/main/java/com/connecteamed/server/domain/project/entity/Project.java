@@ -42,5 +42,13 @@ public class Project extends BaseEntity {
         }
     }
 
-
+    // 비즈니스 로직: 프로젝트 정보 수정
+    public void updateProject(String name, String goal) {
+        if (name != null && !name.isBlank()) {
+            this.name = name;
+        }
+        if (goal != null && !goal.isBlank()) {
+            this.goal = goal;
+        }
+    }
 }
