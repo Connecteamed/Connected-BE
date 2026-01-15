@@ -1,8 +1,9 @@
-package com.connecteamed.server.domain.project.dto;
+ package com.connecteamed.server.domain.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +32,6 @@ public class ProjectCreateReq {
 
     @JsonProperty("requiredRoleNames")
     @Schema(description = "필요 역할 목록", example = "[\"DESIGNER\", \"SERVER\", \"ANDROID\"]")
-    @NotBlank(message = "필요 역할은 필수 입력 값입니다.")
+    @NotEmpty(message = "필요 역할은 필수 입력 값입니다.")
     private List<String> requiredRoleNames;
 }

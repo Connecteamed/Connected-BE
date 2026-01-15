@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -216,6 +217,7 @@ public class ProjectController {
             @Parameter(description = "프로젝트 ID", example = "7")
             Long projectId,
 
+            @Valid
             @RequestBody
             @Parameter(description = "프로젝트 수정 요청")
             ProjectUpdateReq updateReq
@@ -223,21 +225,6 @@ public class ProjectController {
         try {
             log.info("[ProjectController] updateProject called with projectId: {}", projectId);
 
-            // 필수 필드 검증
-            if (updateReq.getName() == null || updateReq.getName().isBlank()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.onFailure(ProjectErrorCode.PROJECT_NAME_REQUIRED));
-            }
-
-            if (updateReq.getGoal() == null || updateReq.getGoal().isBlank()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.onFailure(ProjectErrorCode.PROJECT_GOAL_REQUIRED));
-            }
-
-            if (updateReq.getRequiredRoleNames() == null || updateReq.getRequiredRoleNames().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.onFailure(ProjectErrorCode.PROJECT_REQUIRED_ROLES_REQUIRED));
-            }
 
             ProjectRes.CreateResponse response = projectService.updateProject(projectId, updateReq);
 
