@@ -48,6 +48,19 @@ public class Task extends BaseEntity {
     @Column(name="deleted_at")
     private OffsetDateTime deletedAt;
 
+    public void updateStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public void updateInfo(String name, String content) {
+        this.name = name;
+        this.content = content;
+    }
+
+    public void softDelete() {
+        this.deletedAt = OffsetDateTime.now();
+    }
+
     @PrePersist
     public void prePersist(){
         if(this.publicId == null){
