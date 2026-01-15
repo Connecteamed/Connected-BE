@@ -1,5 +1,5 @@
 package com.connecteamed.server.global.auth;
-
+import com.connecteamed.server.domain.token.repository.BlacklistedTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +16,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
 
     @Override
     protected void doFilterInternal(
@@ -31,7 +32,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authorization.substring(7);
 
             // 2. 토큰 유효성 검사 (JwtTokenProvider의 메서드명 확인 필요)
+            {
             if (jwtUtil.isValid(token)) {
+
+                // 블랙리스트에 있는지 확인
+                if (blacklistedTokenRepository.existsByToken(token)) {
+                    //블랙리스트에 있을 경우 에러로직 처리 필요
+                    return;
+                }
+
+
                 String loginId = jwtUtil.getUserId(token);
 
                 // 3. 유저 정보 조회 및 인증 객체 생성
@@ -41,6 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+        }
         }
 
         // 4. 다음 필터로 전달 (에러가 났던 지점!)

@@ -7,6 +7,7 @@ import com.connecteamed.server.global.auth.dto.AuthResDTO;
 import com.connecteamed.server.global.auth.exception.code.AuthSuccessCode;
 import com.connecteamed.server.global.auth.service.AuthCommandService;
 import com.connecteamed.server.global.auth.service.AuthQueryService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,5 +35,12 @@ public class AuthController {
             @RequestBody @Valid AuthReqDTO.LoginDTO dto
     ){
         return ApiResponse.onSuccess(AuthSuccessCode.LOGIN_SUCCESS, authQueryService.login(dto));
+    }
+
+    //로그아웃
+    @Operation(summary = "로그아웃", description = "토큰을 무효화하여 로그아웃 처리를 합니다.")
+    @PostMapping("/api/auth/logout")
+    public void logout() {
+        // 실제 로직은 SecurityConfig의 LogoutHandler에서 처리
     }
 }
