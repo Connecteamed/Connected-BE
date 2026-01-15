@@ -45,12 +45,11 @@ public class JwtUtil {
 
     // [4] 토큰 유효성 확인
     public boolean isValid(String token) {
-        Logger log = null;
         try {
             getClaims(token);
             return true;
         } catch (JwtException e) {
-            log.error("유효하지 않은 토큰입니다: {}", e.getMessage());
+            System.out.println("유효하지 않은 토큰: " + e.getMessage());
             return false;
         }
     }
@@ -73,7 +72,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // [6] 토큰 파싱 및 검증 (핵심 로직)
+    // [6] 토큰 파싱 및 검증
     private Jws<Claims> getClaims(String token) throws JwtException {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -81,4 +80,16 @@ public class JwtUtil {
                 .build()
                 .parseSignedClaims(token);
     }
+
+//토큰 내부에서 만료시간을 꺼내오는 로직
+    public Instant getExpiryDate(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.getExpiration().toInstant();
+    }
+
 }
