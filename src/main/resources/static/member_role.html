@@ -20,12 +20,17 @@
     .ok { color: #0a7d3b; }
     .bad { color: #b00020; }
     .pill { display:inline-block; padding: 2px 8px; border: 1px solid #ddd; border-radius: 999px; margin-right: 6px; font-size: 12px; }
+
+    .pill.clickable { cursor: pointer; user-select: none; }
+    .pill.selected { border-color: #111; background: #111; color: #fff; }
+    .pill.role-pool { margin-bottom: 6px; }
   </style>
 </head>
 <body>
   <h2>프로젝트 팀원 목록 & 역할 테스트</h2>
   <div class="muted">
     - GET: /api/projects/{projectId}/members<br/>
+    - GET: /api/projects/{projectId}/roles<br/>
     - PATCH: /api/projects/{projectId}/members/{projectMemberId}/roles
   </div>
 
@@ -57,6 +62,12 @@
       </thead>
       <tbody id="memberTbody"></tbody>
     </table>
+
+    <div style="margin-top:10px;">
+      <div class="muted">
+        roles 칼럼의 pill을 클릭하면 아래 PATCH 영역의 역할 선택/roleIds에 반영됩니다(토글).
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -73,6 +84,19 @@
       </div>
       <div style="margin-top: 18px;">
         <button id="btnPatch">역할 업데이트</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <div class="muted" style="margin-bottom:6px;">프로젝트 역할(클릭해서 선택/해제)</div>
+      <div id="rolePool" class="row" style="gap:6px;"></div>
+
+      <label style="margin-top:8px; display:flex; align-items:center; gap:8px; font-size:12px; color:#444;">
+        <input id="autoPatch" type="checkbox" />
+        선택 변경 시 자동 PATCH
+      </label>
+      <div class="muted" style="margin-top:6px;">
+        자동 PATCH를 켜면 역할 pill 선택/해제 시 바로 서버에 반영됩니다.
       </div>
     </div>
 
@@ -112,9 +136,138 @@
       .filter(n => Number.isFinite(n));
   }
 
+  // ===== 역할 목록(/roles) + 선택 상태 =====
+  let projectRoles = [];              // [{roleId, name}]
+  let selectedRoleIdSet = new Set();  // 선택된 roleId들
+
+  function normalizeProjectRoles(json) {
+    const roles =
+      json?.data?.roles ??
+      json?.data ??
+      json?.roles ??
+      (Array.isArray(json) ? json : null);
+
+    if (!Array.isArray(roles)) return [];
+
+    return roles.map(r => ({
+      roleId: r.roleId ?? r.id,
+      name: r.name ?? r.roleName ?? r.displayName ?? String(r)
+    })).filter(r => Number.isFinite(Number(r.roleId)));
+  }
+
+  function syncRoleIdsInputFromSelection() {
+    const ids = Array.from(selectedRoleIdSet).sort((a,b)=>a-b);
+    $("roleIds").value = ids.join(",");
+  }
+
+  function renderRolePool() {
+    const pool = $("rolePool");
+    pool.innerHTML = "";
+
+    if (!projectRoles.length) {
+      pool.innerHTML = `<span class="muted">프로젝트 역할을 불러오지 못했습니다.</span>`;
+      return;
+    }
+
+    for (const r of projectRoles) {
+      const span = document.createElement("span");
+      const rid = Number(r.roleId);
+      span.className = "pill clickable role-pool" + (selectedRoleIdSet.has(rid) ? " selected" : "");
+      span.textContent = r.name;
+      span.dataset.roleId = String(rid);
+
+      span.addEventListener("click", async () => {
+        if (selectedRoleIdSet.has(rid)) selectedRoleIdSet.delete(rid);
+        else selectedRoleIdSet.add(rid);
+
+        syncRoleIdsInputFromSelection();
+        renderRolePool();
+
+        if ($("autoPatch").checked) {
+          await patchRolesWithSelected();
+        }
+      });
+
+      pool.appendChild(span);
+    }
+  }
+
+  async function loadProjectRoles() {
+    const projectId = Number($("projectId").value);
+    if (!Number.isFinite(projectId) || projectId <= 0) return;
+
+    const url = buildUrl(`/api/projects/${projectId}/roles`);
+    logLine(`GET ${url}`);
+
+    try {
+      const res = await fetch(url, { method: "GET" });
+      const text = await res.text();
+      const json = safeJsonParse(text);
+
+      logLine(`roles 응답 ${res.status}: ${text.slice(0, 500)}`);
+
+      if (!res.ok) {
+        projectRoles = [];
+        renderRolePool();
+        return;
+      }
+
+      projectRoles = normalizeProjectRoles(json ?? {});
+      renderRolePool();
+    } catch (e) {
+      projectRoles = [];
+      renderRolePool();
+    }
+  }
+
+  function rolePillsHtml(roles, projectMemberId) {
+    if (!roles) return "-";
+
+    const arr = Array.isArray(roles) ? roles : [roles];
+    const names = arr.map(r => {
+      if (typeof r === "string") return r;
+      if (r && typeof r === "object") return (r.roleName ?? r.name ?? r.displayName ?? JSON.stringify(r));
+      return String(r);
+    }).filter(Boolean);
+
+    if (names.length === 0) return "-";
+
+    return names.map(name =>
+      `<span class="pill clickable" data-pm="${projectMemberId}" data-role-name="${name}">${name}</span>`
+    ).join("");
+  }
+
+  function bindMemberRoleClickEvents() {
+    document.querySelectorAll('.pill.clickable[data-role-name]').forEach(el => {
+      el.addEventListener('click', async () => {
+        const pmId = Number(el.getAttribute('data-pm'));
+        const roleName = el.getAttribute('data-role-name');
+
+        $("projectMemberId").value = String(pmId);
+
+        // roleName -> roleId 매핑 (roles가 없으면 한번 더 로드 시도)
+        let matched = projectRoles.find(r => r.name === roleName);
+        if (!matched) {
+          await loadProjectRoles();
+          matched = projectRoles.find(r => r.name === roleName);
+        }
+        if (!matched) return;
+
+        const roleId = Number(matched.roleId);
+        if (selectedRoleIdSet.has(roleId)) selectedRoleIdSet.delete(roleId);
+        else selectedRoleIdSet.add(roleId);
+
+        syncRoleIdsInputFromSelection();
+        renderRolePool();
+
+        if ($("autoPatch").checked) {
+          await patchRolesWithSelected();
+        }
+      });
+    });
+  }
+
   function renderMembers(data) {
-    // 기대하는 데이터 모양은 프로젝트에 맞게 다를 수 있습니다.
-    // 아래는 가능한 케이스들을 최대한 유연하게 처리합니다.
     const list = Array.isArray(data) ? data
       : (data && Array.isArray(data.data) ? data.data : null);
 
@@ -128,29 +281,17 @@
     }
 
     for (const item of list) {
-      // 아래 필드명은 구현 DTO에 맞게 필요하면 수정하세요.
       const projectMemberId = item.projectMemberId ?? item.id ?? item.projectMember?.id ?? "-";
       const memberId = item.memberId ?? item.member?.id ?? "-";
       const name = item.name ?? item.memberName ?? item.member?.name ?? item.nickname ?? "-";
       const roles = item.roles ?? item.roleNames ?? item.roleNameList ?? [];
-
-      let roleText = "";
-      if (Array.isArray(roles)) {
-        roleText = roles.map(r => {
-          if (typeof r === "string") return r;
-          if (r && typeof r === "object") return (r.roleName ?? r.name ?? r.displayName ?? JSON.stringify(r));
-          return String(r);
-        }).join(", ");
-      } else {
-        roleText = String(roles);
-      }
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${projectMemberId}</td>
         <td>${memberId}</td>
         <td>${name}</td>
-        <td>${roleText ? roleText.split(", ").map(x => `<span class="pill">${x}</span>`).join("") : "-"}</td>
+        <td>${rolePillsHtml(roles, projectMemberId)}</td>
       `;
       tbody.appendChild(tr);
     }
@@ -176,7 +317,7 @@
       const text = await res.text();
       const json = safeJsonParse(text);
 
-      logLine(`응답 ${res.status}: ${text.slice(0, 500)}`);
+      logLine(`members 응답 ${res.status}: ${text.slice(0, 500)}`);
 
       if (!res.ok) {
         $("loadStatus").innerHTML = `<span class="bad">실패 (${res.status})</span>`;
@@ -185,6 +326,11 @@
       }
 
       renderMembers(json ?? text);
+
+      // members 성공 후 roles도 로드하고, members roles pill 클릭 이벤트 바인딩
+      await loadProjectRoles();
+      bindMemberRoleClickEvents();
+
     } catch (e) {
       $("loadStatus").innerHTML = `<span class="bad">요청 중 오류: ${e?.message ?? e}</span>`;
     } finally {
@@ -215,8 +361,6 @@
     $("patchStatus").textContent = "업데이트 중...";
     $("patchResponse").style.display = "none";
 
-    // 서버 DTO에 맞춰 body 키를 바꿔야 할 수 있습니다.
-    // 흔한 형태: { "roleIds": [1,2] }
     const body = { roleIds };
 
     logLine(`PATCH ${url} body=${JSON.stringify(body)}`);
@@ -229,7 +373,7 @@
       });
 
       const text = await res.text();
-      logLine(`응답 ${res.status}: ${text.slice(0, 800)}`);
+      logLine(`patch 응답 ${res.status}: ${text.slice(0, 800)}`);
 
       $("patchResponse").textContent = text;
       $("patchResponse").style.display = "";
@@ -240,7 +384,6 @@
       }
 
       $("patchStatus").innerHTML = `<span class="ok">성공 (${res.status})</span>`;
-      // 성공하면 목록 다시 로드
       await loadMembers();
     } catch (e) {
       $("patchStatus").innerHTML = `<span class="bad">요청 중 오류: ${e?.message ?? e}</span>`;
@@ -249,8 +392,27 @@
     }
   }
 
+  async function patchRolesWithSelected() {
+    const ids = Array.from(selectedRoleIdSet).sort((a,b)=>a-b);
+    $("roleIds").value = ids.join(",");
+    await patchRoles();
+  }
+
+  // 입력칸 수동 변경 시, 선택 UI도 맞춰주기(옵션)
+  $("roleIds").addEventListener("input", () => {
+    const ids = parseRoleIds($("roleIds").value);
+    selectedRoleIdSet = new Set(ids);
+    renderRolePool();
+  });
+
   $("btnLoad").addEventListener("click", loadMembers);
-  $("btnPatch").addEventListener("click", patchRoles);
+  $("btnPatch").addEventListener("click", async () => {
+    // 버튼 클릭은 입력값 기준으로 PATCH + 선택 UI도 동기화
+    const ids = parseRoleIds($("roleIds").value);
+    selectedRoleIdSet = new Set(ids);
+    renderRolePool();
+    await patchRoles();
+  });
 </script>
 </body>
 </html>
