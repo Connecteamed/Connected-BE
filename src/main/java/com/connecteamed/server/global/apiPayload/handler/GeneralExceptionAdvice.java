@@ -1,11 +1,15 @@
 package com.connecteamed.server.global.apiPayload.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.BaseErrorCode;
@@ -16,7 +20,9 @@ import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GeneralExceptionAdvice {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(GeneralExceptionAdvice.class);
+
     // 1) @RequestParam / @PathVariable 검증 실패
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleConstraintViolation(ConstraintViolationException ex) {
@@ -73,10 +79,25 @@ public class GeneralExceptionAdvice {
         return ResponseEntity.status(code.getStatus())
                 .body(ApiResponse.onFailure(code, ex.getMessage()));
     }
+    
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
+        return ResponseEntity.status(code.getStatus())
+                .body(ApiResponse.onFailure(code, "DB 제약 조건 위반이 발생했습니다."));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResource(NoResourceFoundException ex) {
+        // 필요하면 그냥 404 응답만
+        return ResponseEntity.status(404)
+                .body(ApiResponse.onFailure(GeneralErrorCode.NOT_FOUND, "리소스를 찾을 수 없습니다."));
+    }
 
     //사용자가 정의 하는 범위 외 발생 예외 처리- 실패응답 1 구조를 따름
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception ex){
+        log.error("Unhandled exception", ex); // 이 한 줄이 핵심
         BaseErrorCode code = GeneralErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity.status(code.getStatus())
                 .body(ApiResponse.onFailure(code)
