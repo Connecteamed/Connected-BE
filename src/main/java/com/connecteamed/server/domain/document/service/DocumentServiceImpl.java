@@ -5,6 +5,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -50,7 +52,8 @@ public class DocumentServiceImpl implements DocumentService {
         List<Document> docs =
                 documentRepository.findAllByProjectIdAndDeletedAtIsNullOrderByCreatedAtDesc(projectId);
 
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy.MM.dd")
+                .withZone(ZoneId.of("Asia/Seoul"));
 
         return new DocumentListRes(
                 docs.stream()
@@ -59,7 +62,7 @@ public class DocumentServiceImpl implements DocumentService {
                                 d.getTitle(),
                                 d.getFileType().name(),
                                 "TODO_업로더명", // 필요하면 projectMember에서 이름 꺼내서 세팅
-                                d.getCreatedAt().toLocalDate().format(df),
+                                df.format(d.getCreatedAt()),
                                 (d.getFileType() != DocumentFileType.TEXT)
                                         ? "/api/documents/" + d.getId() + "/download"
                                         : null,
