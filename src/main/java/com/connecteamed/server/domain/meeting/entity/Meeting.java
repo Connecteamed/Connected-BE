@@ -5,8 +5,7 @@ import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -32,10 +31,10 @@ public class Meeting extends BaseEntity {
     private String title;
 
     @Column(name = "meeting_date", nullable = false)
-    private LocalDateTime meetingDate;
+    private Instant meetingDate;
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    private Instant deletedAt;
 
     @PrePersist
     public void prePersist() {

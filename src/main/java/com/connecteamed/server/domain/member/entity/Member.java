@@ -5,10 +5,8 @@ import com.connecteamed.server.domain.member.enums.SocialType;
 import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 
@@ -18,7 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor(access= AccessLevel.PRIVATE)
 @Getter
 @Table(name= "member")
-@EntityListeners(AuditingEntityListener.class)
 public class Member extends BaseEntity {
 
     @Id
@@ -42,7 +39,7 @@ public class Member extends BaseEntity {
     private SocialType socialType;
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    private Instant deletedAt;
 
     //객체 생성시에 public_id 자동 생성해주는 빌더
     @PrePersist
