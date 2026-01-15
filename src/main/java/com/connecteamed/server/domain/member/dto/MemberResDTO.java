@@ -1,4 +1,7 @@
 package com.connecteamed.server.domain.member.dto;
 
-public class MemberLoginReq {
+
+public class MemberResDTO {
+
+
 }
