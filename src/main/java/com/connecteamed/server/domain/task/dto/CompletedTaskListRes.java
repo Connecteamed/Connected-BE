@@ -2,7 +2,7 @@ package com.connecteamed.server.domain.task.dto;
 
 import java.util.List;
 
-public record TaskListRes (
+public record CompletedTaskListRes(
         List<TaskSummary> tasks
 ) {
     public record TaskSummary(

@@ -1,6 +1,6 @@
 package com.connecteamed.server.domain.task.service;
 
-import com.connecteamed.server.domain.task.dto.TaskListRes;
+import com.connecteamed.server.domain.task.dto.CompletedTaskListRes;
 import com.connecteamed.server.domain.task.entity.Task;
 import com.connecteamed.server.domain.task.enums.TaskStatus;
 import com.connecteamed.server.domain.task.repository.TaskAssigneeRepository;
@@ -24,20 +24,20 @@ public class CompletedTaskService {
     private Long testUserId;
 
     // 완료된 업무 목록 조회
-    public TaskListRes getCompletedTasks(Long projectId) {
+    public CompletedTaskListRes getCompletedTasks(Long projectId) {
         List<Task> completedTasks = taskRepository.findAllByProjectIdAndStatusAndDeletedAtIsNull(
                 projectId,
                 TaskStatus.DONE
         );
 
-        List<TaskListRes.TaskSummary> summaries = completedTasks.stream()
+        List<CompletedTaskListRes.TaskSummary> summaries = completedTasks.stream()
                 .map(task -> {
                     List<String> assigneeNames = taskAssigneeRepository.findAllByTaskId(task.getId())
                             .stream()
                             .map(assignee -> assignee.getProjectMember().getMember().getName())
                             .toList();
 
-                    return new TaskListRes.TaskSummary(
+                    return new CompletedTaskListRes.TaskSummary(
                             task.getId(),
                             task.getName(),
                             task.getContent(),
@@ -47,7 +47,7 @@ public class CompletedTaskService {
                             assigneeNames
                     );
                 }).toList();
-        return new TaskListRes(summaries);
+        return new CompletedTaskListRes(summaries);
     }
 
     private Long getCurrentUserId() {
