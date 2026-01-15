@@ -1,6 +1,7 @@
 package com.connecteamed.server.global.config;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,6 @@ public class JpaAuditingConfig {
 
     @Bean
     public DateTimeProvider dateTimeProvider() {
-        return () -> Optional.of(LocalDateTime.now());
+        return () -> Optional.of(OffsetDateTime.now());
     }
 }
