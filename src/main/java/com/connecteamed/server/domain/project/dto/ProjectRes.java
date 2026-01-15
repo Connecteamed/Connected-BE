@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.project.dto;
 
+import com.connecteamed.server.domain.project.enums.ProjectStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -43,5 +44,23 @@ public class ProjectRes {
         @JsonProperty("requiredRoleNames")
         @Schema(description = "필요 역할 목록", example = "[\"DESIGNER\", \"SERVER\", \"ANDROID\"]")
         private List<String> requiredRoleNames;
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor
+    @Builder
+    public static class CloseResponse {
+        @JsonProperty("projectId")
+        @Schema(description = "프로젝트 ID", example = "1")
+        private Long projectId;
+
+        @JsonProperty("status")
+        @Schema(description = "프로젝트 상태", example = "COMPLETED")
+        private ProjectStatus status;
+
+        @JsonProperty("closedAt")
+        @Schema(description = "종료 시간 (UTC)", example = "2026-01-10T11:28:00Z")
+        private Instant closedAt;
     }
 }

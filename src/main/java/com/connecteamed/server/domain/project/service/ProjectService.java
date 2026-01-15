@@ -212,4 +212,34 @@ public class ProjectService {
                 .createdAt(project.getCreatedAt())
                 .build();
     }
+
+    /**
+     * 프로젝트 종료
+     * @param projectId 프로젝트 ID
+     * @return 종료된 프로젝트 정보
+     */
+    public ProjectRes.CloseResponse closeProject(Long projectId) {
+        log.info("[ProjectService] closeProject called with projectId: {}", projectId);
+
+        // 1. 프로젝트 존재 여부 확인
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> {
+                    log.error("[ProjectService] Project not found with id: {}", projectId);
+                    return new GeneralException(ProjectErrorCode.PROJECT_NOT_FOUND);
+                });
+        log.info("[ProjectService] Project found: id={}, name={}", project.getId(), project.getName());
+
+        // 2. 프로젝트 종료
+        project.closeProject();
+        log.info("[ProjectService] Project closed: id={}, status={}, closedAt={}",
+                project.getId(), project.getStatus(), project.getClosedAt());
+
+        // 3. 응답 반환
+        return ProjectRes.CloseResponse.builder()
+                .projectId(project.getId())
+                .status(project.getStatus())
+                .closedAt(project.getClosedAt())
+                .build();
+    }
 }
+
