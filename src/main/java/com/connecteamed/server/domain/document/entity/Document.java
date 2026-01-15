@@ -7,7 +7,7 @@ import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -47,7 +47,7 @@ public class Document extends BaseEntity {
     private String content;
 
     @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
+    private Instant deletedAt;
 
     @PrePersist
     public void prePersist() {
@@ -99,6 +99,6 @@ public class Document extends BaseEntity {
     }
 
     public void softDelete() {
-        this.deletedAt = OffsetDateTime.now();
+        this.deletedAt = Instant.now();
     }
 }

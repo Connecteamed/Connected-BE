@@ -6,7 +6,7 @@ import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 
@@ -39,7 +39,7 @@ public class Member extends BaseEntity {
     private SocialType socialType;
 
     @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
+    private Instant deletedAt;
 
     //객체 생성시에 public_id 자동 생성해주는 빌더
     @PrePersist
