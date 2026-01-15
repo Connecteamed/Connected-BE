@@ -49,13 +49,15 @@ public class DashboardController {
             @Parameter(description = "개발 환경 테스트용 사용자 로그인 ID (예: user@example.com)", example = "writer@example.com")
             @RequestParam(required = false) String username
     ) {
-        // 1순위: JWT 인증 정보에서 username 추출
-        // 2순위: 쿼리 파라미터로 받은 username 사용 (개발 환경 테스트용)
-        String userId = (authentication != null) ? authentication.getName() : username;
+        // 1. 인증된 사용자의 userId 추출 (JWT 토큰 또는 테스트 환경)
+        String userId = (authentication != null && authentication.isAuthenticated() 
+                        && !"anonymousUser".equals(authentication.getName()))
+                        ? authentication.getName()
+                        : username;
 
         DashboardRes.RetrospectiveListRes response;
         if (userId != null) {
-            // 특정 사용자의 회고만 조회
+            // 특정 사용자의 회고 조회
             response = dashboardService.getRecentRetrospectives(userId);
         } else {
             // 사용자 정보가 없으면 모든 회고 조회
