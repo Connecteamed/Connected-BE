@@ -1,6 +1,8 @@
 package com.connecteamed.server.domain.project.service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,7 +22,9 @@ import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -42,25 +46,36 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     @Override
     @Transactional
     public ProjectMemberRes updateMemberRoles(Long projectId, Long projectMemberId, ProjectMemberRoleUpdateReq req) {
+        log.info("updateMemberRoles called. projectId={}, projectMemberId={}, req={}",
+                projectId, projectMemberId, req);
+
         ProjectMember pm = projectMemberRepository.findByIdAndProjectId(projectMemberId, projectId)
                 .orElseThrow(() -> new GeneralException(
                         GeneralErrorCode.NOT_FOUND,
                         "프로젝트 팀원을 찾을 수 없습니다."
                 ));
 
-        List<Long> roleIds = (req.roleIds() == null) ? List.of() : req.roleIds();
-        if (roleIds.isEmpty()) {
-            // 역할 전체 해제(빈 배열 허용 정책일 때)
-            pm.getRoles().clear(); // orphanRemoval=true면 기존 row 삭제됨
+        // 요청 roleIds (null 방어 + null 요소 제거 + 중복 제거)
+        List<Long> requestedRoleIds = (req == null || req.roleIds() == null) ? List.of() : req.roleIds();
+        Set<Long> requestedRoleIdSet = requestedRoleIds.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new)); // 순서 유지
+
+        // 역할 전체 해제
+        if (requestedRoleIdSet.isEmpty()) {
+            pm.getRoles().clear(); // orphanRemoval=true면 DB row 삭제
             return toRes(pm);
         }
 
-        // 요청 roleIds 로 role 엔티티 로드
-        List<ProjectRole> roles = projectRoleRepository.findAllById(roleIds);
+        // role 엔티티 로드
+        List<ProjectRole> roles = projectRoleRepository.findAllById(requestedRoleIdSet);
 
         // 존재하지 않는 roleId 검증
         Set<Long> foundIds = roles.stream().map(ProjectRole::getId).collect(Collectors.toSet());
-        List<Long> missing = roleIds.stream().filter(id -> !foundIds.contains(id)).toList();
+        List<Long> missing = requestedRoleIdSet.stream()
+                .filter(id -> !foundIds.contains(id))
+                .toList();
+
         if (!missing.isEmpty()) {
             throw new GeneralException(
                     GeneralErrorCode.BAD_REQUEST,
@@ -68,19 +83,31 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
             );
         }
 
-        // 기존 역할 삭제 후 재할당
-        pm.getRoles().clear();
+        // 현재 보유 roleId 집합
+        Set<Long> currentRoleIds = pm.getRoles().stream()
+                .map(r -> r.getRole().getId())
+                .collect(Collectors.toSet());
+
+
+        // 1) 요청에 없는 기존 역할 삭제
+        pm.getRoles().removeIf(r -> !requestedRoleIdSet.contains(r.getRole().getId()));
+
+        // 2) 기존에 없는 역할만 추가
         for (ProjectRole r : roles) {
-            pm.getRoles().add(
-                    ProjectMemberRole.builder()
-                            .projectMember(pm)
-                            .role(r)
-                            .build()
-            );
+            if (!currentRoleIds.contains(r.getId())) {
+                pm.getRoles().add(
+                        ProjectMemberRole.builder()
+                                .projectMember(pm)
+                                .role(r)
+                                .build()
+                );
+            }
         }
 
-        // pm은 영속 상태라 보통 save 없어도 되지만, 명시적으로 저장해도 무방
+        // 영속 상태면 save 없어도 반영됩니다(더티체킹).
+        // 명시적으로 호출하고 싶으면 아래 한 줄을 써도 됩니다.
         projectMemberRepository.save(pm);
+        projectMemberRepository.flush();
 
         return toRes(pm);
     }
