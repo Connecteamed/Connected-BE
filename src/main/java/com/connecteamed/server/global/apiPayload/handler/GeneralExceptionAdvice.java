@@ -67,6 +67,13 @@ public class GeneralExceptionAdvice {
                 .body(ApiResponse.onFailure(code, message));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
+        return ResponseEntity.status(code.getStatus())
+                .body(ApiResponse.onFailure(code, ex.getMessage()));
+    }
+
     //사용자가 정의 하는 범위 외 발생 예외 처리- 실패응답 1 구조를 따름
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception ex){

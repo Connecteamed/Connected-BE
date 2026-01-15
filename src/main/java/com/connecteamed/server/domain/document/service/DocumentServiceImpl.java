@@ -90,13 +90,13 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional(readOnly = true)
     public ResponseEntity<Resource> download(Long documentId) {
         Document d = documentRepository.findByIdAndDeletedAtIsNull(documentId)
-                .orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "문서를 찾을 수 없습니다."));
 
         if (d.getFileType() == DocumentFileType.TEXT) {
-            throw new IllegalArgumentException("TEXT 문서는 다운로드 대상이 아닙니다.");
+            throw new GeneralException(GeneralErrorCode.FORBIDDEN, "TEXT 문서는 다운로드 대상이 아닙니다.");
         }
         if (d.getFileUrl() == null || d.getFileUrl().isBlank()) {
-            throw new IllegalArgumentException("파일 key가 없습니다.");
+            throw new GeneralException(GeneralErrorCode.NOT_FOUND, "파일 key가 없습니다.");
         }
 
         String key = d.getFileUrl();
@@ -119,7 +119,7 @@ public class DocumentServiceImpl implements DocumentService {
                     .body(resource);
 
         } catch (Exception e) {
-            throw new IllegalArgumentException("파일 다운로드에 실패했습니다.");
+            throw new GeneralException(GeneralErrorCode.NOT_FOUND, "파일 다운로드에 실패했습니다.");
         }
     }
 
@@ -139,7 +139,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public DocumentUploadRes uploadFile(Long projectId, Long projectMemberId, MultipartFile file, DocumentFileType type) {
         if (type == DocumentFileType.TEXT) {
-            throw new IllegalArgumentException("TEXT는 파일 업로드 타입이 아닙니다.");
+            throw new GeneralException(GeneralErrorCode.BAD_REQUEST, "TEXT는 파일 업로드 타입이 아닙니다.");
         }
 
         Project projectRef = projectRepository.getReferenceById(projectId);
@@ -161,10 +161,10 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public void updateText(Long documentId, Long projectMemberId, DocumentUpdateTextReq req) {
         Document d = documentRepository.findByIdAndDeletedAtIsNull(documentId)
-                .orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "문서를 찾을 수 없습니다."));
 
         if (d.getFileType() != DocumentFileType.TEXT) {
-            throw new IllegalArgumentException("텍스트 문서만 수정할 수 있습니다.");
+            throw new GeneralException(GeneralErrorCode.BAD_REQUEST, "텍스트 문서만 수정할 수 있습니다.");
         }
 
         d.updateText(req.title(), req.content());
@@ -174,7 +174,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     public void delete(Long documentId, Long projectMemberId) {
         Document d = documentRepository.findByIdAndDeletedAtIsNull(documentId)
-                .orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "문서를 찾을 수 없습니다."));
 
         // 파일 문서면 필요 시 S3 삭제 정책 추가 가능
         // if (d.getFileType() != DocumentFileType.TEXT) { ... }
