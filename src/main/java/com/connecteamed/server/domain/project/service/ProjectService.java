@@ -20,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -112,6 +114,39 @@ public class ProjectService {
         return ProjectRes.CreateResponse.builder()
                 .projectId(savedProject.getId())
                 .createdAt(savedProject.getCreatedAt())
+                .build();
+    }
+
+    /**
+     * 프로젝트 상세 조회
+     * @param projectId 프로젝트 ID
+     * @return 프로젝트 상세 정보
+     */
+    @Transactional(readOnly = true)
+    public ProjectRes.DetailResponse getProjectDetail(Long projectId) {
+        log.info("[ProjectService] getProjectDetail called with projectId: {}", projectId);
+
+        // 1. 프로젝트 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> {
+                    log.error("[ProjectService] Project not found with id: {}", projectId);
+                    return new GeneralException(ProjectErrorCode.PROJECT_NOT_FOUND);
+                });
+        log.info("[ProjectService] Project found: id={}, name={}", project.getId(), project.getName());
+
+        // 2. 필요 역할 조회
+        List<ProjectRequiredRole> requiredRoles = projectRequiredRoleRepository.findByProjectId(projectId);
+        List<String> requiredRoleNames = requiredRoles.stream()
+                .map(requiredRole -> requiredRole.getProjectRole().getRoleName())
+                .collect(Collectors.toList());
+        log.debug("[ProjectService] Required roles: {}", requiredRoleNames);
+
+        // 3. 응답 반환
+        return ProjectRes.DetailResponse.builder()
+                .projectId(project.getId())
+                .name(project.getName())
+                .goal(project.getGoal())
+                .requiredRoleNames(requiredRoleNames)
                 .build();
     }
 }

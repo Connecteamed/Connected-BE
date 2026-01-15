@@ -131,4 +131,54 @@ public class ProjectController {
                     .body(ApiResponse.onFailure(ProjectErrorCode.INVALID_REQUEST));
         }
     }
+
+    /**
+     * 프로젝트 상세 조회
+     * @param projectId 프로젝트 ID
+     * @return 프로젝트 상세 정보
+     */
+    @GetMapping("/{projectId}")
+    @Operation(
+            summary = "프로젝트 상세 조회",
+            description = "프로젝트 ID로 프로젝트의 상세 정보를 조회합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "프로젝트 조회 성공",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "프로젝트를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    public ResponseEntity<ApiResponse<ProjectRes.DetailResponse>> getProjectDetail(
+            @PathVariable
+            @Parameter(description = "프로젝트 ID", example = "7")
+            Long projectId
+    ) {
+        try {
+            log.info("[ProjectController] getProjectDetail called with projectId: {}", projectId);
+
+            ProjectRes.DetailResponse response = projectService.getProjectDetail(projectId);
+
+            return ResponseEntity.ok(
+                    ApiResponse.onSuccess(
+                            ProjectSuccessCode.OK,
+                            response,
+                            "프로젝트 수정 화면 조회"
+                    )
+            );
+        } catch (GeneralException e) {
+            log.error("[ProjectController] GeneralException occurred: {}", e.getMessage(), e);
+            return ResponseEntity.status(e.getCode().getStatus())
+                    .body(ApiResponse.onFailure(e.getCode()));
+        } catch (Exception e) {
+            log.error("[ProjectController] Unexpected exception occurred: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.onFailure(ProjectErrorCode.INVALID_REQUEST));
+        }
+    }
 }
