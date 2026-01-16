@@ -55,4 +55,17 @@ public class Task extends BaseEntity {
         }
     }
 
+    public void changeStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public void changeSchedule(Instant startDate, Instant dueDate) {
+        this.startDate = startDate;
+        this.dueDate = dueDate;
+    }
+
+    public void softDelete() {
+        this.deletedAt = Instant.now();
+    }
+
 }
