@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
+@EnableJpaAuditing
 public class ConnecteamedApplication {
 
 	public static void main(String[] args) {
