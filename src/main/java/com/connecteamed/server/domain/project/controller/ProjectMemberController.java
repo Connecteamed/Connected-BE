@@ -41,7 +41,7 @@ public class ProjectMemberController {
 
     // 프로젝트 역할 목록 조회 (project_required_role 기반)
     @GetMapping("/roles")
-    public ApiResponse<ProjectRoleListRes> getProjectRoles(@PathVariable Long projectId) {
-        return ApiResponse.onSuccess(GeneralSuccessCode._OK, projectMemberService.getProjectRoles(projectId));
+    public ResponseEntity<ApiResponse<ProjectRoleListRes>> getProjectRoles(@PathVariable Long projectId) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, projectMemberService.getProjectRoles(projectId)));
     }
 }
