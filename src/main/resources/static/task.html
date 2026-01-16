@@ -11,8 +11,19 @@
       --line:#e5e7eb;
       --text:#111827;
       --muted:#6b7280;
+
       --pill:#f3f4f6;
       --pillText:#374151;
+
+      --black:#0b1220;
+      --blueText:#d1e7ff;
+
+      --btn:#111827;
+      --btnText:#ffffff;
+      --btn2:#f3f4f6;
+      --btn2Text:#374151;
+
+      --danger:#ef4444;
     }
     *{box-sizing:border-box}
     body{
@@ -27,7 +38,29 @@
       padding:0 18px 40px;
     }
 
-    /* card + table */
+    /* tabs */
+    .tabs{
+      display:flex;
+      gap:22px;
+      align-items:center;
+      padding:14px 6px;
+      border-bottom:1px solid var(--line);
+      color:#374151;
+      font-size:14px;
+      user-select:none;
+    }
+    .tab{
+      padding:10px 2px;
+      border-bottom:2px solid transparent;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .tab.active{
+      color:#111827;
+      border-bottom-color:#111827;
+      font-weight:700;
+    }
+
     .card{
       background:var(--card);
       border:1px solid var(--line);
@@ -35,6 +68,8 @@
       overflow:hidden;
       margin-top:14px;
     }
+
+    /* table */
     table{
       width:100%;
       border-collapse:separate;
@@ -59,10 +94,10 @@
 
     .col-title{width:170px}
     .col-content{width:auto}
-    .col-status{width:120px}
+    .col-status{width:140px}
     .col-date{width:120px}
-    .col-assignee{width:180px}
-    .col-actions{width:70px; text-align:right}
+    .col-assignee{width:200px}
+    .col-actions{width:120px; text-align:right}
 
     .muted{color:var(--muted); font-size:12px}
     .ellipsis{
@@ -99,26 +134,76 @@
       color:#9ca3af;
       cursor:pointer;
       font-size:12px;
+      margin-left:10px;
     }
-    .btnDel:hover{color:#ef4444}
+    .btnDel:hover{color:var(--danger)}
+
+    .btnLink{
+      border:none;
+      background:transparent;
+      color:#6b7280;
+      cursor:pointer;
+      font-size:12px;
+      text-decoration:underline;
+    }
+    .btnLink:hover{color:#111827}
 
     .footerBar{
       display:flex;
       justify-content:flex-end;
+      gap:10px;
       padding:14px 16px;
       background:#fff;
       border-top:1px solid var(--line);
     }
-    .btnAdd{
-      background:#111827;
-      color:white;
+    .btn{
       border:none;
-      padding:10px 14px;
       border-radius:10px;
+      padding:10px 12px;
       cursor:pointer;
       font-weight:700;
       font-size:12px;
     }
+    .btn.primary{
+      background:var(--btn);
+      color:var(--btnText);
+    }
+    .btn.secondary{
+      background:var(--btn2);
+      color:var(--btn2Text);
+    }
+
+    /* forms */
+    .formRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:flex-end;
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      background:#fff;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:220px;
+    }
+    label{
+      font-size:12px;
+      color:#6b7280;
+    }
+    input, textarea, select{
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:10px 12px;
+      font-size:14px;
+      outline:none;
+      background:#fff;
+    }
+    textarea{min-height:80px; resize:vertical}
+    .field.small{min-width:160px}
+    .field.wide{min-width:360px}
 
     /* modal */
     .overlay{
@@ -133,7 +218,7 @@
     }
     .overlay.open{display:flex}
     .modal{
-      width:min(720px, 100%);
+      width:min(860px, 100%);
       background:#fff;
       border-radius:14px;
       border:1px solid var(--line);
@@ -164,24 +249,6 @@
       grid-template-columns: 1fr 1fr;
       gap:12px;
     }
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    label{
-      font-size:12px;
-      color:#6b7280;
-    }
-    input, textarea, select{
-      border:1px solid var(--line);
-      border-radius:10px;
-      padding:10px 12px;
-      font-size:14px;
-      outline:none;
-      background:#fff;
-    }
-    textarea{min-height:92px; resize:vertical}
     .full{grid-column:1 / -1}
     .modalFoot{
       display:flex;
@@ -191,28 +258,12 @@
       border-top:1px solid var(--line);
       background:#fff;
     }
-    .btn{
-      border:none;
-      border-radius:10px;
-      padding:10px 12px;
-      cursor:pointer;
-      font-weight:700;
-      font-size:13px;
-    }
-    .btn.secondary{
-      background:#f3f4f6;
-      color:#374151;
-    }
-    .btn.primary{
-      background:#111827;
-      color:#fff;
-    }
 
-    /* log (검정 배경 유지) */
+    /* log */
     .log{
       margin-top:12px;
-      background:#0b1220;
-      color:#d1e7ff;
+      background:var(--black);
+      color:var(--blueText);
       padding:12px 12px;
       border-radius:12px;
       overflow:auto;
@@ -221,12 +272,48 @@
       white-space:pre-wrap;
       word-break:break-word;
     }
+
+    .hint{
+      padding:0 16px 14px;
+      font-size:12px;
+      color:#6b7280;
+      background:#fff;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="tabs">
+      <div class="tab active">업무목록</div>
+    </div>
 
     <div class="card">
+      <!-- 상단 설정 + 단건 테스트 -->
+      <div class="formRow">
+        <div class="field small">
+          <label>Base URL</label>
+          <input id="baseUrl" value="http://localhost:8080" />
+        </div>
+        <div class="field small">
+          <label>projectId</label>
+          <input id="projectId" value="1" />
+        </div>
+        <div class="field wide">
+          <label>taskId (UUID)</label>
+          <input id="taskId" placeholder="예) 2d9b0a5b-...." />
+        </div>
+
+        <button class="btn secondary" id="btnList">목록 GET</button>
+        <button class="btn secondary" id="btnDetail">상세 GET</button>
+        <button class="btn secondary" id="btnDeleteOne">삭제 DELETE</button>
+      </div>
+
+      <div class="hint">
+        목록에서 행 클릭하면 taskId가 자동으로 채워집니다. 상태 변경은 드롭다운으로 PATCH /status 호출합니다.
+        일정 변경(PATCH /tasks/{taskId})과 담당자 변경(PATCH /assignees)은 아래 "단건 수정"에서 실행할 수 있습니다.
+      </div>
+
+      <!-- 테이블 -->
       <table>
         <thead>
           <tr>
@@ -243,7 +330,30 @@
       </table>
 
       <div class="footerBar">
-        <button class="btnAdd" id="btnOpenCreate">업무 추가</button>
+        <button class="btn primary" id="btnOpenCreate">업무 추가 POST</button>
+      </div>
+    </div>
+
+    <!-- 단건 수정 카드 -->
+    <div class="card" style="margin-top:14px;">
+      <div class="formRow">
+        <div class="field">
+          <label>일정 변경 (PATCH /api/tasks/{taskId}) - startDate</label>
+          <input id="uStart" type="date" />
+        </div>
+        <div class="field">
+          <label>일정 변경 (PATCH /api/tasks/{taskId}) - dueDate</label>
+          <input id="uDue" type="date" />
+        </div>
+        <button class="btn secondary" id="btnPatchSchedule">일정 PATCH</button>
+      </div>
+
+      <div class="formRow" style="border-bottom:none;">
+        <div class="field wide">
+          <label>담당자 변경 (PATCH /api/tasks/{taskId}/assignees) - projectMemberIds</label>
+          <input id="uAssignees" placeholder="예) 10,11,12" />
+        </div>
+        <button class="btn secondary" id="btnPatchAssignees">담당자 PATCH</button>
       </div>
     </div>
 
@@ -265,9 +375,9 @@
           </div>
 
           <div class="field">
-            <label>상태</label>
-            <select id="cStatus">
-              <option value="TODO">시작 전</option>
+            <label>상태 (참고용: 생성은 TODO로 시작해도 됩니다)</label>
+            <select id="cStatus" disabled>
+              <option value="TODO" selected>시작 전</option>
               <option value="IN_PROGRESS">진행 중</option>
               <option value="DONE">완료</option>
             </select>
@@ -275,7 +385,6 @@
 
           <div class="field">
             <label>시작일</label>
-            <!-- date가 클릭 안 되는 경우가 있어서 text + showPicker로 처리 -->
             <input id="cStart" type="date" />
           </div>
 
@@ -297,17 +406,13 @@
       </div>
       <div class="modalFoot">
         <button class="btn secondary" id="btnCancel">취소</button>
-        <button class="btn primary" id="btnCreate">생성</button>
+        <button class="btn primary" id="btnCreate">생성 POST</button>
       </div>
     </div>
   </div>
 
   <script>
     const $ = (id) => document.getElementById(id);
-
-    // 여기만 바꾸면 됩니다
-    const BASE_URL = "http://localhost:8080";
-    const PROJECT_ID = 1;
 
     const toKDate = (isoOrInstant) => {
       if (!isoOrInstant) return "-";
@@ -339,7 +444,8 @@
     };
 
     const api = async (path, opts = {}) => {
-      const url = BASE_URL.replace(/\/$/, "") + path;
+      const baseUrl = $("baseUrl").value.trim().replace(/\/$/, "");
+      const url = baseUrl + path;
 
       const res = await fetch(url, {
         headers: { "Content-Type": "application/json" },
@@ -387,19 +493,39 @@
             <span class="muted">${escapeHtml(assignees)}</span>
           </td>
           <td class="col-actions">
+            <button class="btnLink" data-action="pick" data-id="${t.taskId}">선택</button>
             <button class="btnDel" data-action="delete" data-id="${t.taskId}">삭제</button>
           </td>
         `;
+
         tbody.appendChild(tr);
       });
     };
 
+    const getProjectId = () => $("projectId").value.trim();
+    const getTaskId = () => $("taskId").value.trim();
+
     const loadTasks = async () => {
-      const data = await api(`/api/projects/${PROJECT_ID}/tasks`, { method: "GET" });
+      const data = await api(`/api/projects/${getProjectId()}/tasks`, { method: "GET" });
       if (data && data.status === "success") {
         renderRows(data.data || []);
       }
       log(data);
+    };
+
+    const getTaskDetail = async () => {
+      const taskId = getTaskId();
+      if (!taskId) return alert("taskId를 입력하세요.");
+      const data = await api(`/api/tasks/${taskId}`, { method: "GET" });
+      log(data);
+
+      // 상세에서 일정값을 채워줌(있으면)
+      if (data && data.status === "success" && data.data) {
+        const sd = data.data.startDate ? String(data.data.startDate).slice(0,10) : "";
+        const dd = data.data.dueDate ? String(data.data.dueDate).slice(0,10) : "";
+        if (sd) $("uStart").value = sd;
+        if (dd) $("uDue").value = dd;
+      }
     };
 
     const patchStatus = async (taskId, status) => {
@@ -410,17 +536,86 @@
       log(data);
     };
 
+    const patchSchedule = async () => {
+      const taskId = getTaskId();
+      if (!taskId) return alert("taskId를 입력하세요.");
+
+      const start = $("uStart").value;
+      const due = $("uDue").value;
+      if (!start || !due) return alert("startDate / dueDate를 모두 입력하세요.");
+
+      const payload = {
+        startDate: dateToInstantZulu(start),
+        dueDate: dateToInstantZulu(due)
+      };
+
+      const data = await api(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload)
+      });
+      log(data);
+      await loadTasks();
+    };
+
+    const patchAssignees = async () => {
+      const taskId = getTaskId();
+      if (!taskId) return alert("taskId를 입력하세요.");
+
+      const raw = $("uAssignees").value.trim();
+      const ids = raw
+        ? raw.split(",").map(s => Number(s.trim())).filter(n => !Number.isNaN(n))
+        : [];
+
+      const data = await api(`/api/tasks/${taskId}/assignees`, {
+        method: "PATCH",
+        body: JSON.stringify({ assigneeProjectMemberIds: ids })
+      });
+      log(data);
+      await loadTasks();
+    };
+
     const deleteTask = async (taskId) => {
       const data = await api(`/api/tasks/${taskId}`, { method: "DELETE" });
       log(data);
+      await loadTasks();
+    };
+
+    const createTask = async () => {
+      const name = $("cName").value.trim();
+      const content = $("cContent").value.trim();
+      const start = $("cStart").value;
+      const due = $("cDue").value;
+      const assigneesRaw = $("cAssignees").value.trim();
+
+      if (!name || !content) return alert("업무명/업무내용을 입력하세요.");
+      if (!start || !due) return alert("시작일/마감일을 입력하세요.");
+
+      const assigneeProjectMemberIds = assigneesRaw
+        ? assigneesRaw.split(",").map(s => Number(s.trim())).filter(n => !Number.isNaN(n))
+        : [];
+
+      const payload = {
+        name,
+        content,
+        startDate: dateToInstantZulu(start),
+        dueDate: dateToInstantZulu(due),
+        assigneeProjectMemberIds
+      };
+
+      const data = await api(`/api/projects/${getProjectId()}/tasks`, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      log(data);
+      await loadTasks();
+      closeModal();
     };
 
     const openModal = () => $("overlay").classList.add("open");
     const closeModal = () => $("overlay").classList.remove("open");
 
     const ensureDatePickerWorks = (inputEl) => {
-      // 일부 환경에서 date input 클릭이 막히는 경우(오버레이/레이아웃 이슈) 대비
-      // showPicker 지원 브라우저면 강제로 열어줌
       inputEl.addEventListener("focus", () => {
         if (typeof inputEl.showPicker === "function") {
           try { inputEl.showPicker(); } catch (e) {}
@@ -433,38 +628,21 @@
       });
     };
 
-    const createTask = async () => {
-      const name = $("cName").value.trim();
-      const content = $("cContent").value.trim();
-      const start = $("cStart").value;
-      const due = $("cDue").value;
-      const assigneesRaw = $("cAssignees").value.trim();
+    // ---- events ----
+    $("btnList").addEventListener("click", () => loadTasks().catch(err => log(err)));
+    $("btnDetail").addEventListener("click", () => getTaskDetail().catch(err => log(err)));
 
-      const assigneeProjectMemberIds = assigneesRaw
-        ? assigneesRaw.split(",").map(s => Number(s.trim())).filter(n => !Number.isNaN(n))
-        : [];
+    $("btnDeleteOne").addEventListener("click", async () => {
+      const taskId = getTaskId();
+      if (!taskId) return alert("taskId를 입력하세요.");
+      if (!confirm("삭제하시겠습니까?")) return;
+      try { await deleteTask(taskId); } catch (e) { log(e); }
+    });
 
-      const payload = {
-        name,
-        content,
-        startDate: start ? dateToInstantZulu(start) : null,
-        dueDate: due ? dateToInstantZulu(due) : null,
-        assigneeProjectMemberIds
-      };
+    $("btnPatchSchedule").addEventListener("click", () => patchSchedule().catch(err => log(err)));
+    $("btnPatchAssignees").addEventListener("click", () => patchAssignees().catch(err => log(err)));
 
-      const data = await api(`/api/projects/${PROJECT_ID}/tasks`, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      log(data);
-      await loadTasks();
-      closeModal();
-    };
-
-    // events
     $("btnOpenCreate").addEventListener("click", () => {
-      // date 기본값
       const today = new Date();
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth()+1).padStart(2,"0");
@@ -474,7 +652,6 @@
       if (!$("cDue").value) $("cDue").value = t;
 
       openModal();
-      // 모달 열린 다음 date picker 강제 연결
       ensureDatePickerWorks($("cStart"));
       ensureDatePickerWorks($("cDue"));
     });
@@ -485,14 +662,7 @@
       if (e.target === $("overlay")) closeModal();
     });
 
-    $("btnCreate").addEventListener("click", async () => {
-      try {
-        await createTask();
-      } catch (e) {
-        log(e);
-        alert("생성 실패: 로그 확인");
-      }
-    });
+    $("btnCreate").addEventListener("click", () => createTask().catch(err => log(err)));
 
     $("tbody").addEventListener("change", async (e) => {
       const target = e.target;
@@ -509,19 +679,28 @@
     });
 
     $("tbody").addEventListener("click", async (e) => {
-      const btn = e.target;
-      if (btn && btn.matches('button[data-action="delete"]')) {
-        const taskId = btn.getAttribute("data-id");
+      const el = e.target;
+      if (!el) return;
+
+      if (el.matches('button[data-action="pick"]')) {
+        const taskId = el.getAttribute("data-id");
+        $("taskId").value = taskId;
+        // 단건 상세도 같이 불러와서 일정 입력칸 채우기
+        try { await getTaskDetail(); } catch (err) { log(err); }
+        return;
+      }
+
+      if (el.matches('button[data-action="delete"]')) {
+        const taskId = el.getAttribute("data-id");
         if (!confirm("삭제하시겠습니까?")) return;
-        try {
-          await deleteTask(taskId);
-          await loadTasks();
-        } catch (err) {
-          log(err);
-          alert("삭제 실패: 로그 확인");
-        }
+        try { await deleteTask(taskId); } catch (err) { log(err); }
+        return;
       }
     });
+
+    // date pickers (단건 수정 영역도 클릭 잘 되게)
+    ensureDatePickerWorks($("uStart"));
+    ensureDatePickerWorks($("uDue"));
 
     // init
     loadTasks().catch(err => log(err));
