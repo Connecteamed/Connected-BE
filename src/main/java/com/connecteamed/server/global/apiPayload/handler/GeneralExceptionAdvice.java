@@ -82,6 +82,7 @@ public class GeneralExceptionAdvice {
     
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMessage()); // 디버깅을 위한 로그 추가
         BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
         return ResponseEntity.status(code.getStatus())
                 .body(ApiResponse.onFailure(code, "DB 제약 조건 위반이 발생했습니다."));
