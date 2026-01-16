@@ -56,7 +56,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 ));
 
         // 요청 roleIds (null 방어 + null 요소 제거 + 중복 제거)
-        List<Long> requestedRoleIds = (req == null || req.roleIds() == null) ? List.of() : req.roleIds();
+        List<Long> requestedRoleIds = (req.roleIds() == null) ? List.of() : req.roleIds();
         Set<Long> requestedRoleIdSet = requestedRoleIds.stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(LinkedHashSet::new)); // 순서 유지
