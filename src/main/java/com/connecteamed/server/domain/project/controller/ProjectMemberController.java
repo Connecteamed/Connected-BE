@@ -4,7 +4,6 @@ import com.connecteamed.server.domain.project.dto.ProjectMemberRes;
 import com.connecteamed.server.domain.project.dto.ProjectMemberRoleUpdateReq;
 import com.connecteamed.server.domain.project.dto.ProjectRoleListRes;
 import com.connecteamed.server.domain.project.service.ProjectMemberService;
-import com.connecteamed.server.domain.project.service.ProjectService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
 import jakarta.validation.Valid;
