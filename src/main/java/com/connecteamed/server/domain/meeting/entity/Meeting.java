@@ -5,6 +5,7 @@ import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +34,10 @@ public class Meeting extends BaseEntity {
     private String title;
 
     @Column(name = "meeting_date", nullable = false)
-    private OffsetDateTime meetingDate;
+    private Instant meetingDate;
 
     @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
+    private Instant deletedAt;
 
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -46,9 +47,9 @@ public class Meeting extends BaseEntity {
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MeetingAttendee> attendees = new ArrayList<>();
 
-    public void update(String title, String meetingDate) {
+    public void update(String title, java.time.Instant meetingDate) {
         this.title = title;
-        this.meetingDate = OffsetDateTime.parse(meetingDate);
+        this.meetingDate = meetingDate;
     }
 
     @PrePersist

@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.meeting.dto;
 
+import java.time.Instant;
 import java.util.List;
 
 public record MeetingListRes (
@@ -8,7 +9,7 @@ public record MeetingListRes (
     public record MeetingSummary(
             Long meetingId,
             String title,
-            String meetingDate,
+            Instant meetingDate,
             List<AttendeeSummary> attendees
     ) {}
 

@@ -1,10 +1,11 @@
 package com.connecteamed.server.domain.meeting.dto;
 
+import java.time.Instant;
 import java.util.List;
 
 public record MeetingUpdateReq (
         String title,
-        String meetingDate,
+        Instant meetingDate,
         List<UpdateAgendaInfo> agendas,
         List<Long> attendeeIds
 ) {

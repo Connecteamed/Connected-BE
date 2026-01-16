@@ -23,7 +23,7 @@ public class MeetingController {
     @PostMapping("/projects/{projectId}/meetings")
     public ApiResponse<MeetingCreateRes> createMeeting(
             @Parameter(description = "프로젝트 식별자") @PathVariable Long projectId,
-            @RequestBody MeetingCreateReq request) {
+            @jakarta.validation.Valid @RequestBody MeetingCreateReq request) {
 
         MeetingCreateRes result = meetingService.createMeeting(projectId, request);
         return ApiResponse.onSuccess(GeneralSuccessCode._CREATED, result);
@@ -34,7 +34,7 @@ public class MeetingController {
     @PatchMapping("/meetings/{meetingId}")
     public ApiResponse<MeetingDetailRes> updateMeeting(
             @Parameter(description = "회의록 식별자") @PathVariable Long meetingId,
-            @RequestBody MeetingUpdateReq request){
+            @jakarta.validation.Valid @RequestBody MeetingUpdateReq request){
 
         MeetingDetailRes result = meetingService.updateMeeting(meetingId, request);
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, result);
