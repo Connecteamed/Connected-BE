@@ -80,7 +80,7 @@
       <div>
         <label>roleIds (쉼표로 구분)</label>
         <input id="roleIds" value="1,2" />
-        <div class="muted">예: 1,2 (designer + ppt)</div>
+        <div class="muted">비우고 PATCH하면 roleIds: [] 로 전송되어 전체 해제됩니다.</div>
       </div>
       <div style="margin-top: 18px;">
         <button id="btnPatch">역할 업데이트</button>
@@ -96,7 +96,15 @@
         선택 변경 시 자동 PATCH
       </label>
       <div class="muted" style="margin-top:6px;">
-        자동 PATCH를 켜면 역할 pill 선택/해제 시 바로 서버에 반영됩니다.
+        자동 PATCH를 켜면 역할 pill 선택/해제 시 바로 서버에 반영됩니다(선택이 0개면 전체 해제).
+      </div>
+
+      <label style="margin-top:8px; display:flex; align-items:center; gap:8px; font-size:12px; color:#444;">
+        <input id="omitRoleIds" type="checkbox" />
+        roleIds 미전달로 요청(변경 없음 테스트)
+      </label>
+      <div class="muted" style="margin-top:6px;">
+        체크하면 PATCH body에서 roleIds를 아예 빼서 {} 로 전송합니다(서버에서 변경 없음 처리).
       </div>
     </div>
 
@@ -128,7 +136,9 @@
   }
 
   function parseRoleIds(value) {
-    return value
+    const v = (value ?? "").trim();
+    if (!v) return [];
+    return v
       .split(",")
       .map(s => s.trim())
       .filter(Boolean)
@@ -351,17 +361,17 @@
       $("patchStatus").innerHTML = `<span class="bad">Project Member ID를 올바르게 입력해주세요.</span>`;
       return;
     }
-    if (roleIds.length === 0) {
-      $("patchStatus").innerHTML = `<span class="bad">roleIds를 1개 이상 입력해주세요. 예: 1,2</span>`;
-      return;
-    }
 
     const url = buildUrl(`/api/projects/${projectId}/members/${projectMemberId}/roles`);
     $("btnPatch").disabled = true;
     $("patchStatus").textContent = "업데이트 중...";
     $("patchResponse").style.display = "none";
 
-    const body = { roleIds };
+    // 서버 의도 반영:
+    // - omitRoleIds 체크: roleIds 미전달 => 변경 없음
+    // - 아니면: roleIds 포함해서 전송(빈 배열이면 전체 해제)
+    const omit = $("omitRoleIds").checked === true;
+    const body = omit ? {} : { roleIds };
 
     logLine(`PATCH ${url} body=${JSON.stringify(body)}`);
 
@@ -393,21 +403,35 @@
   }
 
   async function patchRolesWithSelected() {
+    // 선택 UI 기반 PATCH는 기본적으로 roleIds를 보내는 케이스(빈 배열 포함)로 보냅니다.
+    // 변경 없음 테스트를 하고 싶으면 omitRoleIds 체크 후 버튼 PATCH를 누르시면 됩니다.
     const ids = Array.from(selectedRoleIdSet).sort((a,b)=>a-b);
     $("roleIds").value = ids.join(",");
     await patchRoles();
   }
 
-  // 입력칸 수동 변경 시, 선택 UI도 맞춰주기(옵션)
+  // 입력칸 수동 변경 시, 선택 UI도 맞춰주기
   $("roleIds").addEventListener("input", () => {
     const ids = parseRoleIds($("roleIds").value);
     selectedRoleIdSet = new Set(ids);
     renderRolePool();
   });
 
+  // roleIds 미전달(변경 없음) 체크 시 입력 비활성화(테스트 편의)
+  $("omitRoleIds").addEventListener("change", () => {
+    const on = $("omitRoleIds").checked === true;
+    $("roleIds").disabled = on;
+    if (on) {
+      $("patchStatus").innerHTML = `<span class="muted">roleIds 미전달 모드: PATCH body가 {} 로 나갑니다.</span>`;
+    } else {
+      $("patchStatus").textContent = "";
+    }
+  });
+
   $("btnLoad").addEventListener("click", loadMembers);
+
   $("btnPatch").addEventListener("click", async () => {
-    // 버튼 클릭은 입력값 기준으로 PATCH + 선택 UI도 동기화
+    // 버튼 클릭은 입력값 기준으로 PATCH + 선택 UI도 동기화(omitRoleIds면 roleIds는 무시됨)
     const ids = parseRoleIds($("roleIds").value);
     selectedRoleIdSet = new Set(ids);
     renderRolePool();
