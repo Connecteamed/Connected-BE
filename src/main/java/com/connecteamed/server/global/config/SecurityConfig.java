@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,7 +22,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -38,57 +40,83 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
+
+    // local: API 전체 오픈
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Profile("local")
+    public SecurityFilterChain localFilterChain(HttpSecurity http) throws Exception {
+        configureCommonSecurity(http);
         http
-                // 1. CSRF 및 기본 설정 비활성화
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/", "/index.html", "/document.html",
+                    "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error",
+                    "/docs", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**"
+                ).permitAll()
+                .requestMatchers("/api/**").permitAll()
+                .anyRequest().permitAll()
+            );
 
-                // 2. 세션을 사용하지 않음 (JWT를 사용하기 때문)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        return http.build();
+    }
+
+    // dev/prod: API 보호
+    @Bean
+    @Profile("!local")
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+        configureCommonSecurity(http);
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/", "/index.html", "/document.html",
+                    "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error",
+                    "/docs", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**"
+                ).permitAll()
+                // 로그인/회원가입 같은 것만 예외로 오픈
+                .requestMatchers("/api/auth/**","/api/member/signup","/api/members/check-id","/api/auth/refresh").permitAll()
+                .anyRequest().authenticated()
                 )
-
-                // 3. 권한 설정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/docs", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/auth/logout").authenticated()
-                        .requestMatchers("/api/auth/**").permitAll() // 로그인, 회원가입 경로는 허용
-                        .requestMatchers("/").permitAll()
-                        .requestMatchers("/api/member/signup","/api/members/check-id","/api/auth/refresh").permitAll()
-                        .anyRequest().authenticated()
-                )
-
-                // 4. JWT 필터를 ID/PW 인증 필터보다 앞에 배치
+                // JWT 필터 추가
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, customUserDetailsService, blacklistedTokenRepository),
                         org.springframework.security.web.authentication.logout.LogoutFilter.class)
-
-                //로그아웃 설정
+                // 상세 로그아웃 설정
                 .logout(logout -> logout
-                .logoutUrl("/api/auth/logout") // 로그아웃을 수행할 URL
-                .addLogoutHandler(jwtLogoutHandler) // 우리가 만든 핸들러 추가
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setContentType("application/json;charset=UTF-8");
+                        .logoutUrl("/api/auth/logout")
+                        .addLogoutHandler(jwtLogoutHandler)
+                        .logoutSuccessHandler(customLogoutSuccessHandler())
+                );
 
-                    ObjectMapper objectMapper = new ObjectMapper();
-
-                    //  인증 정보가 없다면(토큰이 없거나 무효하다면) 에러 응답 반환
-                    if (authentication == null) {
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 에러
-                        // 동현님이 정의한 AuthErrorCode 혹은 적절한 에러 코드를 사용하세요.
-                        ApiResponse<Object> errorResponse = ApiResponse.onFailure(AuthErrorCode.TOKEN_EXPIRED);
-                        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
-                        return;
-                    }
-
-                    // 인증된 유저인 경우 정상 로그아웃 응답
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    ApiResponse<String> successResponse = ApiResponse.onSuccess(AuthSuccessCode.LOGOUT_SUCCESS, null);
-                    response.getWriter().write(objectMapper.writeValueAsString(successResponse));
-                })
-        );
         return http.build();
+    }
+
+    //공통 설정
+    private void configureCommonSecurity(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 무조건 Stateless 유지
+                );
+    }
+
+
+    //로그아웃 성공 핸들러
+    private LogoutSuccessHandler customLogoutSuccessHandler() {
+        return (request, response, authentication) -> {
+            response.setContentType("application/json;charset=UTF-8");
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            if (authentication == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(AuthErrorCode.TOKEN_EXPIRED)));
+                return;
+            }
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onSuccess(AuthSuccessCode.LOGOUT_SUCCESS, null)));
+        };
     }
 }

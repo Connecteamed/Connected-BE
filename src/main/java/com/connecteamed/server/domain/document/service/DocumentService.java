@@ -1,4 +1,18 @@
 package com.connecteamed.server.domain.document.service;
 
-public class DocumentService {
+import com.connecteamed.server.domain.document.dto.*;
+import com.connecteamed.server.domain.document.enums.DocumentFileType;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+
+public interface DocumentService {
+    DocumentListRes list(Long projectId);
+    DocumentDetailRes detail(Long documentId);
+    ResponseEntity<Resource> download(Long documentId);
+
+    DocumentCreateRes createText(Long projectId, Long projectMemberId, DocumentCreateTextReq req);
+    DocumentUploadRes uploadFile(Long projectId, Long projectMemberId, MultipartFile file, DocumentFileType type);
+    void updateText(Long documentId, Long projectMemberId, DocumentUpdateTextReq req);
+    void delete(Long documentId, Long projectMemberId);
 }
