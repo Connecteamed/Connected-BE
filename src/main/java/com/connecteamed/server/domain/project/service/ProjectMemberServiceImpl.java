@@ -104,11 +104,6 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
             }
         }
 
-        // 영속 상태면 save 없어도 반영됩니다(더티체킹).
-        // 명시적으로 호출하고 싶으면 아래 한 줄을 써도 됩니다.
-        projectMemberRepository.save(pm);
-        projectMemberRepository.flush();
-
         return toRes(pm);
     }
 
