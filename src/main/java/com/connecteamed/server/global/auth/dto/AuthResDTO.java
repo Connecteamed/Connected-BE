@@ -20,8 +20,16 @@ public class AuthResDTO {
     public record LoginDTO(
             UUID memberId,
             String accessToken,
-            //refreshToken 추가 예정
+            String refreshToken,
             String grantType,
             Long expiresIn
     ){}
+
+
+    @Builder
+    public record RefreshResultDTO(
+            String accessToken,
+            String refreshToken
+    ) {}
+
 }

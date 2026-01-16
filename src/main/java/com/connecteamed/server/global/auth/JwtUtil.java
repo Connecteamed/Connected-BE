@@ -19,19 +19,27 @@ public class JwtUtil {
 
     private final SecretKey secretKey;
     private final Duration accessExpiration;
+    private final Duration refreshExpiration;
 
     public JwtUtil(
             @Value("${jwt.token.secret-key}") String secret,
-            @Value("${jwt.token.expiration.access}") Long accessExpiration
+            @Value("${jwt.token.expiration.access}") Long accessExpiration,
+            @Value("${jwt.token.expiration.refresh}") Long refreshExpiration
     ) {
         // [1] 문자열 키를 HMAC-SHA 알고리즘에 적합한 SecretKey 객체로 변환
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessExpiration = Duration.ofMillis(accessExpiration);
+        this.refreshExpiration = Duration.ofMillis(refreshExpiration);
     }
 
     // [2] AccessToken 생성 (이메일 대신 ID/Username 사용)
     public String createAccessToken(CustomUserDetails user) {
         return createToken(user, accessExpiration);
+    }
+
+    // RefreshToken 생성
+    public String createRefreshToken(CustomUserDetails user) {
+        return createToken(user, refreshExpiration);
     }
 
     // [3] 토큰에서 사용자 식별자(Subject) 가져오기
@@ -90,6 +98,17 @@ public class JwtUtil {
                 .getPayload();
 
         return claims.getExpiration().toInstant();
+    }
+
+
+//서비스 만료시간 계산 위해 호출
+public Duration getRefreshExpiration() {
+    return this.refreshExpiration;
+}
+
+//컨버터에서 expiresIn값 줄 때 사용
+public Long getAccessTokenExpirationMillis() {
+        return this.accessExpiration.toMillis();
     }
 
 }
