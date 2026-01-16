@@ -34,7 +34,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     private final ProjectRoleRepository projectRoleRepository;
     private final ProjectRequiredRoleRepository projectRequiredRoleRepository;
 
-    @Override
+    @Override //TODO : 프로젝트 존재 체크 예외처리 필요 2026/01/16
     public List<ProjectMemberRes> getProjectMembers(Long projectId) {
         List<ProjectMember> members = projectMemberRepository.findAllByProjectId(projectId);
 
@@ -55,13 +55,17 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                         "프로젝트 팀원을 찾을 수 없습니다."
                 ));
 
-        // 요청 roleIds (null 방어 + null 요소 제거 + 중복 제거)
-        List<Long> requestedRoleIds = (req.roleIds() == null) ? List.of() : req.roleIds();
-        Set<Long> requestedRoleIdSet = requestedRoleIds.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(LinkedHashSet::new)); // 순서 유지
+        // roleIds 미전달(null) => 역할 변경 없음
+        if (req == null || req.roleIds() == null) {
+            return toRes(pm);
+        }
 
-        // 역할 전체 해제
+        // null 요소 제거 + 중복 제거(순서 유지)
+        Set<Long> requestedRoleIdSet = req.roleIds().stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        // 빈 배열([]) => 역할 전체 해제
         if (requestedRoleIdSet.isEmpty()) {
             pm.getRoles().clear(); // orphanRemoval=true면 DB row 삭제
             return toRes(pm);
@@ -71,7 +75,10 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         List<ProjectRole> roles = projectRoleRepository.findAllById(requestedRoleIdSet);
 
         // 존재하지 않는 roleId 검증
-        Set<Long> foundIds = roles.stream().map(ProjectRole::getId).collect(Collectors.toSet());
+        Set<Long> foundIds = roles.stream()
+                .map(ProjectRole::getId)
+                .collect(Collectors.toSet());
+
         List<Long> missing = requestedRoleIdSet.stream()
                 .filter(id -> !foundIds.contains(id))
                 .toList();
@@ -83,16 +90,15 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
             );
         }
 
-        // 현재 보유 roleId 집합
+        // 1) 요청에 없는 기존 역할 삭제
+        pm.getRoles().removeIf(r -> !requestedRoleIdSet.contains(r.getRole().getId()));
+
+        // 2) 삭제 후 현재 보유 roleId 집합 재계산
         Set<Long> currentRoleIds = pm.getRoles().stream()
                 .map(r -> r.getRole().getId())
                 .collect(Collectors.toSet());
 
-
-        // 1) 요청에 없는 기존 역할 삭제
-        pm.getRoles().removeIf(r -> !requestedRoleIdSet.contains(r.getRole().getId()));
-
-        // 2) 기존에 없는 역할만 추가
+        // 3) 기존에 없는 역할만 추가
         for (ProjectRole r : roles) {
             if (!currentRoleIds.contains(r.getId())) {
                 pm.getRoles().add(
@@ -107,7 +113,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         return toRes(pm);
     }
 
-    @Override
+    @Override  //TODO: projectId가 실제로 존재하는 프로젝트인지 확인 예외처리 필요 2026/01/16
     @Transactional(readOnly = true)
     public ProjectRoleListRes getProjectRoles(Long projectId) {
         List<Object[]> rows = projectRequiredRoleRepository.findRequiredRoles(projectId);
