@@ -46,7 +46,7 @@ public class AuthController {
 
     //토큰 재발급
     @PostMapping("/api/auth/refresh")
-    public ApiResponse<AuthResDTO.RefreshResultDTO> reissue(@RequestBody AuthReqDTO.ReissueDTO request) {
+    public ApiResponse<AuthResDTO.RefreshResultDTO> reissue(@RequestBody @Valid AuthReqDTO.ReissueDTO request) {
 
         AuthResDTO.RefreshResultDTO result = authQueryService.reissue(request);
 

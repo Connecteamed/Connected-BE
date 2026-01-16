@@ -1,5 +1,7 @@
 package com.connecteamed.server.global.auth;
 
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
+import com.connecteamed.server.global.auth.exception.code.AuthErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.apache.logging.log4j.Logger;
@@ -45,13 +47,14 @@ public class JwtUtil {
     // [3] 토큰에서 사용자 식별자(Subject) 가져오기
     public String getUserId(String token) {
         try {
+            //유효하지 않을 시 getClaim은 jwtexception throw
             return getClaims(token).getPayload().getSubject();
         } catch (JwtException e) {
             return null;
         }
     }
 
-    // [4] 토큰 유효성 확인
+    // 단순 토큰 유효 유무 확인 함수
     public boolean isValid(String token) {
         try {
             getClaims(token);
@@ -100,6 +103,16 @@ public class JwtUtil {
         return claims.getExpiration().toInstant();
     }
 
+    //예외 처리를 위한 토큰 유효처리함수
+    public void validateToken(String token) {
+        try {
+            getClaims(token); // 여기서 ExpiredJwtException 등이 발생
+        } catch (ExpiredJwtException e) {
+            throw new GeneralException(AuthErrorCode.TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new GeneralException(AuthErrorCode.INVALID_TOKEN);
+        }
+    }
 
 //서비스 만료시간 계산 위해 호출
 public Duration getRefreshExpiration() {

@@ -30,15 +30,12 @@ public class AuthCommandServiceImpl implements AuthCommandService {
 
         String encodedPassword = passwordEncoder.encode(dto.password());
 
-        // DTO -> Entity 변환
         Member newMember = AuthConverter.toMember(dto, encodedPassword);
 
         // DB 저장
         Member savedMember = memberRepository.save(newMember);
-        // [중요] DB에 즉시 반영해서 에러가 여기서 터지게 만듭니다.
         memberRepository.flush();
 
-        // Entity -> Response DTO 변환 및 반환
         return AuthConverter.toJoinResultDTO(savedMember);
 
 

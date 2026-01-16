@@ -8,6 +8,7 @@ import com.connecteamed.server.global.auth.JwtUtil;
 import com.connecteamed.server.global.auth.CustomUserDetailsService;
 import com.connecteamed.server.global.auth.exception.code.AuthErrorCode;
 import com.connecteamed.server.global.auth.exception.code.AuthSuccessCode;
+import com.connecteamed.server.global.util.FilterResponseUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class SecurityConfig {
 
     private final JwtLogoutHandler jwtLogoutHandler;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
+    private final FilterResponseUtils filterResponseUtils;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -64,7 +66,7 @@ public class SecurityConfig {
     // dev/prod: API 보호
     @Bean
     @Profile("!local")
-    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http, FilterResponseUtils filterResponseUtils) throws Exception {
         configureCommonSecurity(http);
         http
             .authorizeHttpRequests(auth -> auth
@@ -74,18 +76,25 @@ public class SecurityConfig {
                     "/docs", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**"
                 ).permitAll()
                 // 로그인/회원가입 같은 것만 예외로 오픈
-                .requestMatchers("/api/auth/**","/api/member/signup","/api/members/check-id","/api/auth/refresh").permitAll()
+                .requestMatchers("/api/auth/login","api/auth/refresh","/api/member/signup","/api/members/check-id").permitAll()
                 .anyRequest().authenticated()
                 )
                 // JWT 필터 추가
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, customUserDetailsService, blacklistedTokenRepository),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, customUserDetailsService, blacklistedTokenRepository,filterResponseUtils),
                         org.springframework.security.web.authentication.logout.LogoutFilter.class)
                 // 상세 로그아웃 설정
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .addLogoutHandler(jwtLogoutHandler)
                         .logoutSuccessHandler(customLogoutSuccessHandler())
-                );
+                )
+                .exceptionHandling(conf -> conf
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // 토큰 없이 들어온 사람에게 동현님표 공통 응답 전송!
+                            filterResponseUtils.sendErrorResponse(response, AuthErrorCode.EMPTY_AUTHENTICATION);
+                        })
+                )
+        ;
 
         return http.build();
     }
@@ -110,8 +119,7 @@ public class SecurityConfig {
             ObjectMapper objectMapper = new ObjectMapper();
 
             if (authentication == null) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.onFailure(AuthErrorCode.TOKEN_EXPIRED)));
+                filterResponseUtils.sendErrorResponse(response, AuthErrorCode.EMPTY_AUTHENTICATION);
                 return;
             }
 

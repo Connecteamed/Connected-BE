@@ -2,6 +2,7 @@ package com.connecteamed.server.global.auth;
 
 import com.connecteamed.server.domain.token.entity.BlacklistedToken;
 import com.connecteamed.server.domain.token.repository.BlacklistedTokenRepository;
+import com.connecteamed.server.domain.token.repository.RefreshTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,14 +17,16 @@ import java.time.Instant;
 public class JwtLogoutHandler implements LogoutHandler {
 
     private final BlacklistedTokenRepository blacklistedTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        String authHeader = request.getHeader("Authorization");
+        String accessToken = request.getHeader("Authorization");
+        String refreshToken = request.getHeader("Refresh-Token");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+            String token = accessToken.substring(7);
 
             // 1. 토큰이 유효한지 먼저 확인
             if (jwtUtil.isValid(token)) {
@@ -34,6 +37,10 @@ public class JwtLogoutHandler implements LogoutHandler {
                     blacklistedTokenRepository.save(new BlacklistedToken(token, expiryDate));
                 }
             }
+        }
+
+        if (refreshToken != null) {
+            refreshTokenRepository.deleteByToken(refreshToken);
         }
     }
 }
