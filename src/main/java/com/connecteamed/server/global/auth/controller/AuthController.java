@@ -43,4 +43,13 @@ public class AuthController {
     public void logout() {
         // 실제 로직은 SecurityConfig의 LogoutHandler에서 처리
     }
+
+    //토큰 재발급
+    @PostMapping("/api/auth/refresh")
+    public ApiResponse<AuthResDTO.RefreshResultDTO> reissue(@RequestBody AuthReqDTO.ReissueDTO request) {
+
+        AuthResDTO.RefreshResultDTO result = authQueryService.reissue(request);
+
+        return ApiResponse.onSuccess(AuthSuccessCode.REISSUE_SUCCESS, result);
+    }
 }

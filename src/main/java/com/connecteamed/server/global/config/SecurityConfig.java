@@ -57,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/logout").authenticated()
                         .requestMatchers("/api/auth/**").permitAll() // 로그인, 회원가입 경로는 허용
                         .requestMatchers("/").permitAll()
-                        .requestMatchers("/api/member/signup").permitAll()
+                        .requestMatchers("/api/member/signup","/api/members/check-id","/api/auth/refresh").permitAll()
                         .anyRequest().authenticated()
                 )
 

@@ -7,5 +7,5 @@ public interface AuthQueryService {
 
         AuthResDTO.LoginDTO login(AuthReqDTO.LoginDTO dto);
 
-
+        AuthResDTO.RefreshResultDTO reissue(AuthReqDTO.ReissueDTO dto);
 }

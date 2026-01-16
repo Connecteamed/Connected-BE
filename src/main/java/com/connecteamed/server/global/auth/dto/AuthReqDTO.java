@@ -1,6 +1,7 @@
 package com.connecteamed.server.global.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 
 public class AuthReqDTO {
 
@@ -20,5 +21,11 @@ public class AuthReqDTO {
             String loginId,
             @NotBlank
             String password
+    ){}
+
+    //토큰 재발급
+    @Builder
+    public record ReissueDTO(
+            String refreshToken
     ){}
 }

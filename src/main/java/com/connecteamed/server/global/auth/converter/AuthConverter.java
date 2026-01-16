@@ -32,13 +32,22 @@ public class AuthConverter {
 
 
     //로그인
-    public static AuthResDTO.LoginDTO toLoginDTO(Member member, String accessToken, Long expiresIn) {
+    public static AuthResDTO.LoginDTO toLoginDTO(Member member, String accessToken, String refreshToken,Long expiresIn) {
         return AuthResDTO.LoginDTO.builder()
                 .memberId(member.getPublicId()) // UUID 매핑
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .grantType("Bearer")
                 .expiresIn(expiresIn)
                 .build();
     }
 
+
+    //토큰 재발급
+    public static AuthResDTO.RefreshResultDTO toRefreshResultDTO(String accessToken, String refreshToken) {
+        return AuthResDTO.RefreshResultDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
 }
