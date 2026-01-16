@@ -1,11 +1,11 @@
 package com.connecteamed.server.global.auth.service;
 
 import com.connecteamed.server.domain.member.entity.Member;
-import com.connecteamed.server.domain.member.exception.MemberException;
-import com.connecteamed.server.domain.member.exception.code.MemberErrorCode;
+import com.connecteamed.server.domain.member.code.MemberErrorCode;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.token.entity.RefreshToken;
 import com.connecteamed.server.domain.token.repository.RefreshTokenRepository;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import com.connecteamed.server.global.auth.CustomUserDetails;
 import com.connecteamed.server.global.auth.JwtUtil;
 import com.connecteamed.server.global.auth.converter.AuthConverter;
@@ -36,12 +36,12 @@ public class AuthQueryServiceImpl implements AuthQueryService {
     public AuthResDTO.LoginDTO login(AuthReqDTO.LoginDTO dto) {
         // 1. 아이디(Email)로 사용자 존재 여부 확인
         Member member = memberRepository.findByLoginId(dto.loginId())
-                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         // 2. 비밀번호 일치 여부 검증
         // DB의 암호화된 비번과 사용자가 입력한 평문 비번을 비교합니다.
         if (!passwordEncoder.matches(dto.password(), member.getPassword())) {
-            throw new AuthException(AuthErrorCode.INVALID_PASSWORD);
+            throw new AuthException(AuthErrorCode.INCORRECT_PASSWORD);
         }
 
         // 3. JWT 토큰 발급을 위한 Security 전용 객체 생성

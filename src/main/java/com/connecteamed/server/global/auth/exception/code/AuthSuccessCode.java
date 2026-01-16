@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum AuthSuccessCode implements BaseSuccessCode {
-    LOGIN_SUCCESS(HttpStatus.OK, "MEMBER2001", "로그인에 성공하였습니다."),
-    SIGNUP_SUCCESS(HttpStatus.CREATED, "MEMBER2011", "회원가입이 완료되었습니다."),
-    LOGOUT_SUCCESS(HttpStatus.OK,"MEMBER2002","로그아웃에 성공하였습니다."),
+    LOGIN_SUCCESS(HttpStatus.OK, "LOGIN_SUCCESS", "로그인에 성공하였습니다."),
+    SIGNUP_SUCCESS(HttpStatus.CREATED, "SIGNUP_SUCCESS", "회원가입이 완료되었습니다."),
+    LOGOUT_SUCCESS(HttpStatus.OK,"LOGOUT_SUCCESS","로그아웃에 성공하였습니다."),
     REISSUE_SUCCESS(HttpStatus.CREATED, "REISSUE_SUCCESS", "재발급에 성공하였습니다.")
 ;
     private final HttpStatus status;
