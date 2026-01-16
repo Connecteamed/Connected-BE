@@ -6,7 +6,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.BaseErrorCode;
 import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
@@ -21,7 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Slf4j
 @RestControllerAdvice
 public class GeneralExceptionAdvice {
-    
+
     // 1) @RequestParam / @PathVariable 검증 실패
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleConstraintViolation(ConstraintViolationException ex) {

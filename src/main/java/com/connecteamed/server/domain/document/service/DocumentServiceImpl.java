@@ -3,8 +3,8 @@ package com.connecteamed.server.domain.document.service;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
@@ -44,7 +44,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
-    private final Optional<S3StorageService> s3StorageService;
+    private final S3StorageService s3StorageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -105,10 +105,7 @@ public class DocumentServiceImpl implements DocumentService {
         String key = d.getFileUrl();
 
         try {
-            S3StorageService storageService = s3StorageService
-                    .orElseThrow(() -> new GeneralException(GeneralErrorCode.INTERNAL_SERVER_ERROR,
-                            "S3 서비스가 설정되지 않았습니다."));
-            InputStream in = storageService.download(key);
+            InputStream in = s3StorageService.download(key);
             Resource resource = new InputStreamResource(in);
 
             // 다운로드 파일명: DB title 우선, 없으면 key에서 파일명 뽑기
@@ -151,10 +148,7 @@ public class DocumentServiceImpl implements DocumentService {
         Project projectRef = projectRepository.getReferenceById(projectId);
         ProjectMember projectMemberRef = projectMemberRepository.getReferenceById(projectMemberId);
 
-        S3StorageService storageService = s3StorageService
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.INTERNAL_SERVER_ERROR,
-                        "S3 서비스가 설정되지 않았습니다."));
-        String fileUrl = storageService.upload(file, "project-" + projectId);
+        String fileUrl = s3StorageService.upload(file, "project-" + projectId);
 
         String title = (file.getOriginalFilename() == null || file.getOriginalFilename().isBlank())
                 ? "file"

@@ -1,7 +1,6 @@
 package com.connecteamed.server.domain.document.service;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +16,6 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "app.s3.access-key")
 public class S3StorageServiceImpl implements S3StorageService {
 
     private final S3Client s3Client;
