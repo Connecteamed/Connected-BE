@@ -6,11 +6,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EnableJpaAuditing
+@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 public class ConnecteamedApplication {
 
 	public static void main(String[] args) {
-		Dotenv.load();
+		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+		dotenv.entries().forEach(entry ->
+				System.setProperty(entry.getKey(), entry.getValue())
+		);
 		SpringApplication.run(ConnecteamedApplication.class, args);
 	}
 

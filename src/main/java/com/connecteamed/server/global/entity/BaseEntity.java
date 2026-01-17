@@ -10,7 +10,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
@@ -18,7 +17,7 @@ import java.time.OffsetDateTime;
 public abstract class BaseEntity {
 
     @CreatedDate
-    @Column(name="created_at",nullable = false)
+    @Column(name="created_at", nullable = false)
     private Instant createdAt;
 
     @LastModifiedDate
