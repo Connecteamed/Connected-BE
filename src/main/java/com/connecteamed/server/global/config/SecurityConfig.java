@@ -76,7 +76,7 @@ public class SecurityConfig {
                     "/docs", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**"
                 ).permitAll()
                 // 로그인/회원가입 같은 것만 예외로 오픈
-                .requestMatchers("/api/auth/login","/api/auth/refresh","/api/member/signup","/api/members/check-id").permitAll()
+                .requestMatchers("/api/auth/login","/api/auth/refresh","/api/auth/signup","/api/members/check-id").permitAll()
                 .anyRequest().authenticated()
                 )
                 // JWT 필터 추가

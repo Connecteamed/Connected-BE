@@ -41,7 +41,7 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 (필드 누락 등)"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 회원 (MEMBER_NOT_FOUND)")
     })
-    @PostMapping("/api/member/signup")
+    @PostMapping("/api/auth/signup")
     public ApiResponse<AuthResDTO.JoinDTO> signUp(
             @RequestBody @Valid AuthReqDTO.JoinDTO dto
     ){

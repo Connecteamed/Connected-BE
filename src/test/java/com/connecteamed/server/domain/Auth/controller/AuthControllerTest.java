@@ -151,8 +151,8 @@ class AuthControllerTest {
     void signUp_Success() throws Exception {
         AuthReqDTO.JoinDTO request = new AuthReqDTO.JoinDTO(
                 "testUser",
-                "password123!",
-                "동현"
+                "user123!",
+                "password123!"
         );
 
         UUID testMemberId = UUID.randomUUID();
@@ -160,7 +160,7 @@ class AuthControllerTest {
 
         when(authCommandService.signup(any())).thenReturn(response);
 
-        mockMvc.perform(post("/api/member/signup")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -180,7 +180,7 @@ class AuthControllerTest {
 
         AuthReqDTO.JoinDTO request = new AuthReqDTO.JoinDTO("testUser123","", "password123!" );
 
-        mockMvc.perform(post("/api/member/signup")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -197,7 +197,7 @@ class AuthControllerTest {
 
         AuthReqDTO.JoinDTO request = new AuthReqDTO.JoinDTO("testUser", "testUser123", "");
 
-        mockMvc.perform(post("/api/member/signup")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -213,7 +213,7 @@ class AuthControllerTest {
     void signUp_Fail_Name_Missing() throws Exception {
         AuthReqDTO.JoinDTO request = new AuthReqDTO.JoinDTO("","testUser", "password123!");
 
-        mockMvc.perform(post("/api/member/signup")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -237,7 +237,7 @@ class AuthControllerTest {
         when(authCommandService.signup(any()))
                 .thenThrow(new AuthException(AuthErrorCode.DUPLICATE_LOGIN_ID));
 
-        mockMvc.perform(post("/api/member/signup") // 컨트롤러 경로와 일치
+        mockMvc.perform(post("/api/auth/signup") // 컨트롤러 경로와 일치
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())

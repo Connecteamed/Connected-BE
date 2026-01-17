@@ -35,7 +35,7 @@ public class MemberController {
                             examples = {
                                     @ExampleObject(
                                             name = "사용 가능한 아이디",
-                                            value = "{ \"status\": \"success\", \"data\": { \"loginId\": \"dongguk2026\", \"isAvailabe\": true }, \"message\": \"요청에 성공하였습니다.\", \"code\": \"COMMON200\" }"
+                                            value = "{ \"status\": \"success\", \"data\": { \"loginId\": \"dongguk2026\", \"isAvailable\": true }, \"message\": \"요청에 성공하였습니다.\", \"code\": \"COMMON200\" }"
                                     ),
                                     @ExampleObject(
                                             name = "중복된 아이디",
