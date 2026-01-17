@@ -57,6 +57,7 @@ public class MemberController {
             )
     })
     @GetMapping("/members/check-id")
+    @Validated
     public ApiResponse<MemberRes.CheckIdResultDTO> checkId(
             @RequestParam ("loginId")
             @NotBlank(message = "아이디를 입력해주세요.")
