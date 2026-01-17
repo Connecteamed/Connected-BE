@@ -4,6 +4,7 @@ import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import com.connecteamed.server.global.auth.exception.code.AuthErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +17,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -60,7 +62,7 @@ public class JwtUtil {
             getClaims(token);
             return true;
         } catch (JwtException e) {
-            System.out.println("유효하지 않은 토큰: " + e.getMessage());
+            log.warn("유효하지 않은 토큰: {}" + e.getMessage());
             return false;
         }
     }
