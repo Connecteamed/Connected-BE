@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    // 업무 추가
+    @Operation(summary = "업무 추가", description = "업무 추가 API입니다.")
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<ApiResponse<Map<String, Object>>> createTask(
             @PathVariable Long projectId,
@@ -32,7 +33,7 @@ public class TaskController {
         );
     }
 
-    // 업무 목록 조회(전체)
+    @Operation(summary = "업무 목록 조회(전체)", description = "업무 목록 조회(전체) API입니다.")
     @GetMapping("/projects/{projectId}/tasks")
     public ResponseEntity<ApiResponse<List<TaskSummaryRes>>> getProjectTasks(
             @PathVariable Long projectId
@@ -42,7 +43,7 @@ public class TaskController {
         );
     }
 
-    // 업무 상세 조회
+    @Operation(summary = "업무 상세 조회", description = "업무 상세 조회 API입니다.")
     @GetMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskDetailRes>> getTaskDetail(
             @PathVariable UUID taskId
@@ -52,7 +53,7 @@ public class TaskController {
         );
     }
 
-    // 업무 상태 변경(드롭다운)
+    @Operation(summary = "업무 상태 변경", description = "업무 상태 변경 API입니다.")
     @PatchMapping("/tasks/{taskId}/status")
     public ResponseEntity<ApiResponse<Void>> updateTaskStatus(
             @PathVariable UUID taskId,
@@ -62,7 +63,7 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
     }
 
-    // 업무 일정 수정(시작/마감)
+    @Operation(summary = "업무 일정 수정(시작/마감)", description = "업무 일정 수정(시작/마감) API입니다.")
     @PatchMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<Void>> updateTaskSchedule(
             @PathVariable UUID taskId,
@@ -72,7 +73,7 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
     }
 
-    // 담당자 변경(전체 교체)
+    @Operation(summary = "담당자 변경(전체 교체)", description = "담당자 변경(전체 교체) API입니다.")
     @PatchMapping("/tasks/{taskId}/assignees")
     public ResponseEntity<ApiResponse<Void>> updateTaskAssignees(
             @PathVariable UUID taskId,
@@ -82,7 +83,7 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
     }
 
-    // 업무 삭제(soft delete)
+    @Operation(summary = "업무 삭제(soft delete)", description = "업무 삭제(soft delete) API입니다.")
     @DeleteMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<Void>> deleteTask(
             @PathVariable UUID taskId
