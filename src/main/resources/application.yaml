@@ -3,7 +3,7 @@ spring:
     name: connecteamed-be
 
   profiles:
-    active: local
+    active: notLocal
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/connecteamed}
@@ -21,6 +21,14 @@ spring:
         highlight_sql: true
     open-in-view: false
 
+jwt:
+  token:
+    secretKey: ${JWT_SECRET_KEY}
+    expiration:
+      access: 14400000
+      refresh: 1209600000
+
+
 springdoc:
   swagger-ui:
     # Swagger UI 접속 경로를 /docs로 변경
@@ -36,3 +44,8 @@ app:
     bucket: ${APP_S3_BUCKET}
     access-key: ${APP_S3_ACCESS_KEY}
     secret-key: ${APP_S3_SECRET_KEY}
+
+  # Test Configuration
+  test:
+    login-id: ${TEST_LOGIN_ID:test@example.com}
+    user-name: ${TEST_USER_NAME:테스트사용자}

@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -35,6 +37,19 @@ public class Meeting extends BaseEntity {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MeetingAgenda> agendas = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MeetingAttendee> attendees = new ArrayList<>();
+
+    public void update(String title, java.time.Instant meetingDate) {
+        this.title = title;
+        this.meetingDate = meetingDate;
+    }
 
     @PrePersist
     public void prePersist() {

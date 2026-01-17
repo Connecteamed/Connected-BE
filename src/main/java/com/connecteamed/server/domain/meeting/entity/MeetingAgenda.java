@@ -28,4 +28,10 @@ public class MeetingAgenda extends BaseEntity {
 
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
+
+    public void update(String title, String content, int sortOrder) {
+        this.title = title;
+        this.content = content;
+        this.sortOrder = sortOrder;
+    }
 }

@@ -1,12 +1,11 @@
 package com.connecteamed.server.global.apiPayload.handler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -16,12 +15,13 @@ import com.connecteamed.server.global.apiPayload.code.BaseErrorCode;
 import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 public class GeneralExceptionAdvice {
-
-    private static final Logger log = LoggerFactory.getLogger(GeneralExceptionAdvice.class);
 
     // 1) @RequestParam / @PathVariable 검증 실패
     @ExceptionHandler(ConstraintViolationException.class)
@@ -32,6 +32,18 @@ public class GeneralExceptionAdvice {
         String message = (ex.getConstraintViolations().isEmpty())
                 ? code.getMessage()
                 : ex.getConstraintViolations().iterator().next().getMessage();
+
+        return ResponseEntity.status(code.getStatus())
+                .body(ApiResponse.onFailure(code, message));
+    }
+
+    // 1-2) @RequestParam 파라미터 자체가 누락되었을 때 처리
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParams(MissingServletRequestParameterException ex) {
+        BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
+
+        // "loginId 파라미터가 누락되었습니다." 형태의 메시지 생성
+        String message = String.format("%s 파라미터가 누락되었습니다.", ex.getParameterName());
 
         return ResponseEntity.status(code.getStatus())
                 .body(ApiResponse.onFailure(code, message));
@@ -51,7 +63,9 @@ public class GeneralExceptionAdvice {
 
     //애플리 케이션에서 발생하는 커스텀 예외 처리
     @ExceptionHandler(GeneralException.class)
-    public ResponseEntity<ApiResponse<?>> handleException(GeneralException ex){
+    public ResponseEntity<ApiResponse<?>> handleException(GeneralException ex, HttpServletRequest request){
+        // Log exception details and request info so we can trace occurrences where DB changes happened but client got a 500
+        log.warn("Handled GeneralException - {} {} - code: {} - message: {}", request.getMethod(), request.getRequestURI(), ex.getCode().getCode(), ex.getCustomMessage(), ex);
         return ResponseEntity.status(ex.getCode().getStatus())
                 .body(ApiResponse.onFailure(ex.getCode(),ex.getCustomMessage())
                 );
@@ -97,9 +111,10 @@ public class GeneralExceptionAdvice {
 
     //사용자가 정의 하는 범위 외 발생 예외 처리- 실패응답 1 구조를 따름
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex){
-        log.error("Unhandled exception", ex); // 이 한 줄이 핵심
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex, HttpServletRequest request){
         BaseErrorCode code = GeneralErrorCode.INTERNAL_SERVER_ERROR;
+        // Log full stacktrace and request info to aid debugging when logs previously showed nothing
+        log.error("Unhandled exception - {} {} - returning {}: {}", request.getMethod(), request.getRequestURI(), code.getCode(), code.getMessage(), ex);
         return ResponseEntity.status(code.getStatus())
                 .body(ApiResponse.onFailure(code)
                 );
