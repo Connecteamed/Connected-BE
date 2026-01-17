@@ -8,7 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +32,7 @@ import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentServiceImplTest {
@@ -62,7 +63,7 @@ class DocumentServiceImplTest {
             Document d = invocation.getArgument(0);
             // 테스트용으로 리플렉션 대신, Document 엔티티가 id/createdAt getter를 제대로 반환한다고 가정
             ReflectionTestUtils.setField(d, "id", 1L);
-            ReflectionTestUtils.setField(d, "createdAt", OffsetDateTime.now());
+            ReflectionTestUtils.setField(d, "createdAt", Instant.now());
             return d;
         });
 
@@ -94,8 +95,7 @@ class DocumentServiceImplTest {
 
         // when + then
         assertThatThrownBy(() -> documentService.uploadFile(1L, 1L, file, DocumentFileType.TEXT))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("TEXT는 파일 업로드 타입이 아닙니다");
+                .isInstanceOf(GeneralException.class);
 
         then(s3StorageService).shouldHaveNoInteractions();
         then(documentRepository).shouldHaveNoInteractions();
@@ -130,7 +130,7 @@ class DocumentServiceImplTest {
             Document d = invocation.getArgument(0);
 
             ReflectionTestUtils.setField(d, "id", 1L);
-            ReflectionTestUtils.setField(d, "createdAt", OffsetDateTime.now());
+            ReflectionTestUtils.setField(d, "createdAt", Instant.now());
 
             return d;
         
@@ -159,7 +159,6 @@ class DocumentServiceImplTest {
 
         // when + then
         assertThatThrownBy(() -> documentService.download(10L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("TEXT 문서는 다운로드 대상이 아닙니다.");
+                .isInstanceOf(GeneralException.class);
     }
 }
