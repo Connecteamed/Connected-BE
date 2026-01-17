@@ -16,7 +16,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -70,6 +72,7 @@ class ProjectControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 생성 성공 - Multipart")
     void createProject_Success() throws Exception {
         // given
@@ -77,19 +80,15 @@ class ProjectControllerTest {
                 new TestProjectCreateDto("UMC 7기", "앱 런칭", Arrays.asList("DESIGNER", "SERVER", "ANDROID"))
         );
 
-        MockMultipartFile jsonFile = new MockMultipartFile(
-                "json",
-                "",
-                "application/json",
-                jsonData.getBytes()
-        );
-
         when(projectService.createProject(any(), any())).thenReturn(createResponse);
 
         // when & then
-        mockMvc.perform(multipart("/api/projects")
-                        .file(jsonFile)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/projects")
+                        .param("json", jsonData)
+                        .with(request -> {
+                            request.setContentType("multipart/form-data");
+                            return request;
+                        }))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("success"))
@@ -97,6 +96,7 @@ class ProjectControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 생성 실패 - 프로젝트명 누락")
     void createProject_Fail_MissingName() throws Exception {
         // given
@@ -104,23 +104,20 @@ class ProjectControllerTest {
                 new TestProjectCreateDto("", "앱 런칭", Arrays.asList("DESIGNER"))
         );
 
-        MockMultipartFile jsonFile = new MockMultipartFile(
-                "json",
-                "",
-                "application/json",
-                jsonData.getBytes()
-        );
-
         // when & then
-        mockMvc.perform(multipart("/api/projects")
-                        .file(jsonFile)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/projects")
+                        .param("json", jsonData)
+                        .with(request -> {
+                            request.setContentType("multipart/form-data");
+                            return request;
+                        }))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("error"));
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 생성 실패 - 프로젝트명 중복")
     void createProject_Fail_DuplicateName() throws Exception {
         // given
@@ -128,26 +125,23 @@ class ProjectControllerTest {
                 new TestProjectCreateDto("UMC 7기", "앱 런칭", Arrays.asList("DESIGNER"))
         );
 
-        MockMultipartFile jsonFile = new MockMultipartFile(
-                "json",
-                "",
-                "application/json",
-                jsonData.getBytes()
-        );
-
         when(projectService.createProject(any(), any()))
                 .thenThrow(new GeneralException(ProjectErrorCode.PROJECT_NAME_ALREADY_EXISTS));
 
         // when & then
-        mockMvc.perform(multipart("/api/projects")
-                        .file(jsonFile)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/projects")
+                        .param("json", jsonData)
+                        .with(request -> {
+                            request.setContentType("multipart/form-data");
+                            return request;
+                        }))
                 .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value("error"));
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 상세 조회 성공")
     void getProjectDetail_Success() throws Exception {
         // given
@@ -168,6 +162,7 @@ class ProjectControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 상세 조회 실패 - 프로젝트 없음")
     void getProjectDetail_Fail_ProjectNotFound() throws Exception {
         // given
@@ -183,6 +178,7 @@ class ProjectControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 수정 성공")
     void updateProject_Success() throws Exception {
         // given
@@ -207,6 +203,7 @@ class ProjectControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 수정 실패 - 프로젝트명 누락")
     void updateProject_Fail_MissingName() throws Exception {
         // given
@@ -226,6 +223,7 @@ class ProjectControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 수정 실패 - 프로젝트 없음")
     void updateProject_Fail_ProjectNotFound() throws Exception {
         // given
@@ -248,6 +246,7 @@ class ProjectControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 종료 성공")
     void closeProject_Success() throws Exception {
         // given
@@ -265,6 +264,7 @@ class ProjectControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("프로젝트 종료 실패 - 프로젝트 없음")
     void closeProject_Fail_ProjectNotFound() throws Exception {
         // given
