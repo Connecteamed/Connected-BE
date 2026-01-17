@@ -1,7 +1,5 @@
 package com.connecteamed.server.global.apiPayload.handler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,17 +14,13 @@ import com.connecteamed.server.global.apiPayload.code.BaseErrorCode;
 import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 
-import jakarta.validation.ConstraintViolationException;
-
-import lombok.extern.slf4j.Slf4j;
-
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
 public class GeneralExceptionAdvice {
-
-    private static final Logger log = LoggerFactory.getLogger(GeneralExceptionAdvice.class);
 
     // 1) @RequestParam / @PathVariable 검증 실패
     @ExceptionHandler(ConstraintViolationException.class)
