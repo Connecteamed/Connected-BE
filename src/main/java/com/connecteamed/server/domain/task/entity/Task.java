@@ -6,6 +6,7 @@ import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -40,13 +41,13 @@ public class Task extends BaseEntity {
     private TaskStatus status=TaskStatus.TODO;
 
     @Column(name="start_date",nullable = false)
-    private OffsetDateTime startDate;
+    private Instant startDate;
 
     @Column(name="due_date",nullable = false)
-    private OffsetDateTime dueDate;
+    private Instant dueDate;
 
     @Column(name="deleted_at")
-    private OffsetDateTime deletedAt;
+    private Instant deletedAt;
 
     public void updateStatus(TaskStatus status) {
         this.status = status;
@@ -58,7 +59,7 @@ public class Task extends BaseEntity {
     }
 
     public void softDelete() {
-        this.deletedAt = OffsetDateTime.now();
+        this.deletedAt = java.time.Instant.now();
     }
 
     @PrePersist

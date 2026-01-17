@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.task.dto;
 
+import java.time.Instant;
 import java.util.List;
 
 public record CompletedTaskListRes(
@@ -9,8 +10,8 @@ public record CompletedTaskListRes(
             Long taskId,
             String name,
             String content,
-            String startDate,
-            String dueDate,
+            Instant startDate,
+            Instant dueDate,
             String status,
             List<String> assigneeNames
     ) {}

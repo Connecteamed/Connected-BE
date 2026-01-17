@@ -47,8 +47,8 @@ public class CompletedTaskService {
                             task.getId(),
                             task.getName(),
                             task.getContent(),
-                            task.getStartDate().toString(),
-                            task.getDueDate().toString(),
+                            task.getStartDate(),
+                            task.getDueDate(),
                             task.getStatus().name(),
                             assigneeNames
                     );
@@ -77,8 +77,8 @@ public class CompletedTaskService {
                 task.getId(),
                 task.getName(),
                 task.getContent(),
-                task.getStartDate().toString(),
-                task.getDueDate().toString(),
+                task.getStartDate(),
+                task.getDueDate(),
                 task.getStatus().name(),
                 assigneeNames,
                 myNote
@@ -111,7 +111,14 @@ public class CompletedTaskService {
     }
 
     private TaskNote createNewNote(Task task) {
-        TaskAssignee assignee = taskAssigneeRepository.findAllByTaskId(task.getId()).get(0);
+        List<TaskAssignee> assignees = taskAssigneeRepository.findAllByTaskId(task.getId());
+
+        if (assignees.isEmpty()) {
+            throw new RuntimeException("해당 업무에 할당된 담당자가 없어 회고를 작성할 수 없습니다.");
+        }
+
+        TaskAssignee assignee = assignees.get(0);
+
         return taskNoteRepository.save(TaskNote.builder()
                 .task(task)
                 .taskAssignee(assignee)
