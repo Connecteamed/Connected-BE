@@ -3,7 +3,7 @@ spring:
     name: connecteamed-be
 
   profiles:
-    active: local
+    active: notLocal
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/connecteamed}
@@ -20,6 +20,14 @@ spring:
         format_sql: true
         highlight_sql: true
     open-in-view: false
+
+jwt:
+  token:
+    secretKey: ${JWT_SECRET_KEY}
+    expiration:
+      access: 14400000
+      refresh: 1209600000
+
 
 springdoc:
   swagger-ui:
