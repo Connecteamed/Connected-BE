@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,6 +27,18 @@ public class GeneralExceptionAdvice {
         String message = (ex.getConstraintViolations().isEmpty())
                 ? code.getMessage()
                 : ex.getConstraintViolations().iterator().next().getMessage();
+
+        return ResponseEntity.status(code.getStatus())
+                .body(ApiResponse.onFailure(code, message));
+    }
+
+    // 1-2) @RequestParam 파라미터 자체가 누락되었을 때 처리
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParams(MissingServletRequestParameterException ex) {
+        BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
+
+        // "loginId 파라미터가 누락되었습니다." 형태의 메시지 생성
+        String message = String.format("%s 파라미터가 누락되었습니다.", ex.getParameterName());
 
         return ResponseEntity.status(code.getStatus())
                 .body(ApiResponse.onFailure(code, message));
