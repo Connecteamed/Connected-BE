@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connected 문서 API 테스트</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { margin: 16px; line-height: 1.4; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 12px; margin: 12px 0; }
+    label { font-size: 12px; color: #444; display:block; margin-bottom: 4px; }
+    input, select, textarea, button {
+      font: inherit; border: 1px solid #ccc; border-radius: 8px; padding: 8px 10px;
+    }
+    input, select { min-width: 220px; }
+    textarea { width: 100%; min-height: 90px; }
+    button { cursor: pointer; }
+    button.primary { border-color:#111; background:#111; color:#fff; }
+    button.danger { border-color:#b00; background:#b00; color:#fff; }
+    .hint { font-size: 12px; color: #666; }
+    .out { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background:#fafafa; border:1px solid #eee; border-radius:10px; padding:10px; }
+    .small { min-width: 120px; }
+    .grow { flex: 1 1 auto; }
+  </style>
+</head>
+<body>
+  <h2>문서 API 테스트 페이지</h2>
+  <div class="hint">
+    같은 도메인에서 열면 CORS 이슈가 적습니다. 프론트 dev 서버에서 열거나, Spring에 정적 리소스로 넣어서 /test.html로 띄우는 걸 추천드립니다.
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Base URL</label>
+        <input id="baseUrl" class="grow" value="http://localhost:8080" />
+      </div>
+      <div>
+        <label>Access Token (Bearer 제외)</label>
+        <input id="token" class="grow" placeholder="eyJhbGciOi..." />
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <div>
+        <label>projectId</label>
+        <input id="projectId" class="small" placeholder="1" />
+      </div>
+      <div>
+        <label>projectMemberId</label>
+        <input id="projectMemberId" class="small" placeholder="11" />
+      </div>
+      <div>
+        <label>documentId</label>
+        <input id="documentId" class="small" placeholder="201" />
+      </div>
+      <button class="primary" id="btnHealth">GET /actuator/health</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>1) 문서 목록</h3>
+    <div class="row">
+      <button class="primary" id="btnList">GET /api/projects/{projectId}/documents</button>
+    </div>
+    <div class="hint">응답에 downloadUrl이 나오면, 파일 문서일 때 다운로드 버튼 테스트가 가능합니다.</div>
+  </div>
+
+  <div class="card">
+    <h3>2) 문서 상세</h3>
+    <div class="row">
+      <button class="primary" id="btnDetail">GET /api/documents/{documentId}</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>3) 텍스트 문서 생성</h3>
+    <div class="row">
+      <div class="grow">
+        <label>title</label>
+        <input id="createTitle" class="grow" placeholder="PRD 기획서" />
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <label>content (예: 에디터 HTML 문자열)</label>
+      <textarea id="createContent" placeholder="<h1>기획</h1><p>...</p>"></textarea>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="primary" id="btnCreateText">POST /api/projects/{projectId}/documents/text</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>4) 텍스트 문서 수정</h3>
+    <div class="row">
+      <div class="grow">
+        <label>title</label>
+        <input id="updateTitle" class="grow" placeholder="제목 수정" />
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <label>content</label>
+      <textarea id="updateContent" placeholder="<p>수정된 내용</p>"></textarea>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="primary" id="btnUpdateText">PATCH /api/documents/{documentId}</button>
+    </div>
+    <div class="hint">현재 API가 텍스트만 수정이라면 fileType=TEXT일 때만 성공하도록 백엔드에서 막는 게 일반적입니다.</div>
+  </div>
+
+  <div class="card">
+    <h3>5) 파일 업로드</h3>
+    <div class="row">
+      <div>
+        <label>type</label>
+        <select id="uploadType">
+          <option value="PDF">PDF</option>
+          <option value="DOCX">DOCX</option>
+          <option value="IMAGE">IMAGE</option>
+        </select>
+      </div>
+      <div>
+        <label>file</label>
+        <input id="uploadFile" type="file" />
+      </div>
+      <button class="primary" id="btnUpload">POST /api/projects/{projectId}/documents/upload</button>
+    </div>
+    <div class="hint">multipart/form-data: file(binary), type(PDF/DOCX/IMAGE)</div>
+  </div>
+
+  <div class="card">
+    <h3>6) 다운로드</h3>
+    <div class="row">
+      <button class="primary" id="btnDownload">GET /api/documents/{documentId}/download</button>
+    </div>
+    <div class="hint">서버가 파일(binary)을 내려주면 브라우저가 다운로드합니다.</div>
+  </div>
+
+  <div class="card">
+    <h3>7) 삭제</h3>
+    <div class="row">
+      <button class="danger" id="btnDelete">DELETE /api/documents/{documentId}</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>결과</h3>
+    <div class="out" id="out">여기에 응답이 표시됩니다.</div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function base() {
+    return ($("baseUrl").value || "").replace(/\/+$/, "");
+  }
+
+  function authHeaders() {
+    const token = $("token").value.trim();
+    const h = {};
+    if (token) h["Authorization"] = "Bearer " + token;
+    return h;
+  }
+
+  function mustNumber(id, name) {
+    const v = $(id).value.trim();
+    if (!v) throw new Error(name + " 값을 입력해주세요.");
+    const n = Number(v);
+    if (Number.isNaN(n)) throw new Error(name + "는 숫자여야 합니다.");
+    return n;
+  }
+
+  function setOut(obj) {
+    const out = $("out");
+    if (typeof obj === "string") out.textContent = obj;
+    else out.textContent = JSON.stringify(obj, null, 2);
+  }
+
+  async function req(method, url, { headers = {}, body } = {}) {
+    const res = await fetch(url, { method, headers, body });
+    const ct = res.headers.get("content-type") || "";
+
+    if (ct.includes("application/json")) {
+      const json = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, headers: Object.fromEntries(res.headers), data: json };
+    }
+
+    const text = await res.text().catch(() => "");
+    return { ok: res.ok, status: res.status, headers: Object.fromEntries(res.headers), data: text };
+  }
+
+  async function reqBlob(url, headers = {}) {
+    const res = await fetch(url, { method: "GET", headers });
+    const blob = await res.blob();
+    return { res, blob };
+  }
+
+  // Health
+  $("btnHealth").addEventListener("click", async () => {
+    try {
+      setOut("요청 중...");
+      const url = base() + "/actuator/health";
+      const r = await req("GET", url, { headers: { ...authHeaders() } });
+      setOut(r);
+    } catch (e) { setOut(String(e)); }
+  });
+
+  // List
+  $("btnList").addEventListener("click", async () => {
+    try {
+      setOut("요청 중...");
+      const projectId = mustNumber("projectId", "projectId");
+      const url = base() + `/api/projects/${projectId}/documents`;
+      const r = await req("GET", url, { headers: { ...authHeaders() } });
+      setOut(r);
+    } catch (e) { setOut(String(e)); }
+  });
+
+  // Detail
+  $("btnDetail").addEventListener("click", async () => {
+    try {
+      setOut("요청 중...");
+      const documentId = mustNumber("documentId", "documentId");
+      const url = base() + `/api/documents/${documentId}`;
+      const r = await req("GET", url, { headers: { ...authHeaders() } });
+      setOut(r);
+    } catch (e) { setOut(String(e)); }
+  });
+
+  // Create text
+  $("btnCreateText").addEventListener("click", async () => {
+    try {
+      setOut("요청 중...");
+      const projectId = mustNumber("projectId", "projectId");
+      const projectMemberId = mustNumber("projectMemberId", "projectMemberId");
+
+      const url = base() + `/api/projects/${projectId}/documents/text`;
+
+      const payload = {
+        projectMemberId,
+        title: $("createTitle").value.trim(),
+        content: $("createContent").value
+      };
+
+      const r = await req("POST", url, {
+        headers: {
+          ...authHeaders(),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      setOut(r);
+    } catch (e) { setOut(String(e)); }
+  });
+
+  // Update text
+  $("btnUpdateText").addEventListener("click", async () => {
+    try {
+      setOut("요청 중...");
+      const documentId = mustNumber("documentId", "documentId");
+      const projectMemberId = mustNumber("projectMemberId", "projectMemberId");
+
+      const url = base() + `/api/documents/${documentId}`;
+
+      const payload = {
+        projectMemberId,
+        title: $("updateTitle").value.trim(),
+        content: $("updateContent").value
+      };
+
+      const r = await req("PATCH", url, {
+        headers: {
+          ...authHeaders(),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      setOut(r);
+    } catch (e) { setOut(String(e)); }
+  });
+
+  // Upload file
+  $("btnUpload").addEventListener("click", async () => {
+    try {
+      setOut("요청 중...");
+      const projectId = mustNumber("projectId", "projectId");
+      const projectMemberId = mustNumber("projectMemberId", "projectMemberId");
+
+      const f = $("uploadFile").files && $("uploadFile").files[0];
+      if (!f) throw new Error("업로드할 파일을 선택해주세요.");
+
+      const url = base() + `/api/projects/${projectId}/documents/upload`;
+
+      const form = new FormData();
+      form.append("projectMemberId", String(projectMemberId));
+      form.append("type", $("uploadType").value);
+      form.append("file", f);
+
+      const r = await req("POST", url, {
+        headers: { ...authHeaders() },
+        body: form
+      });
+
+      setOut(r);
+    } catch (e) { setOut(String(e)); }
+  });
+
+  // Download
+  $("btnDownload").addEventListener("click", async () => {
+    try {
+      setOut("요청 중...");
+      const documentId = mustNumber("documentId", "documentId");
+      const url = base() + `/api/documents/${documentId}/download`;
+
+      const { res, blob } = await reqBlob(url, { ...authHeaders() });
+
+      if (!res.ok) {
+        const text = await blob.text().catch(() => "");
+        setOut({ ok: false, status: res.status, error: text });
+        return;
+      }
+
+      const cd = res.headers.get("content-disposition") || "";
+      let filename = "download";
+      const m = cd.match(/filename\*?=(?:UTF-8''|")?([^\";]+)"?/i);
+      if (m && m[1]) filename = decodeURIComponent(m[1]);
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+
+      setOut({ ok: true, status: res.status, message: "다운로드 시작됨", filename });
+    } catch (e) { setOut(String(e)); }
+  });
+
+  // Delete
+  $("btnDelete").addEventListener("click", async () => {
+    try {
+      setOut("요청 중...");
+      const documentId = mustNumber("documentId", "documentId");
+      const projectMemberId = mustNumber("projectMemberId", "projectMemberId");
+
+      const url = base() + `/api/documents/${documentId}`;
+
+      // DELETE에 body를 허용하지 않는 서버/프록시도 있어서 query로 보냅니다.
+      // 백엔드가 body로 받게 되어 있으면 여기만 맞춰 바꿔주세요.
+      const u = url + `?projectMemberId=${encodeURIComponent(projectMemberId)}`;
+
+      const r = await req("DELETE", u, { headers: { ...authHeaders() } });
+      setOut(r);
+    } catch (e) { setOut(String(e)); }
+  });
+</script>
+</body>
+</html>
