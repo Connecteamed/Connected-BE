@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Meeting API", description = "회의록 생성, 수정, 조회 및 삭제 API")
+@Tag(name = "Meeting", description = "회의록 생성, 수정, 조회 및 삭제 API")
 @RequestMapping("/api")
 public class MeetingController {
 
