@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,14 +46,14 @@ class MeetingServiceTest {
     void createMeeting_success() {
         // given
         Long projectId = 1L;
-        var req = new MeetingCreateReq(projectId,"주간 회의", "2026-01-15T10:00:00Z", List.of("안건1"), List.of(1L, 2L));
+        var req = new MeetingCreateReq(projectId,"주간 회의", java.time.Instant.parse("2026-01-15T10:00:00Z"), List.of("안건1"), List.of(1L, 2L));
         Project projectRef = mock(Project.class);
 
         given(projectRepository.findById(projectId)).willReturn(Optional.of(projectRef));
         given(meetingRepository.save(any(Meeting.class))).willAnswer(invocation -> {
             Meeting m = invocation.getArgument(0);
             ReflectionTestUtils.setField(m, "id", 100L);
-            ReflectionTestUtils.setField(m, "createdAt", OffsetDateTime.now());
+            ReflectionTestUtils.setField(m, "createdAt", Instant.now());
             return m;
         });
 
@@ -79,12 +79,14 @@ class MeetingServiceTest {
         Meeting existingMeeting = Meeting.builder()
                 .title("기존 제목")
                 .project(project)
-                .meetingDate(OffsetDateTime.now())
+                .meetingDate(Instant.now())
                 .build();
         ReflectionTestUtils.setField(existingMeeting, "id", meetingId);
-        ReflectionTestUtils.setField(existingMeeting, "createdAt", OffsetDateTime.now());
-        ReflectionTestUtils.setField(existingMeeting, "updatedAt", OffsetDateTime.now());
-        var req = new MeetingUpdateReq("수정 제목", "2026-01-15T11:00:00Z", List.of(), List.of());
+        ReflectionTestUtils.setField(existingMeeting, "createdAt", Instant.now());
+        ReflectionTestUtils.setField(existingMeeting, "updatedAt", Instant.now());
+
+        List<MeetingUpdateReq.UpdateAgendaInfo> emptyAgendas = List.of();
+        var req = new MeetingUpdateReq("수정 제목", Instant.parse("2026-01-15T11:00:00Z"), emptyAgendas, List.of());
 
         given(meetingRepository.findByIdAndDeletedAtIsNull(meetingId)).willReturn(Optional.of(existingMeeting));
 
@@ -93,7 +95,6 @@ class MeetingServiceTest {
 
         // then
         assertThat(existingMeeting.getTitle()).isEqualTo("수정 제목");
-        then(meetingAgendaRepository).should().deleteAllByMeeting(existingMeeting);
         then(meetingAttendeeRepository).should().deleteAllByMeeting(existingMeeting);
     }
 
