@@ -24,6 +24,7 @@ import com.connecteamed.server.domain.document.service.DocumentService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
 @RestController
@@ -36,25 +37,25 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
-    // 문서 목록 조회
+    @Operation(summary = "문서 목록 조회", description = "문서 목록의 조회하는 API입니다.")
     @GetMapping("/projects/{projectId}/documents")
     public ApiResponse<DocumentListRes> list(@PathVariable Long projectId) {
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, documentService.list(projectId));
     }
 
-    // 문서 상세 조회(모달)
+    @Operation(summary = "문서 상세 조회", description = "문서를 상세를 조회하는 API입니다.")
     @GetMapping("/documents/{documentId}")
     public ApiResponse<DocumentDetailRes> detail(@PathVariable Long documentId) {
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, documentService.detail(documentId));
     }
 
-    // 문서 다운로드(바이너리)
+    @Operation(summary = "문서 다운로드", description = "문서 다운로드 API입니다.")
     @GetMapping("/documents/{documentId}/download")
     public ResponseEntity<Resource> download(@PathVariable Long documentId) {
         return documentService.download(documentId);
     }
 
-    // 문서 추가(파일 업로드)
+    @Operation(summary = "문서 추가(파일 업로드)", description = "문서 추가 (파일 업로드) API입니다.")
     @PostMapping(value = "/projects/{projectId}/documents/upload", consumes = "multipart/form-data")
     public ApiResponse<DocumentUploadRes> upload(
             @PathVariable Long projectId,
@@ -66,7 +67,7 @@ public class DocumentController {
         return ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.uploadFile(projectId, projectMemberId, file, fileType));
     }
 
-    // 문서 추가(텍스트 작성)
+    @Operation(summary = "문서 추가(텍스트 작성)", description = "문서 추가 (텍스트 작성) API입니다.")
     @PostMapping("/projects/{projectId}/documents/text")
     public ApiResponse<DocumentCreateRes> createText(
             @PathVariable Long projectId,
@@ -76,7 +77,7 @@ public class DocumentController {
         return ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.createText(projectId, projectMemberId, req));
     }
 
-    // 문서 수정(텍스트만)
+    @Operation(summary = "문서 수정(텍스트)", description = "문서수정(텍스트) API입니다.")
     @PatchMapping("/documents/{documentId}")
     public ApiResponse<Void> updateText(
             @PathVariable Long documentId,
@@ -87,7 +88,7 @@ public class DocumentController {
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, null);
     }
 
-    // 문서 삭제(소프트 삭제)
+    @Operation(summary = "문서 삭제", description = "문서삭제 API입니다.")
     @DeleteMapping("/documents/{documentId}")
     public ApiResponse<Void> delete(@PathVariable Long documentId) {
         Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
