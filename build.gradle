@@ -62,7 +62,14 @@ dependencies {
   implementation "software.amazon.awssdk:s3"
   implementation "software.amazon.awssdk:auth"
 
-  // Test
+  // Servlet API (IDE resolution helper for Jakarta namespace)
+  compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
+  // Jackson JavaTime module to support java.time types like Instant
+  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.4'
+
+
+    // Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
