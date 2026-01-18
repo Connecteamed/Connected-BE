@@ -17,7 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,23 +39,36 @@ public class CompletedTaskService {
                 TaskStatus.DONE
         );
 
-        List<CompletedTaskListRes.TaskSummary> summaries = completedTasks.stream()
-                .map(task -> {
-                    List<String> assigneeNames = taskAssigneeRepository.findAllByTaskId(task.getId())
-                            .stream()
-                            .map(assignee -> assignee.getProjectMember().getMember().getName())
-                            .toList();
+        if (completedTasks.isEmpty()) {
+            return new CompletedTaskListRes(Collections.emptyList());
+        }
 
-                    return new CompletedTaskListRes.TaskSummary(
-                            task.getId(),
-                            task.getName(),
-                            task.getContent(),
-                            task.getStartDate(),
-                            task.getDueDate(),
-                            task.getStatus().name(),
-                            assigneeNames
-                    );
-                }).toList();
+        List<Long> taskIds = completedTasks.stream()
+                .map(Task::getId)
+                .toList();
+
+        List<TaskAssignee> allAssignees = taskAssigneeRepository.findAllByTaskIdIn(taskIds);
+
+        Map<Long, List<String>> assigneeMap = allAssignees.stream()
+                .collect(Collectors.groupingBy(
+                        assignee -> assignee.getTask().getId(),
+                        Collectors.mapping(
+                                assignee -> assignee.getProjectMember().getMember().getName(),
+                                Collectors.toList()
+                        )
+                ));
+
+        List<CompletedTaskListRes.TaskSummary> summaries = completedTasks.stream()
+                .map(task -> new CompletedTaskListRes.TaskSummary(
+                        task.getId(),
+                        task.getName(),
+                        task.getContent(),
+                        task.getStartDate(),
+                        task.getDueDate(),
+                        task.getStatus().name(),
+                        assigneeMap.getOrDefault(task.getId(), Collections.emptyList())
+                )).toList();
+
         return new CompletedTaskListRes(summaries);
     }
 
