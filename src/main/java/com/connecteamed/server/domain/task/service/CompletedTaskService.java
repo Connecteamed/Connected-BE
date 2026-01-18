@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.task.service;
 
+import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.task.dto.CompletedTaskDetailRes;
 import com.connecteamed.server.domain.task.dto.CompletedTaskListRes;
 import com.connecteamed.server.domain.task.dto.CompletedTaskUpdateReq;
@@ -10,6 +11,7 @@ import com.connecteamed.server.domain.task.enums.TaskStatus;
 import com.connecteamed.server.domain.task.repository.TaskAssigneeRepository;
 import com.connecteamed.server.domain.task.repository.TaskNoteRepository;
 import com.connecteamed.server.domain.task.repository.TaskRepository;
+import com.connecteamed.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,9 +27,7 @@ public class CompletedTaskService {
     private final TaskRepository taskRepository;
     private final TaskAssigneeRepository taskAssigneeRepository;
     private final TaskNoteRepository taskNoteRepository;
-
-    @Value("${app.test.user-id:1}")
-    private Long testUserId;
+    private final MemberRepository  memberRepository;
 
     // 완료한 업무 목록 조회
     public CompletedTaskListRes getCompletedTasks(Long projectId) {
@@ -69,7 +69,9 @@ public class CompletedTaskService {
 
         List<String> assigneeNames = getAssigneeNames(taskId);
 
-        String myNote = taskNoteRepository.findByTaskIdAndTaskAssignee_ProjectMember_Id(taskId, testUserId)
+        Long currentMemberId = getCurrentUserId();
+
+        String myNote = taskNoteRepository.findByTaskIdAndTaskAssignee_ProjectMember_Id(taskId, currentMemberId)
                 .map(TaskNote::getContent)
                 .orElse("");
 
@@ -88,11 +90,14 @@ public class CompletedTaskService {
     // 완료한 업무 상세 수정
     @Transactional
     public void updateCompletedTask(Long taskId, CompletedTaskUpdateReq req) {
-        Task task = taskRepository.findById(taskId).orElseThrow();
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("업무를 찾을 수 없습니다."));
         task.updateInfo(req.name(), req.content());
 
-        TaskNote note = taskNoteRepository.findByTaskIdAndTaskAssignee_ProjectMember_Id(taskId, testUserId)
-                .orElseGet(() -> createNewNote(task));
+        Long currentMemberId = getCurrentUserId();
+
+        TaskNote note = taskNoteRepository.findByTaskIdAndTaskAssignee_ProjectMember_Id(taskId, currentMemberId)
+                .orElseGet(() -> createNewNote(task, currentMemberId));
 
         note.updateContent(req.noteContent());
     }
@@ -110,14 +115,11 @@ public class CompletedTaskService {
                 .toList();
     }
 
-    private TaskNote createNewNote(Task task) {
-        List<TaskAssignee> assignees = taskAssigneeRepository.findAllByTaskId(task.getId());
-
-        if (assignees.isEmpty()) {
-            throw new RuntimeException("해당 업무에 할당된 담당자가 없어 회고를 작성할 수 없습니다.");
-        }
-
-        TaskAssignee assignee = assignees.get(0);
+    private TaskNote createNewNote(Task task, Long memberId) {
+        TaskAssignee assignee = taskAssigneeRepository.findAllByTaskId(task.getId()).stream()
+                .filter(a -> a.getProjectMember().getMember().getId().equals(memberId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("해당 업무의 담당자가 아니므로 노트를 작성할 수 없습니다."));
 
         return taskNoteRepository.save(TaskNote.builder()
                 .task(task)
@@ -127,6 +129,9 @@ public class CompletedTaskService {
     }
 
     private Long getCurrentUserId() {
-        return testUserId;
+        String loginId = SecurityUtil.getCurrentLoginId();
+        return memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new RuntimeException("인증된 사용자 정보를 찾을 수 없습니다."))
+                .getId();
     }
 }
