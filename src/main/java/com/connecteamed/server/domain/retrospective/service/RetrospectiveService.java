@@ -92,7 +92,14 @@ public class RetrospectiveService {
     public void updateRetrospective(UUID retrospectiveId, RetrospectiveUpdateReq request) {
         AiRetrospective retrospective = aiRetrospectiveRepository.findByPublicId(retrospectiveId)
                 .orElseThrow(() -> new RuntimeException("회고를 찾을 수 없습니다."));
-
         retrospective.update(request.title(), request.projectResult());
+    }
+
+    // 회고 삭제
+    @Transactional
+    public void deleteRetrospective(UUID retrospectiveId) {
+        AiRetrospective retrospective = aiRetrospectiveRepository.findByPublicId(retrospectiveId)
+                .orElseThrow(() -> new RuntimeException("삭제하려는 회고를 찾을 수 없습니다."));
+        aiRetrospectiveRepository.delete(retrospective);
     }
 }

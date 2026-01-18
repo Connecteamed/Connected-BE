@@ -60,4 +60,14 @@ public class RetrospectiveController {
         retrospectiveService.updateRetrospective(retrospectiveId, request);
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, "회고가 성공적으로 수정되었습니다.");
     }
+
+    @Operation(summary = "AI 회고 삭제", description = "생성된 AI 회고를 삭제합니다.")
+    @DeleteMapping("/{retrospectiveId}")
+    public ApiResponse<String> deleteRetrospective(
+            @PathVariable Long projectId,
+            @PathVariable UUID retrospectiveId
+    ) {
+        retrospectiveService.deleteRetrospective(retrospectiveId);
+        return ApiResponse.onSuccess(GeneralSuccessCode._OK, "회고가 성공적으로 삭제되었습니다.");
+    }
 }
