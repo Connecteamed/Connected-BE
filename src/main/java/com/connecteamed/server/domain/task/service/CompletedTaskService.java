@@ -11,6 +11,8 @@ import com.connecteamed.server.domain.task.enums.TaskStatus;
 import com.connecteamed.server.domain.task.repository.TaskAssigneeRepository;
 import com.connecteamed.server.domain.task.repository.TaskNoteRepository;
 import com.connecteamed.server.domain.task.repository.TaskRepository;
+import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import com.connecteamed.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,14 +78,14 @@ public class CompletedTaskService {
     @Transactional
     public void updateCompletedTaskStatus(Long taskId, TaskStatus taskStatus) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("해당 ID의 업무를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "해당 ID의 업무를 찾을 수 없습니다."));
         task.updateStatus(taskStatus);
     }
 
     // 완료한 업무 상세 조회
     public CompletedTaskDetailRes getCompletedTaskDetail(Long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("해당 ID의 업무를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "해당 ID의 업무를 찾을 수 없습니다."));
 
         List<String> assigneeNames = getAssigneeNames(taskId);
 
@@ -109,7 +111,7 @@ public class CompletedTaskService {
     @Transactional
     public void updateCompletedTask(Long taskId, CompletedTaskUpdateReq req) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("해당 ID의 업무를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "해당 ID의 업무를 찾을 수 없습니다."));
         task.updateInfo(req.name(), req.content());
 
         Long currentMemberId = getCurrentUserId();
@@ -124,7 +126,7 @@ public class CompletedTaskService {
     @Transactional
     public void deleteCompletedTask(Long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("해당 ID의 업무를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "해당 ID의 업무를 찾을 수 없습니다."));
         task.softDelete();
     }
 
@@ -138,7 +140,7 @@ public class CompletedTaskService {
         TaskAssignee assignee = taskAssigneeRepository.findAllByTaskId(task.getId()).stream()
                 .filter(a -> a.getProjectMember().getMember().getId().equals(memberId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("해당 업무의 담당자가 아니므로 노트를 작성할 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.FORBIDDEN, "해당 업무의 담당자가 아니므로 노트를 작성할 수 없습니다."));
 
         return taskNoteRepository.save(TaskNote.builder()
                 .task(task)
@@ -150,7 +152,7 @@ public class CompletedTaskService {
     private Long getCurrentUserId() {
         String loginId = SecurityUtil.getCurrentLoginId();
         return memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new RuntimeException("인증된 사용자 정보를 찾을 수 없습니다."))
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.UNAUTHORIZED, "인증된 사용자 정보를 찾을 수 없습니다."))
                 .getId();
     }
 }
