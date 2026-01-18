@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum ProjectSuccessCode implements BaseSuccessCode {
 
     CREATED(HttpStatus.CREATED, "PROJECT_CREATED", "프로젝트 생성에 성공했습니다"),
-    OK(HttpStatus.OK, "PROJECT_OK", "요청에 성공했습니다");
+    OK(HttpStatus.OK, "PROJECT_OK", "요청에 성공했습니다.");
 
     private final HttpStatus status;
     private final String code;
