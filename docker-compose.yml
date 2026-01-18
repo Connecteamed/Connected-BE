@@ -19,6 +19,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
