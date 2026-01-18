@@ -75,13 +75,15 @@ public class CompletedTaskService {
     // 완료한 업무 상태 변경
     @Transactional
     public void updateCompletedTaskStatus(Long taskId, TaskStatus taskStatus) {
-        Task task = taskRepository.findById(taskId).orElseThrow();
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 업무를 찾을 수 없습니다."));
         task.updateStatus(taskStatus);
     }
 
     // 완료한 업무 상세 조회
     public CompletedTaskDetailRes getCompletedTaskDetail(Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow();
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 업무를 찾을 수 없습니다."));
 
         List<String> assigneeNames = getAssigneeNames(taskId);
 
@@ -107,7 +109,7 @@ public class CompletedTaskService {
     @Transactional
     public void updateCompletedTask(Long taskId, CompletedTaskUpdateReq req) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("업무를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("해당 ID의 업무를 찾을 수 없습니다."));
         task.updateInfo(req.name(), req.content());
 
         Long currentMemberId = getCurrentUserId();
@@ -121,7 +123,8 @@ public class CompletedTaskService {
     // 완료한 업무 삭제
     @Transactional
     public void deleteCompletedTask(Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow();
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 업무를 찾을 수 없습니다."));
         task.softDelete();
     }
 
