@@ -6,6 +6,8 @@ import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,6 +18,8 @@ import java.util.UUID;
 @AllArgsConstructor(access= AccessLevel.PRIVATE)
 @Getter
 @Table(name = "ai_retrospective")
+@SQLDelete(sql = "UPDATE ai_retrospective SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class AiRetrospective extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +44,11 @@ public class AiRetrospective extends BaseEntity {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
+
+    public void update(String title, String projectResult) {
+        this.title = title;
+        this.projectResult = projectResult;
+    }
 
     @PrePersist
     public void prePersist() {
