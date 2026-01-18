@@ -4,9 +4,7 @@ import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
-import com.connecteamed.server.domain.retrospective.dto.RetrospectiveCreateReq;
-import com.connecteamed.server.domain.retrospective.dto.RetrospectiveCreateRes;
-import com.connecteamed.server.domain.retrospective.dto.RetrospectiveDetailRes;
+import com.connecteamed.server.domain.retrospective.dto.*;
 import com.connecteamed.server.domain.retrospective.entity.AiRetrospective;
 import com.connecteamed.server.domain.retrospective.repository.AiRetrospectiveRepository;
 import com.connecteamed.server.domain.retrospective.repository.RetrospectiveRepository;
@@ -18,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +27,9 @@ public class RetrospectiveService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final TaskRepository taskRepository;
+    private final GeminiProvider geminiProvider;
 
+    // ai 회고 생성
     @Transactional
     public RetrospectiveCreateRes createAiRetrospective(Long projectId, Long memberId, RetrospectiveCreateReq request){
         // 데이터 조회 (프로젝트, 작성자, 업무 리스트)
@@ -41,9 +42,9 @@ public class RetrospectiveService {
         List<Task> selectedTasks = taskRepository.findAllById(request.taskIds());
 
         // AI 분석 수행
-        String aiAnalyzedResult = simulateGeminiAnalysis(request.projectResult(), selectedTasks);
+        List<String> taskNames = selectedTasks.stream().map(Task::getName).toList();
+        String aiAnalyzedResult = geminiProvider.getAnalysis(request.projectResult(), taskNames);
 
-        // 3. AiRetrospective 엔티티 생성
         AiRetrospective retrospective = AiRetrospective.builder()
                 .project(project)
                 .writer(writer)
@@ -51,15 +52,13 @@ public class RetrospectiveService {
                 .projectResult(aiAnalyzedResult)
                 .build();
 
-        // 4. 연관된 업무들 매핑 (RetrospectiveTask 생성)
         selectedTasks.forEach(retrospective::addRetrospectiveTask);
-
-        // 5. 저장
         AiRetrospective saved = aiRetrospectiveRepository.save(retrospective);
 
         return new RetrospectiveCreateRes(saved.getPublicId(), saved.getTitle());
     }
-    @Transactional(readOnly = true)
+
+    // ai 회고 상세 조회
     public RetrospectiveDetailRes getRetrospectiveDetail(UUID retrospectiveId) {
         AiRetrospective retrospective = aiRetrospectiveRepository.findByPublicId(retrospectiveId)
                 .orElseThrow(() -> new RuntimeException("회고를 찾을 수 없습니다."));
@@ -73,14 +72,27 @@ public class RetrospectiveService {
         );
     }
 
-    // Gemini 연동 전 임시 메서드
-    private String simulateGeminiAnalysis(String userPerformance, List<Task> tasks) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[AI 분석 결과]\n");
-        sb.append("사용자 입력 성과: ").append(userPerformance).append("\n\n");
-        sb.append("분석된 업무 리스트:\n");
-        tasks.forEach(t -> sb.append("- ").append(t.getName()).append("\n"));
-        sb.append("\n이 업무들을 바탕으로 Gemini가 곧 멋진 회고를 생성할 예정입니다!");
-        return sb.toString();
+    // ai 회고 목록 조회
+    public RetrospectiveListRes getRetrospectivesByProject(Long projectId) {
+        // 프로젝트 ID로 회고 목록 조회
+        List<AiRetrospective> retrospectives = aiRetrospectiveRepository.findAllByProjectIdOrderByCreatedAtDesc(projectId);
+
+        List<RetrospectiveListRes.RetrospectiveSummary> summaries = retrospectives.stream()
+                .map(r -> new RetrospectiveListRes.RetrospectiveSummary(
+                        r.getPublicId(),
+                        r.getTitle(),
+                        r.getCreatedAt()))
+                .collect(Collectors.toList());
+
+        return new RetrospectiveListRes(summaries);
+    }
+
+    // 회고 수정
+    @Transactional
+    public void updateRetrospective(UUID retrospectiveId, RetrospectiveUpdateReq request) {
+        AiRetrospective retrospective = aiRetrospectiveRepository.findByPublicId(retrospectiveId)
+                .orElseThrow(() -> new RuntimeException("회고를 찾을 수 없습니다."));
+
+        retrospective.update(request.title(), request.projectResult());
     }
 }
