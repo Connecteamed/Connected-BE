@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.retrospective.repository;
 
+import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.retrospective.entity.AiRetrospective;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +24,5 @@ public interface RetrospectiveRepository extends JpaRepository<AiRetrospective, 
             "AND m.loginId = :username " +
             "ORDER BY ar.createdAt DESC")
     List<AiRetrospective> findRecentRetrospectivesByUsername(@Param("username") String username);
+    List<AiRetrospective> findAllByWriterMemberAndDeletedAtIsNullOrderByCreatedAtDesc(Member member);
 }

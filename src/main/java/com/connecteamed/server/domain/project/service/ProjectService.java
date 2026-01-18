@@ -4,16 +4,23 @@ import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.project.code.ProjectErrorCode;
 import com.connecteamed.server.domain.project.dto.ProjectCreateReq;
+import com.connecteamed.server.domain.project.dto.ProjectListRes;
 import com.connecteamed.server.domain.project.dto.ProjectRes;
 import com.connecteamed.server.domain.project.dto.ProjectUpdateReq;
 import com.connecteamed.server.domain.project.entity.Project;
+import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.entity.ProjectRequiredRole;
 import com.connecteamed.server.domain.project.entity.ProjectRole;
+import com.connecteamed.server.domain.project.enums.ProjectStatus;
+import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRequiredRoleRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRoleRepository;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
+import com.connecteamed.server.global.auth.exception.AuthException;
+import com.connecteamed.server.global.auth.exception.code.AuthErrorCode;
 import com.connecteamed.server.global.util.S3Uploader;
+import com.connecteamed.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,6 +46,7 @@ public class ProjectService {
     private final ProjectRequiredRoleRepository projectRequiredRoleRepository;
     private final MemberRepository memberRepository;
     private final Optional<S3Uploader> s3Uploader;
+    private final ProjectMemberRepository projectMemberRepository;
 
     /**
      * 프로젝트 생성
@@ -241,5 +252,75 @@ public class ProjectService {
                 .closedAt(project.getClosedAt())
                 .build();
     }
+
+    /**
+     * 완료한 프로젝트 목록
+     * @return 완료한 프로젝트 목록 관련 내 정보
+     */
+
+
+    public ProjectListRes.CompletedProjectList getMyCompletedProjects() {
+
+        String loginId = SecurityUtil.getCurrentLoginId();
+
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
+
+        List<ProjectMember> participations = projectMemberRepository.findAllByMember(member);
+
+        List<ProjectListRes.CompletedProjectData> projectDataList = participations.stream()
+                .filter(pm -> pm.getProject().getStatus() == ProjectStatus.COMPLETED)
+                .map(pm -> {
+                    Project p = pm.getProject();
+
+                    List<String> roleNames = pm.getRoles().stream()
+                            .map(pmr -> pmr.getRole().getRoleName())
+                            .toList();
+
+                    return ProjectListRes.CompletedProjectData.builder()
+                            .id(p.getId())
+                            .name(p.getName())
+                            .roles(roleNames)
+                            .createdAt(p.getCreatedAt()) // Instant 그대로 매핑
+                            .closedAt(p.getClosedAt())   // Instant 그대로 매핑
+                            .build();
+                })
+                .toList();
+
+        return ProjectListRes.CompletedProjectList.builder()
+                .projects(projectDataList)
+                .build();
+    }
+
+
+
+    /**
+     * 프로젝트 삭제
+     * @param projectId 프로젝트 ID
+     * @return 삭제 성공 여
+     */
+
+
+    @Transactional
+    public void deleteCompletedProject(Long projectId) {
+        String loginId = SecurityUtil.getCurrentLoginId();
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new GeneralException(ProjectErrorCode.PROJECT_NOT_FOUND));
+
+        if (!project.getOwner().equals(member)) {
+            throw new AuthException(ProjectErrorCode.PROJECT_NOT_OWNER);
+        }
+
+        if (project.getStatus() != ProjectStatus.COMPLETED) {
+            throw new GeneralException(ProjectErrorCode.PROJECT_NOT_COMPLETED);
+        }
+
+        projectRepository.delete(project);
+    }
+
+
 }
 

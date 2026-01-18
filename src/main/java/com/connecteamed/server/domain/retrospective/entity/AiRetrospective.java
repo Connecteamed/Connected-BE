@@ -41,6 +41,10 @@ public class AiRetrospective extends BaseEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    public void updateDeletedAt(Instant now) {
+        this.deletedAt = now;
+    }
+
     @PrePersist
     public void prePersist() {
         if (this.publicId == null) {
