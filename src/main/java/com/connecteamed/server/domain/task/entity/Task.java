@@ -57,10 +57,6 @@ public class Task extends BaseEntity {
         this.content = content;
     }
 
-    public void softDelete() {
-        this.deletedAt = java.time.Instant.now();
-    }
-
     @PrePersist
     public void prePersist(){
         if(this.publicId == null){
