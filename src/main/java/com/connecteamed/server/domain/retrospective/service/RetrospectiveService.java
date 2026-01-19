@@ -57,7 +57,7 @@ public class RetrospectiveService {
 
         String loginId = SecurityUtil.getCurrentLoginId();
         Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(RetrospectiveErrorCode.RETROSPECTIVE_MEMBER_NOT_FOUND));
 
         AiRetrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
                 .orElseThrow(() -> new GeneralException(RetrospectiveErrorCode.RETROSPECTIVE_NOT_FOUND));
