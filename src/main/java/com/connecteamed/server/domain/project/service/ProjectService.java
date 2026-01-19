@@ -28,9 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -297,7 +294,7 @@ public class ProjectService {
     /**
      * 프로젝트 삭제
      * @param projectId 프로젝트 ID
-     * @return 삭제 성공 여
+     * @return 삭제 성공 여부
      */
 
 
