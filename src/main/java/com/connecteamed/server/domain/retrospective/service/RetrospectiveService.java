@@ -66,7 +66,7 @@ public class RetrospectiveService {
             throw new GeneralException(RetrospectiveErrorCode.RETROSPECTIVE_ALREADY_DELETED);
         }
 
-        if (!retrospective.getWriter().getMember().equals(member)) {
+        if (!retrospective.getWriter().getMember().getId().equals(member.getId())) {
             throw new AuthException(RetrospectiveErrorCode.RETROSPECTIVE_NOT_WRITER);
         }
 

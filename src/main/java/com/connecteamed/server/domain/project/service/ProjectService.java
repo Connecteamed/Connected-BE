@@ -310,7 +310,7 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new GeneralException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
-        if (!project.getOwner().equals(member)) {
+        if (!project.getOwner().getId().equals(member.getId())) {
             throw new AuthException(ProjectErrorCode.PROJECT_NOT_OWNER);
         }
 
