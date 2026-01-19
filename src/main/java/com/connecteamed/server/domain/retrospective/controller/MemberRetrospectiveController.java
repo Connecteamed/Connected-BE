@@ -1,7 +1,6 @@
 package com.connecteamed.server.domain.retrospective.controller;
 
 
-import com.connecteamed.server.domain.project.service.ProjectService;
 import com.connecteamed.server.domain.retrospective.code.RetrospectiveSuccessCode;
 import com.connecteamed.server.domain.retrospective.dto.RetrospectiveRes;
 import com.connecteamed.server.domain.retrospective.service.RetrospectiveService;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
 public class MemberRetrospectiveController {
-    private final ProjectService projectService;
     private final RetrospectiveService retrospectiveService;
 
     @Operation(summary = "내가 작성한 회고 목록 조회", description = "사용자가 작성한 모든 회고 목록을 최신순으로 조회합니다.")
