@@ -44,7 +44,7 @@ public class TaskController {
     }
 
     @Operation(summary = "업무 상세 조회", description = "업무 상세 조회 API입니다.")
-    @GetMapping("/tasks/{taskId}")
+    @GetMapping("/tasks/{taskId}/detail")
     public ResponseEntity<ApiResponse<TaskDetailRes>> getTaskDetail(
             @PathVariable UUID taskId
     ) {
@@ -53,18 +53,19 @@ public class TaskController {
         );
     }
 
-    @Operation(summary = "업무 상태 변경", description = "업무 상태 변경 API입니다.")
-    @PatchMapping("/tasks/{taskId}/status")
-    public ResponseEntity<ApiResponse<Void>> updateTaskStatus(
-            @PathVariable UUID taskId,
-            @RequestBody @Valid TaskStatusUpdateReq req
-    ) {
-        taskService.updateTaskStatus(taskId, req);
-        return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
-    }
+    //TODO: updateTaskStatus 중복-> TaskController
+    // @Operation(summary = "업무 상태 변경", description = "업무 상태 변경 API입니다.")
+    // @PatchMapping("/tasks/{taskId}/status")
+    // public ResponseEntity<ApiResponse<Void>> updateTaskStatus(
+    //         @PathVariable UUID taskId,
+    //         @RequestBody @Valid TaskStatusUpdateReq req
+    // ) {
+    //     taskService.updateTaskStatus(taskId, req);
+    //     return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
+    // }
 
     @Operation(summary = "업무 일정 수정(시작/마감)", description = "업무 일정 수정(시작/마감) API입니다.")
-    @PatchMapping("/tasks/{taskId}")
+    @PatchMapping("/tasks/{taskId}/schedule")
     public ResponseEntity<ApiResponse<Void>> updateTaskSchedule(
             @PathVariable UUID taskId,
             @RequestBody @Valid TaskScheduleUpdateReq req
@@ -83,12 +84,12 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
     }
 
-    @Operation(summary = "업무 삭제(soft delete)", description = "업무 삭제(soft delete) API입니다.")
-    @DeleteMapping("/tasks/{taskId}")
-    public ResponseEntity<ApiResponse<Void>> deleteTask(
-            @PathVariable UUID taskId
-    ) {
-        taskService.deleteTask(taskId);
-        return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
-    }
+    // @Operation(summary = "업무 삭제(soft delete)", description = "업무 삭제(soft delete) API입니다.")
+    // @DeleteMapping("/tasks/{taskId}")
+    // public ResponseEntity<ApiResponse<Void>> deleteTask(
+    //         @PathVariable UUID taskId
+    // ) {
+    //     taskService.deleteTask(taskId);
+    //     return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
+    // }
 }
