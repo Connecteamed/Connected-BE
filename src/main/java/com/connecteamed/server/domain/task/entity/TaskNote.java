@@ -26,4 +26,8 @@ public class TaskNote extends BaseEntity {
 
     @Column(name="content",nullable = false,columnDefinition = "TEXT")
     private String content;
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

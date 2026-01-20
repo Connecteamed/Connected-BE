@@ -48,6 +48,19 @@ public class Task extends BaseEntity {
     @Column(name="deleted_at")
     private Instant deletedAt;
 
+    public void updateStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public void updateInfo(String name, String content) {
+        this.name = name;
+        this.content = content;
+    }
+
+    public void softDelete() {
+        this.deletedAt = java.time.Instant.now();
+    }
+
     @PrePersist
     public void prePersist(){
         if(this.publicId == null){
