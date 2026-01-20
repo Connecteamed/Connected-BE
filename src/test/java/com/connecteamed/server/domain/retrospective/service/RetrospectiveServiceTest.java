@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.retrospective.service;
 
+import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
@@ -82,11 +83,17 @@ public class RetrospectiveServiceTest {
     void updateRetrospectiveTest() {
         // given
         UUID publicId = UUID.randomUUID();
+        Long memberId = 1L;
         AiRetrospective retrospective = mock(AiRetrospective.class);
+        ProjectMember writer = mock(ProjectMember.class);
+        Member member = mock(Member.class);
         given(aiRetrospectiveRepository.findByPublicId(publicId)).willReturn(Optional.of(retrospective));
+        given(retrospective.getWriter()).willReturn(writer);
+        given(writer.getMember()).willReturn(member);
+        given(member.getId()).willReturn(memberId);
 
         // when
-        retrospectiveService.updateRetrospective(publicId, new com.connecteamed.server.domain.retrospective.dto.RetrospectiveUpdateReq("새 제목", "새 결과"));
+        retrospectiveService.updateRetrospective(memberId, publicId, new com.connecteamed.server.domain.retrospective.dto.RetrospectiveUpdateReq("새 제목", "새 결과"));
 
         // then
         verify(retrospective).update(anyString(), anyString()); // 엔티티의 update 메서드가 호출되었는지 확인
@@ -97,11 +104,19 @@ public class RetrospectiveServiceTest {
     void deleteRetrospectiveTest() {
         // given
         UUID publicId = UUID.randomUUID();
+        Long memberId = 1L;
+
         AiRetrospective retrospective = mock(AiRetrospective.class);
+        ProjectMember writer = mock(ProjectMember.class);
+        Member member = mock(Member.class);
+
         given(aiRetrospectiveRepository.findByPublicId(publicId)).willReturn(Optional.of(retrospective));
+        given(retrospective.getWriter()).willReturn(writer);
+        given(writer.getMember()).willReturn(member);
+        given(member.getId()).willReturn(memberId);
 
         // when
-        retrospectiveService.deleteRetrospective(publicId);
+        retrospectiveService.deleteRetrospective(memberId, publicId);
 
         // then
         verify(aiRetrospectiveRepository, times(1)).delete(retrospective);

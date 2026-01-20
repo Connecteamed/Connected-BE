@@ -4,10 +4,13 @@ import com.connecteamed.server.domain.retrospective.dto.*;
 import com.connecteamed.server.domain.retrospective.service.RetrospectiveService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
+import com.connecteamed.server.global.auth.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -24,9 +27,10 @@ public class RetrospectiveController {
     @PostMapping("/ai")
     public ApiResponse<RetrospectiveCreateRes> createRetrospective(
             @PathVariable Long projectId,
-            @RequestParam Long memberId,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody RetrospectiveCreateReq request
     ) {
+        Long memberId = customUserDetails.member().getId();
         RetrospectiveCreateRes response = retrospectiveService.createAiRetrospective(projectId, memberId, request);
         return ApiResponse.onSuccess(GeneralSuccessCode._CREATED, response);
     }
@@ -55,9 +59,10 @@ public class RetrospectiveController {
     public ApiResponse<String> updateRetrospective(
             @PathVariable Long projectId,
             @PathVariable UUID retrospectiveId,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody RetrospectiveUpdateReq request
     ) {
-        retrospectiveService.updateRetrospective(retrospectiveId, request);
+        retrospectiveService.updateRetrospective(customUserDetails.member().getId(), retrospectiveId, request);
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, "회고가 성공적으로 수정되었습니다.");
     }
 
@@ -65,9 +70,10 @@ public class RetrospectiveController {
     @DeleteMapping("/{retrospectiveId}")
     public ApiResponse<String> deleteRetrospective(
             @PathVariable Long projectId,
-            @PathVariable UUID retrospectiveId
+            @PathVariable UUID retrospectiveId,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        retrospectiveService.deleteRetrospective(retrospectiveId);
+        retrospectiveService.deleteRetrospective(customUserDetails.member().getId(), retrospectiveId);
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, "회고가 성공적으로 삭제되었습니다.");
     }
 }
