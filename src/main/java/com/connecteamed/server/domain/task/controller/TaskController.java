@@ -84,6 +84,7 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
     }
 
+    // TODO: 업무 삭제 CompletedTaskController 중복 해결 필요
     // @Operation(summary = "업무 삭제(soft delete)", description = "업무 삭제(soft delete) API입니다.")
     // @DeleteMapping("/tasks/{taskId}")
     // public ResponseEntity<ApiResponse<Void>> deleteTask(
