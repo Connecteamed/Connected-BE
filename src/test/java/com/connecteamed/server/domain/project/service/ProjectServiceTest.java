@@ -5,11 +5,9 @@ import com.connecteamed.server.domain.member.enums.SocialType;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.project.code.ProjectErrorCode;
 import com.connecteamed.server.domain.project.dto.ProjectCreateReq;
-import com.connecteamed.server.domain.myPage.dto.MyPageProjectListRes;
 import com.connecteamed.server.domain.project.dto.ProjectRes;
 import com.connecteamed.server.domain.project.dto.ProjectUpdateReq;
 import com.connecteamed.server.domain.project.entity.Project;
-import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.entity.ProjectRequiredRole;
 import com.connecteamed.server.domain.project.entity.ProjectRole;
 import com.connecteamed.server.domain.project.enums.ProjectStatus;
@@ -31,11 +29,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.Instant;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
