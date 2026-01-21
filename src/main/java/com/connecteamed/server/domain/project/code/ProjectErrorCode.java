@@ -16,7 +16,10 @@ public enum ProjectErrorCode implements BaseErrorCode {
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_NOT_FOUND", "요청한 역할을 찾을 수 없습니다."),
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_NOT_FOUND", "프로젝트를 찾을 수 없습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_NOT_FOUND", "회원을 찾을 수 없습니다."),
-    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "요청이 유효하지 않습니다.");
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "요청이 유효하지 않습니다."),
+    PROJECT_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "PROJECT_ALREADY_DELETED", "이미 삭제된 프로젝트 입니다."),
+    ;
+
 
     private final HttpStatus status;
     private final String code;

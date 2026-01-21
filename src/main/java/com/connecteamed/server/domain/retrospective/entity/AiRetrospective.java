@@ -67,6 +67,10 @@ public class AiRetrospective extends BaseEntity {
         this.projectResult = projectResult;
     }
 
+    public void updateDeletedAt(Instant now) {
+        this.deletedAt = now;
+    }
+
     /*
     @PrePersist
     public void prePersist() {
