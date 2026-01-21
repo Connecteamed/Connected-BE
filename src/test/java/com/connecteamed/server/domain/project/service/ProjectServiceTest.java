@@ -11,20 +11,20 @@ import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectRequiredRole;
 import com.connecteamed.server.domain.project.entity.ProjectRole;
 import com.connecteamed.server.domain.project.enums.ProjectStatus;
+import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRequiredRoleRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRoleRepository;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import com.connecteamed.server.global.util.S3Uploader;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.connecteamed.server.global.util.SecurityUtil;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.*;
@@ -52,6 +52,11 @@ class ProjectServiceTest {
     @Mock
     private S3Uploader s3Uploader;
 
+    @Mock
+    private ProjectMemberRepository projectMemberRepository;
+
+    private static MockedStatic<SecurityUtil> mockedSecurityUtil;
+
     @InjectMocks
     private ProjectService projectService;
 
@@ -60,6 +65,16 @@ class ProjectServiceTest {
     private ProjectRole designerRole;
     private ProjectRole serverRole;
     private List<String> requiredRoleNames;
+
+    @BeforeAll
+    static void setup() {
+        mockedSecurityUtil = mockStatic(SecurityUtil.class);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        mockedSecurityUtil.close();
+    }
 
     @BeforeEach
     void setUp() {

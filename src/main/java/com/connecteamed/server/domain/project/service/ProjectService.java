@@ -9,6 +9,7 @@ import com.connecteamed.server.domain.project.dto.ProjectUpdateReq;
 import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectRequiredRole;
 import com.connecteamed.server.domain.project.entity.ProjectRole;
+import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRequiredRoleRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRoleRepository;
@@ -36,6 +37,7 @@ public class ProjectService {
     private final ProjectRequiredRoleRepository projectRequiredRoleRepository;
     private final MemberRepository memberRepository;
     private final Optional<S3Uploader> s3Uploader;
+    private final ProjectMemberRepository projectMemberRepository;
 
     /**
      * 프로젝트 생성
