@@ -2,7 +2,9 @@ package com.connecteamed.server.domain.project.entity;
 
 
 import com.connecteamed.server.domain.member.entity.Member;
+import com.connecteamed.server.domain.project.code.ProjectErrorCode;
 import com.connecteamed.server.domain.project.enums.ProjectStatus;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,6 +47,9 @@ public class Project extends BaseEntity {
     @Column(name="closed_at")
     private Instant closedAt;
 
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @PrePersist
     public void prePersist(){
         if(this.publicId == null){
@@ -66,5 +71,14 @@ public class Project extends BaseEntity {
     public void closeProject() {
         this.status = ProjectStatus.COMPLETED;
         this.closedAt = Instant.now();
+    }
+
+    // 비즈니스 로직: 소프트 삭제 수행
+    public void softDelete() {
+        if (this.deletedAt != null) {
+            // 이미 삭제된 경우 처리 (선택 사항)
+            throw new GeneralException(ProjectErrorCode.PROJECT_ALREADY_DELETED);
+        }
+        this.deletedAt = Instant.now();
     }
 }
