@@ -1,4 +1,4 @@
-package com.connecteamed.server.domain.MyPage.controller;
+package com.connecteamed.server.domain.myPage.controller;
 
 
 import com.connecteamed.server.domain.myPage.service.MyPageRetrospectiveService;

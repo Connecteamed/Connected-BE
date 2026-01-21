@@ -1,9 +1,8 @@
-package com.connecteamed.server.domain.MyPage.service;
+package com.connecteamed.server.domain.myPage.service;
 
 import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.myPage.code.MyPageErrorCode;
-import com.connecteamed.server.domain.myPage.service.MyPageProjectService;
 import com.connecteamed.server.domain.myPage.dto.MyPageProjectListRes;
 import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
