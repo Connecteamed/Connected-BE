@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.connecteamed.server.domain.task.entity.Task;
 import com.connecteamed.server.domain.task.entity.TaskAssignee;
-//TODO: 정리하기
+
 public interface TaskAssigneeRepository extends JpaRepository<TaskAssignee, Long> {
 
     List<TaskAssignee> findAllByTask(Task task);

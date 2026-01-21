@@ -7,11 +7,12 @@ import com.connecteamed.server.domain.task.enums.TaskStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-//TODO: 정리하기
+
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
     Optional<Task> findByPublicIdAndDeletedAtIsNull(UUID publicId);
 
+    // TODO: 업무목록 조회 & 완료된 업무 목록 조회 -> 하나로 통일 필요
     List<Task> findAllByProject_IdAndDeletedAtIsNullOrderByStartDateAsc(Long projectId);
   
     List<Task> findAllByProjectIdAndStatusAndDeletedAtIsNull(Long projectId, TaskStatus status);
