@@ -114,7 +114,8 @@ public class MyPageProjectServiceTest {
 
         myPageProjectService.deleteCompletedProject(projectId);
 
-        verify(projectRepository, times(1)).delete(project);
+        assertThat(project.getDeletedAt()).isNotNull();
+        verify(projectRepository, never()).delete(any(Project.class));
     }
 
     @Test

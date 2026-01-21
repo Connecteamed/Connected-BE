@@ -96,7 +96,7 @@ public class MyPageProjectService {
             throw new GeneralException(MyPageErrorCode.PROJECT_NOT_COMPLETED);
         }
 
-        projectRepository.delete(project);
+        project.softDelete();
     }
 
 }
