@@ -25,10 +25,12 @@ import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Document", description = "문서 관련 API")
 public class DocumentController {
 
     private final DocumentService documentService;

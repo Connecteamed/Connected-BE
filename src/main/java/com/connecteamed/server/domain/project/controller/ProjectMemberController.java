@@ -12,11 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/projects/{projectId}")
+@Tag(name = "Project-Member", description = "팀원 & 역할 관련 API")
 public class ProjectMemberController {
 
     private final ProjectMemberService projectMemberService;
