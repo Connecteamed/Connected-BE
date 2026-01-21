@@ -13,11 +13,14 @@ import com.connecteamed.server.domain.task.repository.TaskAssigneeRepository;
 import com.connecteamed.server.domain.task.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -60,10 +63,20 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new TaskException(TaskErrorCode.PROJECT_NOT_FOUND));
 
         List<Task> tasks = taskRepository.findAllByProject_IdAndDeletedAtIsNullOrderByStartDateAsc(projectId);
+        if (tasks.isEmpty()) return List.of();
 
-        List<TaskSummaryRes> result = new ArrayList<>();
+        // 1번 쿼리로 담당자/멤버까지 한 번에 로딩
+        List<TaskAssignee> allAssignees = taskAssigneeRepository.findAllByTaskInWithDetails(tasks);
+
+        // taskId(또는 task) 기준으로 grouping
+        var assigneeMap = allAssignees.stream()
+                .collect(java.util.stream.Collectors.groupingBy(ta -> ta.getTask().getId()));
+
+        List<TaskSummaryRes> result = new ArrayList<>(tasks.size());
         for (Task task : tasks) {
-            List<TaskAssigneeRes> assignees = toAssigneeRes(taskAssigneeRepository.findAllByTask(task));
+            List<TaskAssignee> tas = assigneeMap.getOrDefault(task.getId(), List.of());
+            List<TaskAssigneeRes> assignees = toAssigneeRes(tas);
+
             result.add(new TaskSummaryRes(
                     task.getPublicId(),
                     task.getName(),
