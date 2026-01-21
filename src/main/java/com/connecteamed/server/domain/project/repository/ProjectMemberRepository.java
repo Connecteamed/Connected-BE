@@ -17,8 +17,8 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     Optional<ProjectMember> findByIdAndProjectId(Long id, Long projectId);
 
     @EntityGraph(attributePaths = {"member", "roles", "roles.role"})
-    List<ProjectMember> findAllByIdIn(List<Long> ids);\
-      
+    List<ProjectMember> findAllByIdIn(List<Long> ids);
+
     @EntityGraph(attributePaths = {"project", "roles", "roles.role"})
     List<ProjectMember> findAllByMember(Member member);
 
