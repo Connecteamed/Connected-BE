@@ -26,7 +26,6 @@ public class CompletedTaskController {
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, completedTaskService.getCompletedTasks(projectId));
     }
 
-    //TODO: updateTaskStatus 중복-> CompletedTaskController
     @Operation(summary = "완료한 업무 상태 변경", description = "업무의 진행 상태를 변경합니다.")
     @PatchMapping("/tasks/{taskId}/status")
     public ApiResponse<String> updateTaskStatus(
