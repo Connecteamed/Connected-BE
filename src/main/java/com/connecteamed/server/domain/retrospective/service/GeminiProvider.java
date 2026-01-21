@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.retrospective.service;
 
+import com.connecteamed.server.domain.retrospective.dto.GeminiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,19 +37,12 @@ public class GeminiProvider {
 
         try {
             // 3. API 호출
-            Map response = restTemplate.postForObject(url, requestBody, Map.class);
+            GeminiResponse response = restTemplate.postForObject(url, requestBody, GeminiResponse.class);
 
-            // 4. 응답 데이터에서 결과 텍스트만 추출 (JSON 파싱)
-            if (response != null) {
-                List candidates = (List) response.get("candidates");
-                Map firstCandidate = (Map) candidates.get(0);
-                Map content = (Map) firstCandidate.get("content");
-                List parts = (List) content.get("parts");
-                Map firstPart = (Map) parts.get(0);
-
-                return firstPart.get("text").toString();
+            if (response != null && !response.candidates().isEmpty()) {
+                return response.candidates().get(0).content().parts().get(0).text();
             }
-            return "AI 분석 결과를 가져오지 못했습니다.";
+            return "분석 결과를 가져오지 못했습니다.";
 
         } catch (Exception e) {
             return "AI 분석 결과를 생성하는 중 오류가 발생했습니다: " + e.getMessage();
