@@ -72,7 +72,7 @@ public class TaskServiceImpl implements TaskService {
 
         // taskId(또는 task) 기준으로 grouping
         var assigneeMap = allAssignees.stream()
-                .collect(java.util.stream.Collectors.groupingBy(ta -> ta.getTask().getId()));
+                .collect(groupingBy(ta -> ta.getTask().getId()));
 
         List<TaskSummaryRes> result = new ArrayList<>(tasks.size());
         for (Task task : tasks) {
