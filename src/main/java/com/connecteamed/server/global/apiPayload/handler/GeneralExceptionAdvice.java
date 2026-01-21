@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.connecteamed.server.domain.task.exception.TaskException;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.BaseErrorCode;
 import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
@@ -107,6 +108,19 @@ public class GeneralExceptionAdvice {
         // 필요하면 그냥 404 응답만
         return ResponseEntity.status(404)
                 .body(ApiResponse.onFailure(GeneralErrorCode.NOT_FOUND, "리소스를 찾을 수 없습니다."));
+    }
+
+    @ExceptionHandler(TaskException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTaskException(TaskException e, HttpServletRequest req) {
+        log.warn("TaskException - {} {} - code={} msg={}",
+                req.getMethod(), req.getRequestURI(),
+                e.getErrorCode().getCode(),
+                e.getErrorCode().getMessage()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ApiResponse.onFailure(e.getErrorCode()));
     }
 
     //사용자가 정의 하는 범위 외 발생 예외 처리- 실패응답 1 구조를 따름
