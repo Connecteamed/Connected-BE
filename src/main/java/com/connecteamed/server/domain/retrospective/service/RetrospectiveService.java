@@ -10,6 +10,8 @@ import com.connecteamed.server.domain.retrospective.repository.AiRetrospectiveRe
 import com.connecteamed.server.domain.retrospective.repository.RetrospectiveRepository;
 import com.connecteamed.server.domain.task.entity.Task;
 import com.connecteamed.server.domain.task.repository.TaskRepository;
+import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +62,7 @@ public class RetrospectiveService {
     // ai 회고 상세 조회
     public RetrospectiveDetailRes getRetrospectiveDetail(Long projectId, Long retrospectiveId) {
         AiRetrospective retrospective = aiRetrospectiveRepository.findByIdAndProjectId(retrospectiveId, projectId)
-                .orElseThrow(() -> new RuntimeException("회고를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
 
         return new RetrospectiveDetailRes(
                 retrospective.getId(),
@@ -90,10 +92,10 @@ public class RetrospectiveService {
     @Transactional
     public void updateRetrospective(Long memberId, Long projectId, Long retrospectiveId, RetrospectiveUpdateReq request) {
         AiRetrospective retrospective = aiRetrospectiveRepository.findByIdAndProjectId(retrospectiveId, projectId)
-                .orElseThrow(() -> new RuntimeException("회고를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
 
         if (!retrospective.getWriter().getMember().getId().equals(memberId)) {
-            throw new RuntimeException("해당 회고를 수정할 권한이 없습니다.");
+            throw new GeneralException(GeneralErrorCode.FORBIDDEN);
         }
         retrospective.update(request.title(), request.projectResult());
     }
@@ -102,10 +104,10 @@ public class RetrospectiveService {
     @Transactional
     public void deleteRetrospective(Long memberId, Long projectId, Long retrospectiveId) {
         AiRetrospective retrospective = aiRetrospectiveRepository.findByIdAndProjectId(retrospectiveId, projectId)
-                .orElseThrow(() -> new RuntimeException("삭제하려는 회고를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
 
         if (!retrospective.getWriter().getMember().getId().equals(memberId)) {
-            throw new RuntimeException("해당 회고를 삭제할 권한이 없습니다.");
+            throw new GeneralException(GeneralErrorCode.FORBIDDEN);
         }
 
         aiRetrospectiveRepository.delete(retrospective);
