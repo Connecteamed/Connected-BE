@@ -1,9 +1,9 @@
-package com.connecteamed.server.domain.myPage.controller;
+package com.connecteamed.server.domain.mypage.controller;
 
 
-import com.connecteamed.server.domain.myPage.code.MyPageSuccessCode;
-import com.connecteamed.server.domain.myPage.dto.MyPageRetrospectiveRes;
-import com.connecteamed.server.domain.myPage.service.MyPageRetrospectiveService;
+import com.connecteamed.server.domain.mypage.code.MyPageSuccessCode;
+import com.connecteamed.server.domain.mypage.dto.MyPageRetrospectiveRes;
+import com.connecteamed.server.domain.mypage.service.MyPageRetrospectiveService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

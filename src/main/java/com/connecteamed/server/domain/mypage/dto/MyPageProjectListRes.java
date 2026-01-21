@@ -1,4 +1,4 @@
-package com.connecteamed.server.domain.myPage.dto;
+package com.connecteamed.server.domain.mypage.dto;
 
 import lombok.*;
 

@@ -1,7 +1,7 @@
-package com.connecteamed.server.domain.myPage.controller;
+package com.connecteamed.server.domain.mypage.controller;
 
-import com.connecteamed.server.domain.myPage.dto.MyPageProjectListRes;
-import com.connecteamed.server.domain.myPage.service.MyPageProjectService;
+import com.connecteamed.server.domain.mypage.dto.MyPageProjectListRes;
+import com.connecteamed.server.domain.mypage.service.MyPageProjectService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

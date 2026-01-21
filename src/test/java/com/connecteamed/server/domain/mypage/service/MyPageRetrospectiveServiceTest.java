@@ -1,11 +1,11 @@
-package com.connecteamed.server.domain.myPage.service;
+package com.connecteamed.server.domain.mypage.service;
 
 
 import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
-import com.connecteamed.server.domain.myPage.code.MyPageErrorCode;
+import com.connecteamed.server.domain.mypage.code.MyPageErrorCode;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
-import com.connecteamed.server.domain.myPage.dto.MyPageRetrospectiveRes;
+import com.connecteamed.server.domain.mypage.dto.MyPageRetrospectiveRes;
 import com.connecteamed.server.domain.retrospective.entity.AiRetrospective;
 import com.connecteamed.server.domain.retrospective.repository.RetrospectiveRepository;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;

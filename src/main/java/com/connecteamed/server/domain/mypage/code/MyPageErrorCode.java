@@ -1,4 +1,4 @@
-package com.connecteamed.server.domain.myPage.code;
+package com.connecteamed.server.domain.mypage.code;
 
 import com.connecteamed.server.global.apiPayload.code.BaseErrorCode;
 import lombok.AllArgsConstructor;

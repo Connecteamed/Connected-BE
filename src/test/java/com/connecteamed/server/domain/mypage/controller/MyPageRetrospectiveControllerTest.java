@@ -1,8 +1,8 @@
-package com.connecteamed.server.domain.myPage.controller;
+package com.connecteamed.server.domain.mypage.controller;
 
 
-import com.connecteamed.server.domain.myPage.service.MyPageRetrospectiveService;
-import com.connecteamed.server.domain.myPage.dto.MyPageRetrospectiveRes;
+import com.connecteamed.server.domain.mypage.service.MyPageRetrospectiveService;
+import com.connecteamed.server.domain.mypage.dto.MyPageRetrospectiveRes;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
