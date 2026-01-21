@@ -549,7 +549,7 @@
         dueDate: dateToInstantZulu(due)
       };
 
-      const data = await api(`/api/tasks/${taskId}`, {
+      const data = await api(`/api/tasks/${taskId}/schedule`, {
         method: "PATCH",
         body: JSON.stringify(payload)
       });
