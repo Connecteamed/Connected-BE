@@ -32,6 +32,7 @@ public class TaskServiceImpl implements TaskService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
 
+    //업무 추가
     @Override
     public UUID createTask(Long projectId, TaskCreateReq req) {
         Project project = projectRepository.findById(projectId)
@@ -57,6 +58,7 @@ public class TaskServiceImpl implements TaskService {
         return saved.getPublicId();
     }
 
+    //업무 목록 조회(전체)
     @Override
     public List<TaskSummaryRes> getProjectTasks(Long projectId) {
         projectRepository.findById(projectId)
@@ -90,6 +92,7 @@ public class TaskServiceImpl implements TaskService {
         return result;
     }
 
+    //업무 상세 조회
     @Override
     public TaskDetailRes getTaskDetail(UUID taskId) {
         Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
@@ -111,6 +114,7 @@ public class TaskServiceImpl implements TaskService {
         );
     }
 
+    // 업무 상태 변경 TODO: Completed Task 겹침
     @Override
     public void updateTaskStatus(UUID taskId, TaskStatusUpdateReq req) {
         Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
@@ -119,6 +123,7 @@ public class TaskServiceImpl implements TaskService {
         task.changeStatus(req.status());
     }
 
+    // 업무 일정 수정
     @Override
     public void updateTaskSchedule(UUID taskId, TaskScheduleUpdateReq req) {
         Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
@@ -131,6 +136,7 @@ public class TaskServiceImpl implements TaskService {
         task.changeSchedule(req.startDate(), req.dueDate());
     }
 
+    // 업무 담당자 변경
     @Override
     public void updateTaskAssignees(UUID taskId, TaskAssigneeUpdateReq req) {
         Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
@@ -144,6 +150,7 @@ public class TaskServiceImpl implements TaskService {
         attachAssignees(task, projectId, assigneeIds);
     }
 
+    // 업무 삭제 TODO: Completed Task 겹침 
     @Override
     public void deleteTask(UUID taskId) {
         Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
