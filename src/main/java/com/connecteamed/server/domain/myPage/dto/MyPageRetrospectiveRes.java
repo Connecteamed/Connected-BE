@@ -1,29 +1,28 @@
-package com.connecteamed.server.domain.project.dto;
+package com.connecteamed.server.domain.myPage.dto;
 
 import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
 
-public class ProjectListRes {
+public class MyPageRetrospectiveRes {
 
     @Getter
     @Builder
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
-    public static class CompletedProjectList {
-        private List<CompletedProjectData> projects;
+    public static class RetrospectiveList {
+        private List<RetrospectiveInfo> retrospectives;
     }
 
     @Getter
     @Builder
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
-    public static class CompletedProjectData {
+    public static class RetrospectiveInfo {
         private Long id;
-        private String name;
-        private List<String> roles;
+        private String title;
         private Instant createdAt;
-        private Instant closedAt;
     }
+
 }

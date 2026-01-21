@@ -1,18 +1,17 @@
-package com.connecteamed.server.domain.retrospective.code;
+package com.connecteamed.server.domain.myPage.code;
 
 import com.connecteamed.server.global.apiPayload.code.BaseSuccessCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-
 @Getter
 @AllArgsConstructor
-public enum RetrospectiveSuccessCode implements BaseSuccessCode {
+public enum MyPageSuccessCode implements BaseSuccessCode {
 
-    OK(HttpStatus.OK, "RETROSPECTIVE_OK", "요청에 성공했습니다."),
-    DELETED(HttpStatus.OK ,"RETROSPECTIVE_DELETED", "회고 삭제에 성공했습니다.");
-
+    OK(HttpStatus.OK, "MYPAGE_OK", "요청에 성공했습니다."),
+    RETROSPECTIVE_DELETED(HttpStatus.OK ,"RETROSPECTIVE_DELETED", "회고 삭제에 성공했습니다.")
+    ;
     private final HttpStatus status;
     private final String code;
     private final String message;

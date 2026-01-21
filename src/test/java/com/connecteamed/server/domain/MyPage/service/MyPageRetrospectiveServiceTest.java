@@ -1,11 +1,12 @@
-package com.connecteamed.server.domain.retrospective.service;
+package com.connecteamed.server.domain.MyPage.service;
 
 
 import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
+import com.connecteamed.server.domain.myPage.code.MyPageErrorCode;
+import com.connecteamed.server.domain.myPage.service.MyPageRetrospectiveService;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
-import com.connecteamed.server.domain.retrospective.code.RetrospectiveErrorCode;
-import com.connecteamed.server.domain.retrospective.dto.RetrospectiveRes;
+import com.connecteamed.server.domain.myPage.dto.MyPageRetrospectiveRes;
 import com.connecteamed.server.domain.retrospective.entity.AiRetrospective;
 import com.connecteamed.server.domain.retrospective.repository.RetrospectiveRepository;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
@@ -32,9 +33,9 @@ import java.util.Optional;
 
 
 @ExtendWith(MockitoExtension.class)
-public class RetrospectiveServiceTest {
+public class MyPageRetrospectiveServiceTest {
     @InjectMocks
-    private RetrospectiveService retrospectiveService;
+    private MyPageRetrospectiveService myPageRetrospectiveService;
 
     @Mock
     private RetrospectiveRepository retrospectiveRepository;
@@ -68,7 +69,7 @@ public class RetrospectiveServiceTest {
         given(retrospectiveRepository.findAllByWriterMemberAndDeletedAtIsNullOrderByCreatedAtDesc(member))
                 .willReturn(List.of(retro1, retro2));
 
-        RetrospectiveRes.RetrospectiveList result = retrospectiveService.getMyRetrospectives();
+        MyPageRetrospectiveRes.RetrospectiveList result = myPageRetrospectiveService.getMyRetrospectives();
 
         assertThat(result.getRetrospectives()).hasSize(2);
         assertThat(result.getRetrospectives().get(0).getTitle()).isEqualTo("회고 1");
@@ -94,7 +95,7 @@ public class RetrospectiveServiceTest {
         given(memberRepository.findByLoginId(loginId)).willReturn(Optional.of(member));
         given(retrospectiveRepository.findById(retroId)).willReturn(Optional.of(retrospective));
 
-        retrospectiveService.deleteRetrospective(retroId);
+        myPageRetrospectiveService.deleteRetrospective(retroId);
 
         assertThat(retrospective.getDeletedAt()).isNotNull();
     }
@@ -119,10 +120,10 @@ public class RetrospectiveServiceTest {
         given(retrospectiveRepository.findById(retroId)).willReturn(Optional.of(retrospective));
 
         GeneralException exception = assertThrows(GeneralException.class, () ->
-                retrospectiveService.deleteRetrospective(retroId)
+                myPageRetrospectiveService.deleteRetrospective(retroId)
         );
 
-        assertEquals(RetrospectiveErrorCode.RETROSPECTIVE_NOT_WRITER, exception.getCode());
+        assertEquals(MyPageErrorCode.RETROSPECTIVE_NOT_WRITER, exception.getCode());
         assertThat(retrospective.getDeletedAt()).isNull();
     }
 
@@ -146,10 +147,10 @@ public class RetrospectiveServiceTest {
         given(retrospectiveRepository.findById(retroId)).willReturn(Optional.of(retrospective));
 
         GeneralException exception = assertThrows(GeneralException.class, () ->
-                retrospectiveService.deleteRetrospective(retroId)
+                myPageRetrospectiveService.deleteRetrospective(retroId)
         );
 
-        assertEquals(RetrospectiveErrorCode.RETROSPECTIVE_ALREADY_DELETED, exception.getCode());
+        assertEquals(MyPageErrorCode.RETROSPECTIVE_ALREADY_DELETED, exception.getCode());
     }
 
 }

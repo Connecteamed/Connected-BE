@@ -4,7 +4,7 @@ import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.project.code.ProjectErrorCode;
 import com.connecteamed.server.domain.project.dto.ProjectCreateReq;
-import com.connecteamed.server.domain.project.dto.ProjectListRes;
+import com.connecteamed.server.domain.myPage.dto.MyPageProjectListRes;
 import com.connecteamed.server.domain.project.dto.ProjectRes;
 import com.connecteamed.server.domain.project.dto.ProjectUpdateReq;
 import com.connecteamed.server.domain.project.entity.Project;
@@ -249,75 +249,5 @@ public class ProjectService {
                 .closedAt(project.getClosedAt())
                 .build();
     }
-
-    /**
-     * 완료한 프로젝트 목록
-     * @return 완료한 프로젝트 목록 관련 내 정보
-     */
-
-
-    public ProjectListRes.CompletedProjectList getMyCompletedProjects() {
-
-        String loginId = SecurityUtil.getCurrentLoginId();
-
-        Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
-
-        List<ProjectMember> participations = projectMemberRepository.findAllByMember(member);
-
-        List<ProjectListRes.CompletedProjectData> projectDataList = participations.stream()
-                .filter(pm -> pm.getProject().getStatus() == ProjectStatus.COMPLETED)
-                .map(pm -> {
-                    Project p = pm.getProject();
-
-                    List<String> roleNames = pm.getRoles().stream()
-                            .map(pmr -> pmr.getRole().getRoleName())
-                            .toList();
-
-                    return ProjectListRes.CompletedProjectData.builder()
-                            .id(p.getId())
-                            .name(p.getName())
-                            .roles(roleNames)
-                            .createdAt(p.getCreatedAt()) // Instant 그대로 매핑
-                            .closedAt(p.getClosedAt())   // Instant 그대로 매핑
-                            .build();
-                })
-                .toList();
-
-        return ProjectListRes.CompletedProjectList.builder()
-                .projects(projectDataList)
-                .build();
-    }
-
-
-
-    /**
-     * 프로젝트 삭제
-     * @param projectId 프로젝트 ID
-     * @return 삭제 성공 여부
-     */
-
-
-    @Transactional
-    public void deleteCompletedProject(Long projectId) {
-        String loginId = SecurityUtil.getCurrentLoginId();
-        Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
-
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new GeneralException(ProjectErrorCode.PROJECT_NOT_FOUND));
-
-        if (!project.getOwner().getId().equals(member.getId())) {
-            throw new AuthException(ProjectErrorCode.PROJECT_NOT_OWNER);
-        }
-
-        if (project.getStatus() != ProjectStatus.COMPLETED) {
-            throw new GeneralException(ProjectErrorCode.PROJECT_NOT_COMPLETED);
-        }
-
-        projectRepository.delete(project);
-    }
-
-
 }
 

@@ -1,8 +1,8 @@
-package com.connecteamed.server.domain.retrospective.controller;
+package com.connecteamed.server.domain.MyPage.controller;
 
 
-import com.connecteamed.server.domain.retrospective.service.RetrospectiveService;
-import com.connecteamed.server.domain.retrospective.dto.RetrospectiveRes;
+import com.connecteamed.server.domain.myPage.service.MyPageRetrospectiveService;
+import com.connecteamed.server.domain.myPage.dto.MyPageRetrospectiveRes;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,32 +28,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("MemberRetrospectiveController 통합 테스트")
-public class MemberRetrospectiveControllerTest {
+public class MyPageRetrospectiveControllerTest {
 
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private RetrospectiveService retrospectiveService;
+    private MyPageRetrospectiveService retrospectiveService;
 
     @Test
     @WithMockUser(username = "test_user")
     @DisplayName("나의 회고 목록 조회 - 성공")
     void getMyRetrospectives_Success() throws Exception {
-        RetrospectiveRes.RetrospectiveInfo retroData = RetrospectiveRes.RetrospectiveInfo.builder()
+        MyPageRetrospectiveRes.RetrospectiveInfo retroData = MyPageRetrospectiveRes.RetrospectiveInfo.builder()
                 .id(55L)
                 .title("1주차 회고")
                 .createdAt(Instant.now())
                 .build();
 
-        RetrospectiveRes.RetrospectiveList response = RetrospectiveRes.RetrospectiveList.builder()
+        MyPageRetrospectiveRes.RetrospectiveList response = MyPageRetrospectiveRes.RetrospectiveList.builder()
                 .retrospectives(List.of(retroData))
                 .build();
 
         when(retrospectiveService.getMyRetrospectives()).thenReturn(response);
 
-        mockMvc.perform(get("/api/members/me/retrospectives")
+        mockMvc.perform(get("/api/mypage/retrospectives")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
@@ -70,7 +70,7 @@ public class MemberRetrospectiveControllerTest {
         Long retrospectiveId = 55L;
         doNothing().when(retrospectiveService).deleteRetrospective(retrospectiveId);
 
-        mockMvc.perform(delete("/api/members/me/retrospectives/{retrospectiveId}", retrospectiveId)
+        mockMvc.perform(delete("/api/mypage/retrospectives/{retrospectiveId}", retrospectiveId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
