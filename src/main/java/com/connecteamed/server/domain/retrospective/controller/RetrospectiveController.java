@@ -50,7 +50,7 @@ public class RetrospectiveController {
             @PathVariable Long projectId,
             @PathVariable UUID retrospectiveId
     ) {
-        RetrospectiveDetailRes response = retrospectiveService.getRetrospectiveDetail(retrospectiveId);
+        RetrospectiveDetailRes response = retrospectiveService.getRetrospectiveDetail(projectId, retrospectiveId);
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, response);
     }
 
@@ -62,7 +62,7 @@ public class RetrospectiveController {
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody RetrospectiveUpdateReq request
     ) {
-        retrospectiveService.updateRetrospective(customUserDetails.member().getId(), retrospectiveId, request);
+        retrospectiveService.updateRetrospective(customUserDetails.member().getId(), projectId, retrospectiveId, request);
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, "회고가 성공적으로 수정되었습니다.");
     }
 
@@ -73,7 +73,7 @@ public class RetrospectiveController {
             @PathVariable UUID retrospectiveId,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        retrospectiveService.deleteRetrospective(customUserDetails.member().getId(), retrospectiveId);
+        retrospectiveService.deleteRetrospective(customUserDetails.member().getId(), projectId, retrospectiveId);
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, "회고가 성공적으로 삭제되었습니다.");
     }
 }

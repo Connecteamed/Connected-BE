@@ -7,6 +7,7 @@ import com.connecteamed.server.domain.project.repository.ProjectMemberRepository
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
 import com.connecteamed.server.domain.retrospective.dto.RetrospectiveCreateReq;
 import com.connecteamed.server.domain.retrospective.dto.RetrospectiveCreateRes;
+import com.connecteamed.server.domain.retrospective.dto.RetrospectiveUpdateReq;
 import com.connecteamed.server.domain.retrospective.entity.AiRetrospective;
 import com.connecteamed.server.domain.retrospective.repository.AiRetrospectiveRepository;
 import com.connecteamed.server.domain.task.entity.Task;
@@ -84,16 +85,22 @@ public class RetrospectiveServiceTest {
         // given
         UUID publicId = UUID.randomUUID();
         Long memberId = 1L;
+        Long projectId = 10L;
+
         AiRetrospective retrospective = mock(AiRetrospective.class);
         ProjectMember writer = mock(ProjectMember.class);
         Member member = mock(Member.class);
+        Project project = mock(Project.class);
+
         given(aiRetrospectiveRepository.findByPublicId(publicId)).willReturn(Optional.of(retrospective));
+        given(retrospective.getProject()).willReturn(project);
+        given(project.getId()).willReturn(projectId);
         given(retrospective.getWriter()).willReturn(writer);
         given(writer.getMember()).willReturn(member);
         given(member.getId()).willReturn(memberId);
 
         // when
-        retrospectiveService.updateRetrospective(memberId, publicId, new com.connecteamed.server.domain.retrospective.dto.RetrospectiveUpdateReq("새 제목", "새 결과"));
+        retrospectiveService.updateRetrospective(memberId, projectId, publicId, new RetrospectiveUpdateReq("새 제목", "새 결과"));
 
         // then
         verify(retrospective).update(anyString(), anyString()); // 엔티티의 update 메서드가 호출되었는지 확인
@@ -105,18 +112,22 @@ public class RetrospectiveServiceTest {
         // given
         UUID publicId = UUID.randomUUID();
         Long memberId = 1L;
+        Long projectId = 10L;
 
         AiRetrospective retrospective = mock(AiRetrospective.class);
         ProjectMember writer = mock(ProjectMember.class);
         Member member = mock(Member.class);
+        Project project = mock(Project.class);
 
         given(aiRetrospectiveRepository.findByPublicId(publicId)).willReturn(Optional.of(retrospective));
+        given(retrospective.getProject()).willReturn(project);
+        given(project.getId()).willReturn(projectId);
         given(retrospective.getWriter()).willReturn(writer);
         given(writer.getMember()).willReturn(member);
         given(member.getId()).willReturn(memberId);
 
         // when
-        retrospectiveService.deleteRetrospective(memberId, publicId);
+        retrospectiveService.deleteRetrospective(memberId, projectId, publicId);
 
         // then
         verify(aiRetrospectiveRepository, times(1)).delete(retrospective);
