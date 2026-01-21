@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AiRetrospectiveRepository extends JpaRepository<AiRetrospective, Long> {
-    Optional<AiRetrospective> findByPublicId(UUID publicId);
+    Optional<AiRetrospective> findByIdAndProjectId(Long id, Long projectId);
     List<AiRetrospective> findAllByProjectIdOrderByCreatedAtDesc (Long projectId);
 }

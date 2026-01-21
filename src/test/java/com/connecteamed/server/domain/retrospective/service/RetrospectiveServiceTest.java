@@ -50,6 +50,7 @@ public class RetrospectiveServiceTest {
         // given
         Long projectId = 1L;
         Long memberId = 1L;
+        Long mockRetrospectiveId = 100L;
         RetrospectiveCreateReq request = new RetrospectiveCreateReq("테스트 제목", "내 성과", List.of(1L, 2L));
 
         Project project = mock(Project.class);
@@ -60,8 +61,7 @@ public class RetrospectiveServiceTest {
                 .title("테스트 제목")
                 .build();
         AiRetrospective spyRetrospective = spy(savedRetrospective);
-        UUID mockUuid = UUID.randomUUID();
-        given(spyRetrospective.getPublicId()).willReturn(mockUuid);
+        given(spyRetrospective.getId()).willReturn(mockRetrospectiveId);
 
         given(projectRepository.findById(projectId)).willReturn(Optional.of(project));
         given(projectMemberRepository.findById(memberId)).willReturn(Optional.of(writer));
@@ -74,7 +74,7 @@ public class RetrospectiveServiceTest {
 
         // then
         assertNotNull(result);
-        assertEquals(mockUuid, result.retrospectiveId());
+        assertEquals(mockRetrospectiveId, result.retrospectiveId());
         verify(aiRetrospectiveRepository, times(1)).save(any()); // 저장이 한 번 일어났는지 확인
         verify(geminiProvider, times(1)).getAnalysis(any(), any()); // AI 분석을 호출했는지 확인
     }
@@ -83,24 +83,21 @@ public class RetrospectiveServiceTest {
     @DisplayName("회고 수정 로직 검증")
     void updateRetrospectiveTest() {
         // given
-        UUID publicId = UUID.randomUUID();
+        Long retrospectiveId = 100L;
         Long memberId = 1L;
         Long projectId = 10L;
 
         AiRetrospective retrospective = mock(AiRetrospective.class);
         ProjectMember writer = mock(ProjectMember.class);
         Member member = mock(Member.class);
-        Project project = mock(Project.class);
 
-        given(aiRetrospectiveRepository.findByPublicId(publicId)).willReturn(Optional.of(retrospective));
-        given(retrospective.getProject()).willReturn(project);
-        given(project.getId()).willReturn(projectId);
+        given(aiRetrospectiveRepository.findByIdAndProjectId(retrospectiveId, projectId)).willReturn(Optional.of(retrospective));
         given(retrospective.getWriter()).willReturn(writer);
         given(writer.getMember()).willReturn(member);
         given(member.getId()).willReturn(memberId);
 
         // when
-        retrospectiveService.updateRetrospective(memberId, projectId, publicId, new RetrospectiveUpdateReq("새 제목", "새 결과"));
+        retrospectiveService.updateRetrospective(memberId, projectId, retrospectiveId, new RetrospectiveUpdateReq("새 제목", "새 결과"));
 
         // then
         verify(retrospective).update(anyString(), anyString()); // 엔티티의 update 메서드가 호출되었는지 확인
@@ -110,24 +107,21 @@ public class RetrospectiveServiceTest {
     @DisplayName("회고 삭제 로직 검증")
     void deleteRetrospectiveTest() {
         // given
-        UUID publicId = UUID.randomUUID();
+        Long retrospectiveId = 100L;
         Long memberId = 1L;
         Long projectId = 10L;
 
         AiRetrospective retrospective = mock(AiRetrospective.class);
         ProjectMember writer = mock(ProjectMember.class);
         Member member = mock(Member.class);
-        Project project = mock(Project.class);
 
-        given(aiRetrospectiveRepository.findByPublicId(publicId)).willReturn(Optional.of(retrospective));
-        given(retrospective.getProject()).willReturn(project);
-        given(project.getId()).willReturn(projectId);
+        given(aiRetrospectiveRepository.findByIdAndProjectId(retrospectiveId, projectId)).willReturn(Optional.of(retrospective));
         given(retrospective.getWriter()).willReturn(writer);
         given(writer.getMember()).willReturn(member);
         given(member.getId()).willReturn(memberId);
 
         // when
-        retrospectiveService.deleteRetrospective(memberId, projectId, publicId);
+        retrospectiveService.deleteRetrospective(memberId, projectId, retrospectiveId);
 
         // then
         verify(aiRetrospectiveRepository, times(1)).delete(retrospective);

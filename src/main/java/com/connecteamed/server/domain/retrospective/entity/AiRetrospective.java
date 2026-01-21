@@ -27,9 +27,11 @@ public class AiRetrospective extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+/*
+    @Column(name = "public_id", nullable = false, unique = true)
+    private Long publicId;
 
-    @Column(name = "public_id", nullable = false, unique = true, columnDefinition = "UUID")
-    private UUID publicId;
+ */
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
@@ -65,11 +67,14 @@ public class AiRetrospective extends BaseEntity {
         this.projectResult = projectResult;
     }
 
+    /*
     @PrePersist
     public void prePersist() {
         if (this.publicId == null) {
-            this.publicId = UUID.randomUUID();
+            this.publicId = this.id;
         }
     }
+
+     */
 }
 

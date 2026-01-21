@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,20 +54,16 @@ public class RetrospectiveService {
         selectedTasks.forEach(retrospective::addRetrospectiveTask);
         AiRetrospective saved = aiRetrospectiveRepository.save(retrospective);
 
-        return new RetrospectiveCreateRes(saved.getPublicId(), saved.getTitle());
+        return new RetrospectiveCreateRes(saved.getId(), saved.getTitle());
     }
 
     // ai 회고 상세 조회
-    public RetrospectiveDetailRes getRetrospectiveDetail(Long projectId, UUID retrospectiveId) {
-        AiRetrospective retrospective = aiRetrospectiveRepository.findByPublicId(retrospectiveId)
+    public RetrospectiveDetailRes getRetrospectiveDetail(Long projectId, Long retrospectiveId) {
+        AiRetrospective retrospective = aiRetrospectiveRepository.findByIdAndProjectId(retrospectiveId, projectId)
                 .orElseThrow(() -> new RuntimeException("회고를 찾을 수 없습니다."));
 
-        if (!retrospective.getProject().getId().equals(projectId)) {
-            throw new RuntimeException("해당 프로젝트의 리소스가 아닙니다.");
-        }
-
         return new RetrospectiveDetailRes(
-                retrospective.getPublicId(),
+                retrospective.getId(),
                 retrospective.getTitle(),
                 retrospective.getProjectResult(),
                 retrospective.getCreatedAt(),
@@ -83,7 +78,7 @@ public class RetrospectiveService {
 
         List<RetrospectiveListRes.RetrospectiveSummary> summaries = retrospectives.stream()
                 .map(r -> new RetrospectiveListRes.RetrospectiveSummary(
-                        r.getPublicId(),
+                        r.getId(),
                         r.getTitle(),
                         r.getCreatedAt()))
                 .collect(Collectors.toList());
@@ -93,13 +88,9 @@ public class RetrospectiveService {
 
     // 회고 수정
     @Transactional
-    public void updateRetrospective(Long memberId, Long projectId, UUID retrospectiveId, RetrospectiveUpdateReq request) {
-        AiRetrospective retrospective = aiRetrospectiveRepository.findByPublicId(retrospectiveId)
+    public void updateRetrospective(Long memberId, Long projectId, Long retrospectiveId, RetrospectiveUpdateReq request) {
+        AiRetrospective retrospective = aiRetrospectiveRepository.findByIdAndProjectId(retrospectiveId, projectId)
                 .orElseThrow(() -> new RuntimeException("회고를 찾을 수 없습니다."));
-
-        if (!retrospective.getProject().getId().equals(projectId)) {
-            throw new RuntimeException("잘못된 프로젝트 접근입니다.");
-        }
 
         if (!retrospective.getWriter().getMember().getId().equals(memberId)) {
             throw new RuntimeException("해당 회고를 수정할 권한이 없습니다.");
@@ -109,13 +100,9 @@ public class RetrospectiveService {
 
     // 회고 삭제
     @Transactional
-    public void deleteRetrospective(Long memberId, Long projectId, UUID retrospectiveId) {
-        AiRetrospective retrospective = aiRetrospectiveRepository.findByPublicId(retrospectiveId)
+    public void deleteRetrospective(Long memberId, Long projectId, Long retrospectiveId) {
+        AiRetrospective retrospective = aiRetrospectiveRepository.findByIdAndProjectId(retrospectiveId, projectId)
                 .orElseThrow(() -> new RuntimeException("삭제하려는 회고를 찾을 수 없습니다."));
-
-        if (!retrospective.getProject().getId().equals(projectId)) {
-            throw new RuntimeException("잘못된 프로젝트 접근입니다.");
-        }
 
         if (!retrospective.getWriter().getMember().getId().equals(memberId)) {
             throw new RuntimeException("해당 회고를 삭제할 권한이 없습니다.");

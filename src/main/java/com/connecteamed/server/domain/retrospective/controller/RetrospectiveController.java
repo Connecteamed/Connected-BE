@@ -13,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @Tag(name = "Retrospective", description = "AI 회고 관련 API")
 @RestController
 @RequiredArgsConstructor
@@ -48,7 +46,7 @@ public class RetrospectiveController {
     @GetMapping("/{retrospectiveId}")
     public ApiResponse<RetrospectiveDetailRes> getRetrospectiveDetail(
             @PathVariable Long projectId,
-            @PathVariable UUID retrospectiveId
+            @PathVariable Long retrospectiveId
     ) {
         RetrospectiveDetailRes response = retrospectiveService.getRetrospectiveDetail(projectId, retrospectiveId);
         return ApiResponse.onSuccess(GeneralSuccessCode._OK, response);
@@ -58,7 +56,7 @@ public class RetrospectiveController {
     @PatchMapping("/{retrospectiveId}")
     public ApiResponse<String> updateRetrospective(
             @PathVariable Long projectId,
-            @PathVariable UUID retrospectiveId,
+            @PathVariable Long retrospectiveId,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody RetrospectiveUpdateReq request
     ) {
@@ -70,7 +68,7 @@ public class RetrospectiveController {
     @DeleteMapping("/{retrospectiveId}")
     public ApiResponse<String> deleteRetrospective(
             @PathVariable Long projectId,
-            @PathVariable UUID retrospectiveId,
+            @PathVariable Long retrospectiveId,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         retrospectiveService.deleteRetrospective(customUserDetails.member().getId(), projectId, retrospectiveId);

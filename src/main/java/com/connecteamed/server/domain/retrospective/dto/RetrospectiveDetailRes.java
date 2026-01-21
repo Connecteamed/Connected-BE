@@ -1,10 +1,9 @@
 package com.connecteamed.server.domain.retrospective.dto;
 
 import java.time.Instant;
-import java.util.UUID;
 
 public record RetrospectiveDetailRes (
-        UUID retrospectiveId,
+        Long retrospectiveId,
         String title,
         String projectResult,
         Instant createdAt,
