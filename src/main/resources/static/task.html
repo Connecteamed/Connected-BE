@@ -516,7 +516,7 @@
     const getTaskDetail = async () => {
       const taskId = getTaskId();
       if (!taskId) return alert("taskId를 입력하세요.");
-      const data = await api(`/api/tasks/${taskId}`, { method: "GET" });
+      const data = await api(`/api/tasks/${taskId}/detail`, { method: "GET" });
       log(data);
 
       // 상세에서 일정값을 채워줌(있으면)
