@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Project Members & Roles 테스트</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 20px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; margin-top: 14px; }
+    label { font-size: 12px; color: #444; display: block; margin-bottom: 4px; }
+    input, textarea, select { padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; min-width: 220px; }
+    button { padding: 9px 12px; border: 1px solid #333; background: #111; color: #fff; border-radius: 8px; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; font-size: 14px; }
+    th { background: #fafafa; }
+    .muted { color: #666; font-size: 12px; }
+    pre { background: #0b0f14; color: #e6edf3; padding: 12px; border-radius: 10px; overflow: auto; }
+    .ok { color: #0a7d3b; }
+    .bad { color: #b00020; }
+    .pill { display:inline-block; padding: 2px 8px; border: 1px solid #ddd; border-radius: 999px; margin-right: 6px; font-size: 12px; }
+
+    .pill.clickable { cursor: pointer; user-select: none; }
+    .pill.selected { border-color: #111; background: #111; color: #fff; }
+    .pill.role-pool { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <h2>프로젝트 팀원 목록 & 역할 테스트</h2>
+  <div class="muted">
+    - GET: /api/projects/{projectId}/members<br/>
+    - GET: /api/projects/{projectId}/roles<br/>
+    - PATCH: /api/projects/{projectId}/members/{projectMemberId}/roles
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Base URL</label>
+        <input id="baseUrl" value="http://localhost:8080" />
+      </div>
+      <div>
+        <label>Project ID</label>
+        <input id="projectId" type="number" value="1" />
+      </div>
+      <div style="margin-top: 18px;">
+        <button id="btnLoad">팀원 목록 불러오기</button>
+      </div>
+    </div>
+
+    <div id="loadStatus" class="muted" style="margin-top:10px;"></div>
+
+    <table id="memberTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>projectMemberId</th>
+          <th>memberId</th>
+          <th>이름/닉네임</th>
+          <th>roles</th>
+        </tr>
+      </thead>
+      <tbody id="memberTbody"></tbody>
+    </table>
+
+    <div style="margin-top:10px;">
+      <div class="muted">
+        roles 칼럼의 pill을 클릭하면 아래 PATCH 영역의 역할 선택/roleIds에 반영됩니다(토글).
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 10px;">역할 할당(PATCH) 테스트</h3>
+    <div class="row">
+      <div>
+        <label>Project Member ID</label>
+        <input id="projectMemberId" type="number" value="1" />
+      </div>
+      <div>
+        <label>roleIds (쉼표로 구분)</label>
+        <input id="roleIds" value="1,2" />
+        <div class="muted">비우고 PATCH하면 roleIds: [] 로 전송되어 전체 해제됩니다.</div>
+      </div>
+      <div style="margin-top: 18px;">
+        <button id="btnPatch">역할 업데이트</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <div class="muted" style="margin-bottom:6px;">프로젝트 역할(클릭해서 선택/해제)</div>
+      <div id="rolePool" class="row" style="gap:6px;"></div>
+
+      <label style="margin-top:8px; display:flex; align-items:center; gap:8px; font-size:12px; color:#444;">
+        <input id="autoPatch" type="checkbox" />
+        선택 변경 시 자동 PATCH
+      </label>
+      <div class="muted" style="margin-top:6px;">
+        자동 PATCH를 켜면 역할 pill 선택/해제 시 바로 서버에 반영됩니다(선택이 0개면 전체 해제).
+      </div>
+
+      <label style="margin-top:8px; display:flex; align-items:center; gap:8px; font-size:12px; color:#444;">
+        <input id="omitRoleIds" type="checkbox" />
+        roleIds 미전달로 요청(변경 없음 테스트)
+      </label>
+      <div class="muted" style="margin-top:6px;">
+        체크하면 PATCH body에서 roleIds를 아예 빼서 {} 로 전송합니다(서버에서 변경 없음 처리).
+      </div>
+    </div>
+
+    <div id="patchStatus" class="muted" style="margin-top:10px;"></div>
+    <pre id="patchResponse" style="display:none;"></pre>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 10px;">응답 로그</h3>
+    <pre id="log"></pre>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function logLine(line) {
+    const el = $("log");
+    const now = new Date().toISOString();
+    el.textContent = `[${now}] ${line}\n` + el.textContent;
+  }
+
+  function safeJsonParse(text) {
+    try { return JSON.parse(text); } catch { return null; }
+  }
+
+  function buildUrl(path) {
+    const base = $("baseUrl").value.replace(/\/+$/, "");
+    return base + path;
+  }
+
+  function parseRoleIds(value) {
+    const v = (value ?? "").trim();
+    if (!v) return [];
+    return v
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean)
+      .map(Number)
+      .filter(n => Number.isFinite(n));
+  }
+
+  // ===== 역할 목록(/roles) + 선택 상태 =====
+  let projectRoles = [];              // [{roleId, name}]
+  let selectedRoleIdSet = new Set();  // 선택된 roleId들
+
+  function normalizeProjectRoles(json) {
+    const roles =
+      json?.data?.roles ??
+      json?.data ??
+      json?.roles ??
+      (Array.isArray(json) ? json : null);
+
+    if (!Array.isArray(roles)) return [];
+
+    return roles.map(r => ({
+      roleId: r.roleId ?? r.id,
+      name: r.name ?? r.roleName ?? r.displayName ?? String(r)
+    })).filter(r => Number.isFinite(Number(r.roleId)));
+  }
+
+  function syncRoleIdsInputFromSelection() {
+    const ids = Array.from(selectedRoleIdSet).sort((a,b)=>a-b);
+    $("roleIds").value = ids.join(",");
+  }
+
+  function renderRolePool() {
+    const pool = $("rolePool");
+    pool.innerHTML = "";
+
+    if (!projectRoles.length) {
+      pool.innerHTML = `<span class="muted">프로젝트 역할을 불러오지 못했습니다.</span>`;
+      return;
+    }
+
+    for (const r of projectRoles) {
+      const span = document.createElement("span");
+      const rid = Number(r.roleId);
+      span.className = "pill clickable role-pool" + (selectedRoleIdSet.has(rid) ? " selected" : "");
+      span.textContent = r.name;
+      span.dataset.roleId = String(rid);
+
+      span.addEventListener("click", async () => {
+        if (selectedRoleIdSet.has(rid)) selectedRoleIdSet.delete(rid);
+        else selectedRoleIdSet.add(rid);
+
+        syncRoleIdsInputFromSelection();
+        renderRolePool();
+
+        if ($("autoPatch").checked) {
+          await patchRolesWithSelected();
+        }
+      });
+
+      pool.appendChild(span);
+    }
+  }
+
+  async function loadProjectRoles() {
+    const projectId = Number($("projectId").value);
+    if (!Number.isFinite(projectId) || projectId <= 0) return;
+
+    const url = buildUrl(`/api/projects/${projectId}/roles`);
+    logLine(`GET ${url}`);
+
+    try {
+      const res = await fetch(url, { method: "GET" });
+      const text = await res.text();
+      const json = safeJsonParse(text);
+
+      logLine(`roles 응답 ${res.status}: ${text.slice(0, 500)}`);
+
+      if (!res.ok) {
+        projectRoles = [];
+        renderRolePool();
+        return;
+      }
+
+      projectRoles = normalizeProjectRoles(json ?? {});
+      renderRolePool();
+    } catch (e) {
+      projectRoles = [];
+      renderRolePool();
+    }
+  }
+
+  function rolePillsHtml(roles, projectMemberId) {
+    if (!roles) return "-";
+
+    const arr = Array.isArray(roles) ? roles : [roles];
+    const names = arr.map(r => {
+      if (typeof r === "string") return r;
+      if (r && typeof r === "object") return (r.roleName ?? r.name ?? r.displayName ?? JSON.stringify(r));
+      return String(r);
+    }).filter(Boolean);
+
+    if (names.length === 0) return "-";
+
+    return names.map(name =>
+      `<span class="pill clickable" data-pm="${projectMemberId}" data-role-name="${name}">${name}</span>`
+    ).join("");
+  }
+
+  function bindMemberRoleClickEvents() {
+    document.querySelectorAll('.pill.clickable[data-role-name]').forEach(el => {
+      el.addEventListener('click', async () => {
+        const pmId = Number(el.getAttribute('data-pm'));
+        const roleName = el.getAttribute('data-role-name');
+
+        $("projectMemberId").value = String(pmId);
+
+        // roleName -> roleId 매핑 (roles가 없으면 한번 더 로드 시도)
+        let matched = projectRoles.find(r => r.name === roleName);
+        if (!matched) {
+          await loadProjectRoles();
+          matched = projectRoles.find(r => r.name === roleName);
+        }
+        if (!matched) return;
+
+        const roleId = Number(matched.roleId);
+        if (selectedRoleIdSet.has(roleId)) selectedRoleIdSet.delete(roleId);
+        else selectedRoleIdSet.add(roleId);
+
+        syncRoleIdsInputFromSelection();
+        renderRolePool();
+
+        if ($("autoPatch").checked) {
+          await patchRolesWithSelected();
+        }
+      });
+    });
+  }
+
+  function renderMembers(data) {
+    const list = Array.isArray(data) ? data
+      : (data && Array.isArray(data.data) ? data.data : null);
+
+    const tbody = $("memberTbody");
+    tbody.innerHTML = "";
+
+    if (!list || list.length === 0) {
+      $("memberTable").style.display = "none";
+      $("loadStatus").innerHTML = `<span class="bad">목록이 비어있거나 응답 형태를 해석하지 못했습니다.</span>`;
+      return;
+    }
+
+    for (const item of list) {
+      const projectMemberId = item.projectMemberId ?? item.id ?? item.projectMember?.id ?? "-";
+      const memberId = item.memberId ?? item.member?.id ?? "-";
+      const name = item.name ?? item.memberName ?? item.member?.name ?? item.nickname ?? "-";
+      const roles = item.roles ?? item.roleNames ?? item.roleNameList ?? [];
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${projectMemberId}</td>
+        <td>${memberId}</td>
+        <td>${name}</td>
+        <td>${rolePillsHtml(roles, projectMemberId)}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    $("memberTable").style.display = "";
+    $("loadStatus").innerHTML = `<span class="ok">목록 로드 성공</span>`;
+  }
+
+  async function loadMembers() {
+    const projectId = Number($("projectId").value);
+    if (!Number.isFinite(projectId) || projectId <= 0) {
+      $("loadStatus").innerHTML = `<span class="bad">Project ID를 올바르게 입력해주세요.</span>`;
+      return;
+    }
+
+    const url = buildUrl(`/api/projects/${projectId}/members`);
+    $("btnLoad").disabled = true;
+    $("loadStatus").textContent = "불러오는 중...";
+    logLine(`GET ${url}`);
+
+    try {
+      const res = await fetch(url, { method: "GET" });
+      const text = await res.text();
+      const json = safeJsonParse(text);
+
+      logLine(`members 응답 ${res.status}: ${text.slice(0, 500)}`);
+
+      if (!res.ok) {
+        $("loadStatus").innerHTML = `<span class="bad">실패 (${res.status})</span>`;
+        $("memberTable").style.display = "none";
+        return;
+      }
+
+      renderMembers(json ?? text);
+
+      // members 성공 후 roles도 로드하고, members roles pill 클릭 이벤트 바인딩
+      await loadProjectRoles();
+      bindMemberRoleClickEvents();
+
+    } catch (e) {
+      $("loadStatus").innerHTML = `<span class="bad">요청 중 오류: ${e?.message ?? e}</span>`;
+    } finally {
+      $("btnLoad").disabled = false;
+    }
+  }
+
+  async function patchRoles() {
+    const projectId = Number($("projectId").value);
+    const projectMemberId = Number($("projectMemberId").value);
+    const roleIds = parseRoleIds($("roleIds").value);
+
+    if (!Number.isFinite(projectId) || projectId <= 0) {
+      $("patchStatus").innerHTML = `<span class="bad">Project ID를 올바르게 입력해주세요.</span>`;
+      return;
+    }
+    if (!Number.isFinite(projectMemberId) || projectMemberId <= 0) {
+      $("patchStatus").innerHTML = `<span class="bad">Project Member ID를 올바르게 입력해주세요.</span>`;
+      return;
+    }
+
+    const url = buildUrl(`/api/projects/${projectId}/members/${projectMemberId}/roles`);
+    $("btnPatch").disabled = true;
+    $("patchStatus").textContent = "업데이트 중...";
+    $("patchResponse").style.display = "none";
+
+    // 서버 의도 반영:
+    // - omitRoleIds 체크: roleIds 미전달 => 변경 없음
+    // - 아니면: roleIds 포함해서 전송(빈 배열이면 전체 해제)
+    const omit = $("omitRoleIds").checked === true;
+    const body = omit ? {} : { roleIds };
+
+    logLine(`PATCH ${url} body=${JSON.stringify(body)}`);
+
+    try {
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const text = await res.text();
+      logLine(`patch 응답 ${res.status}: ${text.slice(0, 800)}`);
+
+      $("patchResponse").textContent = text;
+      $("patchResponse").style.display = "";
+
+      if (!res.ok) {
+        $("patchStatus").innerHTML = `<span class="bad">실패 (${res.status})</span>`;
+        return;
+      }
+
+      $("patchStatus").innerHTML = `<span class="ok">성공 (${res.status})</span>`;
+      await loadMembers();
+    } catch (e) {
+      $("patchStatus").innerHTML = `<span class="bad">요청 중 오류: ${e?.message ?? e}</span>`;
+    } finally {
+      $("btnPatch").disabled = false;
+    }
+  }
+
+  async function patchRolesWithSelected() {
+    // 선택 UI 기반 PATCH는 기본적으로 roleIds를 보내는 케이스(빈 배열 포함)로 보냅니다.
+    // 변경 없음 테스트를 하고 싶으면 omitRoleIds 체크 후 버튼 PATCH를 누르시면 됩니다.
+    const ids = Array.from(selectedRoleIdSet).sort((a,b)=>a-b);
+    $("roleIds").value = ids.join(",");
+    await patchRoles();
+  }
+
+  // 입력칸 수동 변경 시, 선택 UI도 맞춰주기
+  $("roleIds").addEventListener("input", () => {
+    const ids = parseRoleIds($("roleIds").value);
+    selectedRoleIdSet = new Set(ids);
+    renderRolePool();
+  });
+
+  // roleIds 미전달(변경 없음) 체크 시 입력 비활성화(테스트 편의)
+  $("omitRoleIds").addEventListener("change", () => {
+    const on = $("omitRoleIds").checked === true;
+    $("roleIds").disabled = on;
+    if (on) {
+      $("patchStatus").innerHTML = `<span class="muted">roleIds 미전달 모드: PATCH body가 {} 로 나갑니다.</span>`;
+    } else {
+      $("patchStatus").textContent = "";
+    }
+  });
+
+  $("btnLoad").addEventListener("click", loadMembers);
+
+  $("btnPatch").addEventListener("click", async () => {
+    // 버튼 클릭은 입력값 기준으로 PATCH + 선택 UI도 동기화(omitRoleIds면 roleIds는 무시됨)
+    const ids = parseRoleIds($("roleIds").value);
+    selectedRoleIdSet = new Set(ids);
+    renderRolePool();
+    await patchRoles();
+  });
+</script>
+</body>
+</html>

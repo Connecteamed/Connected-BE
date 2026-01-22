@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: connecteamed-be
+
+  profiles:
+    active: notLocal
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/connecteamed_db}
+    username: ${SPRING_DATASOURCE_USERNAME:connecteamed}
+    password: ${SPRING_DATASOURCE_PASSWORD:connecteamed}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+    open-in-view: false
+
+jwt:
+  token:
+    secretKey: ${JWT_SECRET_KEY}
+    expiration:
+      access: 14400000
+      refresh: 1209600000
+
+
+springdoc:
+  swagger-ui:
+    # Swagger UI 접속 경로를 /docs로 변경
+    # http://localhost:8080/docs 로 접속
+    path: /docs
+
+server:
+  port: 8080
+
+app:
+  s3:
+    region: ${APP_S3_REGION:ap-northeast-2}
+    bucket: ${APP_S3_BUCKET}
+    access-key: ${APP_S3_ACCESS_KEY}
+    secret-key: ${APP_S3_SECRET_KEY}
+
+  # Test Configuration
+  test:
+    login-id: ${TEST_LOGIN_ID:test@example.com}
+    user-name: ${TEST_USER_NAME:테스트사용자}

@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: connecteamed-be-test
+
+  profiles:
+    active: test
+
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    open-in-view: false
+
+jwt:
+  token:
+    secretKey: static_test_key_for_unit_testing_purposes_only_12345
+    expiration:
+      access: 14400000
+      refresh: 1209600000
+
+springdoc:
+  swagger-ui:
+    path: /docs
+
+server:
+  port: 8080
+
+app:
+  s3:
+    region: ap-northeast-2
+    bucket: test-bucket
+    access-key: test-access-key
+    secret-key: test-secret-key
+
+  test:
+    login-id: test@example.com
+    user-name: 테스트사용자
+

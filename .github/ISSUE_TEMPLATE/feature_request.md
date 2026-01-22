@@ -1,4 +1,3 @@
----
 name: "✨ Feature Template"
 about: 기능 추가와 관련한 작업 사항을 작성합니다.
 title: "[FEAT]"

@@ -1,0 +1,66 @@
+package com.connecteamed.server.domain.project.dto;
+
+import com.connecteamed.server.domain.project.enums.ProjectStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
+
+import java.time.Instant;
+import java.util.List;
+
+public class ProjectRes {
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor
+    @Builder
+    public static class CreateResponse {
+        @JsonProperty("projectId")
+        @Schema(description = "생성된 프로젝트 ID", example = "105")
+        private Long projectId;
+
+        @JsonProperty("createdAt")
+        @Schema(description = "생성 시간 (UTC)", example = "2026-01-15T00:32:50.021Z")
+        private Instant createdAt;
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor
+    @Builder
+    public static class DetailResponse {
+        @JsonProperty("projectId")
+        @Schema(description = "프로젝트 ID", example = "7")
+        private Long projectId;
+
+        @JsonProperty("name")
+        @Schema(description = "프로젝트명", example = "UMC 7기")
+        private String name;
+
+        @JsonProperty("goal")
+        @Schema(description = "프로젝트 목표", example = "앱 런칭")
+        private String goal;
+
+        @JsonProperty("requiredRoleNames")
+        @Schema(description = "필요 역할 목록", example = "[\"DESIGNER\", \"SERVER\", \"ANDROID\"]")
+        private List<String> requiredRoleNames;
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor
+    @Builder
+    public static class CloseResponse {
+        @JsonProperty("projectId")
+        @Schema(description = "프로젝트 ID", example = "1")
+        private Long projectId;
+
+        @JsonProperty("status")
+        @Schema(description = "프로젝트 상태", example = "COMPLETED")
+        private ProjectStatus status;
+
+        @JsonProperty("closedAt")
+        @Schema(description = "종료 시간 (UTC)", example = "2026-01-10T11:28:00Z")
+        private Instant closedAt;
+    }
+}
