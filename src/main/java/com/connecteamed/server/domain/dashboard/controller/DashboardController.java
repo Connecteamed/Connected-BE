@@ -105,7 +105,7 @@ public class DashboardController {
     @Operation(summary = "날짜별 업무 조회", description = "특정 날짜의 업무 및 일정을 조회합니다.")
     public ApiResponse<DailyScheduleListRes> getDailySchedules(
             @Parameter(description = "조회 날짜", example = "2026-01-22T00:00:00Z")
-            @RequestParam("data") Instant date,
+            @RequestParam("date") Instant date,
             Authentication authentication,
             @RequestParam(required = false) String username
     ) {

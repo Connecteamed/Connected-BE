@@ -63,7 +63,6 @@ public class DashboardService {
                         task.getProject().getName(),
                         task.getDueDate()
                 ))
-                .limit(5)
                 .toList();
 
         return new UpcomingTaskListRes(taskResList);
@@ -102,15 +101,15 @@ public class DashboardService {
                 t.getId(),
                 "[업무] " + t.getName(),
                 t.getProject().getName(),
-                t.getDueDate() // Instant 타입
+                t.getDueDate()
         )));
 
         // 회의 추가
         dailyMeetings.forEach(m -> resList.add(new DailyScheduleListRes.ScheduleRes(
                 m.getId(),
-                "[회의] " + m.getTitle(), // Meeting 엔티티 필드명 확인 (title 혹은 name)
+                "[회의] " + m.getTitle(),
                 m.getProject().getName(),
-                m.getMeetingDate() // Instant 타입
+                m.getMeetingDate()
         )));
 
         // 4. 시간순 정렬
