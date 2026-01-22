@@ -3,9 +3,9 @@ package com.connecteamed.server.domain.document.service;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.time.ZoneId;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -25,6 +25,8 @@ import com.connecteamed.server.domain.document.dto.DocumentUploadRes;
 import com.connecteamed.server.domain.document.entity.Document;
 import com.connecteamed.server.domain.document.enums.DocumentFileType;
 import com.connecteamed.server.domain.document.repository.DocumentRepository;
+import com.connecteamed.server.domain.member.entity.Member;
+import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.project.entity.Project;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
@@ -44,13 +46,13 @@ public class DocumentServiceImpl implements DocumentService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final S3StorageService s3StorageService;
+    private final MemberRepository memberRepository;
 
     //문서 목록 조회
     @Override
     @Transactional(readOnly = true)
     public DocumentListRes list(Long projectId) {
-        List<Document> docs =
-                documentRepository.findAllByProjectIdAndDeletedAtIsNullOrderByCreatedAtDesc(projectId);
+        List<Document> docs = documentRepository.findAllByProjectIdAndDeletedAtIsNullOrderByCreatedAtDesc(projectId);
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy.MM.dd")
                 .withZone(ZoneId.of("Asia/Seoul"));
@@ -61,7 +63,7 @@ public class DocumentServiceImpl implements DocumentService {
                                 d.getId(),
                                 d.getTitle(),
                                 d.getFileType().name(),
-                                "TODO_업로더명", //TODO: 필요하면 projectMember에서 이름 꺼내서 세팅
+                                d.getProjectMember().getMember().getName(),
                                 df.format(d.getCreatedAt()),
                                 (d.getFileType() != DocumentFileType.TEXT)
                                         ? "/api/documents/" + d.getId() + "/download"
@@ -131,11 +133,22 @@ public class DocumentServiceImpl implements DocumentService {
     //문서 추가(텍스트)
     @Override
     @Transactional
-    public DocumentCreateRes createText(Long projectId, Long projectMemberId, DocumentCreateTextReq req) {
+    public DocumentCreateRes createText(Long projectId, String loginId, DocumentCreateTextReq req) {
         Project projectRef = projectRepository.getReferenceById(projectId);
-        ProjectMember projectMemberRef = projectMemberRepository.getReferenceById(projectMemberId);
 
-        Document d = Document.createText(projectRef, projectMemberRef, req.title(), req.content());
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> {
+                    return new GeneralException(GeneralErrorCode.UNAUTHORIZED);
+                });
+        log.info("[ProjectService] Member found: id={}, name={}", member.getId(), member.getName());
+
+        ProjectMember projectMember = projectMemberRepository
+                .findByProject_IdAndMember_Id(projectId, member.getId())
+                .orElseThrow(() -> {
+                    return new GeneralException(GeneralErrorCode.FORBIDDEN,"Project MemberRepository error");
+                });
+
+        Document d = Document.createText(projectRef, projectMember, req.title(), req.content());
         documentRepository.save(d);
 
         return new DocumentCreateRes(d.getId(), d.getCreatedAt().toString());
