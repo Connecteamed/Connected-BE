@@ -23,6 +23,7 @@ import com.connecteamed.server.domain.document.enums.DocumentFileType;
 import com.connecteamed.server.domain.document.service.DocumentService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
+import com.connecteamed.server.global.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -81,9 +82,9 @@ public class DocumentController {
             @PathVariable Long projectId,
             @Valid @RequestBody DocumentCreateTextReq req
     ) {
-        Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
+        String loginId = SecurityUtil.getCurrentLoginId();
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.createText(projectId, projectMemberId, req))
+            ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.createText(projectId, loginId, req))
         );
     }
 
