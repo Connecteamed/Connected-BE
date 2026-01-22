@@ -48,7 +48,7 @@ public class TaskController {
     @Operation(summary = "업무 상세 조회", description = "업무 상세 조회 API입니다.")
     @GetMapping("/tasks/{taskId}/detail")
     public ResponseEntity<ApiResponse<TaskDetailRes>> getTaskDetail(
-            @PathVariable UUID taskId
+            @PathVariable Long taskId
     ) {
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(GeneralSuccessCode._OK, taskService.getTaskDetail(taskId))
@@ -69,7 +69,7 @@ public class TaskController {
     @Operation(summary = "업무 일정 수정(시작/마감)", description = "업무 일정 수정(시작/마감) API입니다.")
     @PatchMapping("/tasks/{taskId}/schedule")
     public ResponseEntity<ApiResponse<Void>> updateTaskSchedule(
-            @PathVariable UUID taskId,
+            @PathVariable Long taskId,
             @RequestBody @Valid TaskScheduleUpdateReq req
     ) {
         taskService.updateTaskSchedule(taskId, req);
@@ -79,7 +79,7 @@ public class TaskController {
     @Operation(summary = "담당자 변경(전체 교체)", description = "담당자 변경(전체 교체) API입니다.")
     @PatchMapping("/tasks/{taskId}/assignees")
     public ResponseEntity<ApiResponse<Void>> updateTaskAssignees(
-            @PathVariable UUID taskId,
+            @PathVariable Long taskId,
             @RequestBody @Valid TaskAssigneeUpdateReq req
     ) {
         taskService.updateTaskAssignees(taskId, req);

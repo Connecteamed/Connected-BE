@@ -11,13 +11,13 @@ public interface TaskService {
 
     List<TaskSummaryRes> getProjectTasks(Long projectId);
 
-    TaskDetailRes getTaskDetail(UUID taskId);
+    TaskDetailRes getTaskDetail(Long taskId);
 
-    void updateTaskStatus(UUID taskId, TaskStatusUpdateReq req);
+    void updateTaskStatus(Long taskId, TaskStatusUpdateReq req);
 
-    void updateTaskSchedule(UUID taskId, TaskScheduleUpdateReq req);
+    void updateTaskSchedule(Long taskId, TaskScheduleUpdateReq req);
 
-    void updateTaskAssignees(UUID taskId, TaskAssigneeUpdateReq req);
+    void updateTaskAssignees(Long taskId, TaskAssigneeUpdateReq req);
 
-    void deleteTask(UUID taskId);
+    void deleteTask(Long taskId);
 }

@@ -94,8 +94,8 @@ public class TaskServiceImpl implements TaskService {
 
     //업무 상세 조회
     @Override
-    public TaskDetailRes getTaskDetail(UUID taskId) {
-        Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
+    public TaskDetailRes getTaskDetail(Long taskId) {
+        Task task = taskRepository.findByIdAndDeletedAtIsNull(taskId)
                 .orElseThrow(() -> new TaskException(TaskErrorCode.TASK_NOT_FOUND));
 
         List<TaskAssigneeRes> assignees = toAssigneeRes(taskAssigneeRepository.findAllByTask(task));
@@ -116,8 +116,8 @@ public class TaskServiceImpl implements TaskService {
 
     // 업무 상태 변경 TODO: Completed Task 겹침
     @Override
-    public void updateTaskStatus(UUID taskId, TaskStatusUpdateReq req) {
-        Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
+    public void updateTaskStatus(Long taskId, TaskStatusUpdateReq req) {
+        Task task = taskRepository.findByIdAndDeletedAtIsNull(taskId)
                 .orElseThrow(() -> new TaskException(TaskErrorCode.TASK_NOT_FOUND));
 
         task.changeStatus(req.status());
@@ -125,8 +125,8 @@ public class TaskServiceImpl implements TaskService {
 
     // 업무 일정 수정
     @Override
-    public void updateTaskSchedule(UUID taskId, TaskScheduleUpdateReq req) {
-        Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
+    public void updateTaskSchedule(Long taskId, TaskScheduleUpdateReq req) {
+        Task task = taskRepository.findByIdAndDeletedAtIsNull(taskId)
                 .orElseThrow(() -> new TaskException(TaskErrorCode.TASK_NOT_FOUND));
 
         if (req.startDate().isAfter(req.dueDate())) {
@@ -138,8 +138,8 @@ public class TaskServiceImpl implements TaskService {
 
     // 업무 담당자 변경
     @Override
-    public void updateTaskAssignees(UUID taskId, TaskAssigneeUpdateReq req) {
-        Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
+    public void updateTaskAssignees(Long taskId, TaskAssigneeUpdateReq req) {
+        Task task = taskRepository.findByIdAndDeletedAtIsNull(taskId)
                 .orElseThrow(() -> new TaskException(TaskErrorCode.TASK_NOT_FOUND));
 
         Long projectId = task.getProject().getId();
@@ -152,8 +152,8 @@ public class TaskServiceImpl implements TaskService {
 
     // 업무 삭제 TODO: Completed Task 겹침 
     @Override
-    public void deleteTask(UUID taskId) {
-        Task task = taskRepository.findByPublicIdAndDeletedAtIsNull(taskId)
+    public void deleteTask(Long taskId) {
+        Task task = taskRepository.findByIdAndDeletedAtIsNull(taskId)
                 .orElseThrow(() -> new TaskException(TaskErrorCode.TASK_NOT_FOUND));
 
         task.softDelete();
