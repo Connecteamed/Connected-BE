@@ -69,10 +69,10 @@ public class DocumentController {
             @RequestPart("file") MultipartFile file,
             @RequestPart("type") String type
     ) {
-        Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
+        String loginId = SecurityUtil.getCurrentLoginId();
         DocumentFileType fileType = DocumentFileType.valueOf(type);
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.uploadFile(projectId, projectMemberId, file, fileType))
+            ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.uploadFile(projectId, loginId, file, fileType))
         );
     }
 
@@ -94,8 +94,7 @@ public class DocumentController {
             @PathVariable Long documentId,
             @RequestBody DocumentUpdateTextReq req
     ) {
-        Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
-        documentService.updateText(documentId, projectMemberId, req);
+        documentService.updateText(documentId, req);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(GeneralSuccessCode._OK, null)
         );
@@ -104,8 +103,7 @@ public class DocumentController {
     @Operation(summary = "문서 삭제", description = "문서삭제 API입니다.")
     @DeleteMapping("/documents/{documentId}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long documentId) {
-        Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
-        documentService.delete(documentId, projectMemberId);
+        documentService.delete(documentId);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(GeneralSuccessCode._OK, null)
         );
