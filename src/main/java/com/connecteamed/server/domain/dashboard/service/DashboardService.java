@@ -1,12 +1,24 @@
 package com.connecteamed.server.domain.dashboard.service;
 
+import com.connecteamed.server.domain.dashboard.dto.DailyScheduleListRes;
 import com.connecteamed.server.domain.dashboard.dto.DashboardRes;
+import com.connecteamed.server.domain.dashboard.dto.NotificationListRes;
+import com.connecteamed.server.domain.dashboard.dto.UpcomingTaskListRes;
+import com.connecteamed.server.domain.meeting.entity.Meeting;
+import com.connecteamed.server.domain.meeting.repository.MeetingRepository;
+import com.connecteamed.server.domain.notification.dto.NotificationRes;
+import com.connecteamed.server.domain.notification.entity.Notification;
+import com.connecteamed.server.domain.notification.repository.NotificationRepository;
 import com.connecteamed.server.domain.retrospective.entity.AiRetrospective;
 import com.connecteamed.server.domain.retrospective.repository.RetrospectiveRepository;
+import com.connecteamed.server.domain.task.entity.Task;
+import com.connecteamed.server.domain.task.enums.TaskStatus;
+import com.connecteamed.server.domain.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +29,9 @@ import java.util.stream.Collectors;
 public class DashboardService {
 
     private final RetrospectiveRepository retrospectiveRepository;
+    private final TaskRepository taskRepository;
+    private final NotificationRepository notificationRepository;
+    private final MeetingRepository meetingRepository;
 
     /**
      * 최근 회고 목록 조회
@@ -35,6 +50,73 @@ public class DashboardService {
     public DashboardRes.RetrospectiveListRes getRecentRetrospectives(String username) {
         List<AiRetrospective> retrospectives = retrospectiveRepository.findRecentRetrospectivesByUsername(username);
         return convertToResponse(retrospectives);
+    }
+
+    public UpcomingTaskListRes getUpcomingTasks(String userId) {
+        List<TaskStatus> targetStatuses = List.of(TaskStatus.TODO, TaskStatus.IN_PROGRESS);
+        List<Task> tasks = taskRepository.findUpcomingTasksByUserId(userId, targetStatuses);
+        List<UpcomingTaskListRes.UpcomingTaskRes> taskResList = tasks.stream()
+                .map(task -> new UpcomingTaskListRes.UpcomingTaskRes(
+                        task.getId(),
+                        task.getStatus().name(),
+                        task.getName(),
+                        task.getProject().getName(),
+                        task.getDueDate()
+                ))
+                .limit(5)
+                .toList();
+
+        return new UpcomingTaskListRes(taskResList);
+    }
+
+    public NotificationListRes getRecentNotifications(String userId) {
+        List<Notification> notifications = notificationRepository.findAllByReceiverRecordId(userId);
+        List<NotificationListRes.NotificationRes> resList = notifications.stream()
+                .map(n -> new NotificationListRes.NotificationRes(
+                        n.getId(),
+                        n.getContent(),
+                        n.getProject().getName(),
+                        n.isRead(),
+                        n.getCreatedAt()
+                ))
+                .toList();
+
+        return new NotificationListRes(resList);
+    }
+
+    public DailyScheduleListRes getDailySchedules(String userId, Instant date) {
+        // 1. 선택된 날짜의 00:00:00 ~ 23:59:59 범위 계산
+        java.time.LocalDate localDate = date.atZone(ZoneId.systemDefault()).toLocalDate();
+        Instant startOfDay = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant endOfDay = startOfDay.plus(java.time.Duration.ofDays(1)).minusNanos(1);
+
+        // 2. Task(업무)와 Meeting(회의) 각각 조회
+        List<Task> dailyTasks = taskRepository.findAllByMemberAndDate(userId, startOfDay, endOfDay);
+        List<Meeting> dailyMeetings = meetingRepository.findAllByMemberAndDate(userId, startOfDay, endOfDay);
+
+        // 3. 통합 리스트 생성 및 변환
+        List<DailyScheduleListRes.ScheduleRes> resList = new java.util.ArrayList<>();
+
+        // 업무 추가
+        dailyTasks.forEach(t -> resList.add(new DailyScheduleListRes.ScheduleRes(
+                t.getId(),
+                "[업무] " + t.getName(),
+                t.getProject().getName(),
+                t.getDueDate() // Instant 타입
+        )));
+
+        // 회의 추가
+        dailyMeetings.forEach(m -> resList.add(new DailyScheduleListRes.ScheduleRes(
+                m.getId(),
+                "[회의] " + m.getTitle(), // Meeting 엔티티 필드명 확인 (title 혹은 name)
+                m.getProject().getName(),
+                m.getMeetingDate() // Instant 타입
+        )));
+
+        // 4. 시간순 정렬
+        resList.sort(java.util.Comparator.comparing(DailyScheduleListRes.ScheduleRes::time));
+
+        return new DailyScheduleListRes(date, resList);
     }
 
     /**

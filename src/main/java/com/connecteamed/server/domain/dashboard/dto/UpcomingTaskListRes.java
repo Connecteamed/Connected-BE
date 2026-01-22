@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.dashboard.dto;
 
+import java.time.Instant;
 import java.util.List;
 
 public record UpcomingTaskListRes (
@@ -10,6 +11,6 @@ public record UpcomingTaskListRes (
             String status,
             String title,
             String teamName,
-            String dueDate
+            Instant dueDate
     ) {}
 }
