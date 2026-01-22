@@ -4,6 +4,7 @@ import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.project.entity.ProjectMember;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,13 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
 
     @EntityGraph(attributePaths = {"project", "roles", "roles.role"})
     List<ProjectMember> findAllByMember(Member member);
+    
+    //사용자가 참여중인 프로젝트 목록 조회 위한 query
+    @Query("SELECT pm FROM ProjectMember pm " +
+            "JOIN FETCH pm.project p " +
+            "WHERE pm.member.id = :memberId " +
+            "AND p.deletedAt IS NULL")
+    List<ProjectMember> findAllByMemberIdWithProject(Long memberId);
 
     Optional<ProjectMember> findByProject_IdAndMember_Id(Long projectId, Long memberId);
 
