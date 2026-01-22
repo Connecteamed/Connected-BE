@@ -22,7 +22,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("SELECT t FROM Task t " +
             "JOIN FETCH t.project p " +
             "JOIN ProjectMember pm ON pm.project = p " +
-            "WHERE pm.member.recordId = :userId " +
+            "WHERE pm.member.loginId = :userId " +
             "AND t.status IN :statuses " +
             "AND t.deletedAt IS NULL " +
             "ORDER BY t.dueDate ASC")
@@ -32,9 +32,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     );
 
     @Query("SELECT t FROM Task t " +
-            "JOIN FETCH t.project " +
+            "JOIN FETCH t.project p " +
             "JOIN ProjectMember pm ON pm.project = p " +
-            "WHERE pm.member.recordId = :userId " +
+            "WHERE pm.member.loginId = :userId " +
             "AND t.dueDate >= :startOfDay AND t.dueDate < :endOfDay " +
             "AND t.deletedAt IS NULL")
     List<Task> findAllByMemberAndDate(

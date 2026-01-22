@@ -14,9 +14,12 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     Optional<Meeting> findByIdAndDeletedAtIsNull(Long meetingId);
 
     @Query("SELECT m FROM Meeting m " +
-            "JOIN FETCH m.project " +
-            "WHERE m.receiver.recordId = :userId " + // 수신자 필드명 확인 필요
-            "AND m.startTime >= :startOfDay AND m.startTime < :endOfDay " +
+            "JOIN FETCH m.project p " +
+            "JOIN MeetingAttendee ma ON ma.meeting = m " +
+            "JOIN ProjectMember pm ON pm.id = ma.attendeeId " +
+            "JOIN pm.member mem " +
+            "WHERE mem.loginId = :userId " +
+            "AND m.meetingDate >= :startOfDay AND m.meetingDate < :endOfDay " +
             "AND m.deletedAt IS NULL")
     List<Meeting> findAllByMemberAndDate(
             @Param("userId") String userId,
