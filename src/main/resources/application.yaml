@@ -6,9 +6,9 @@ spring:
     active: notLocal
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/connecteamed}
-    username: ${DB_USERNAME:connecteamed}
-    password: ${DB_PASSWORD:connecteamed}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/connecteamed_db}
+    username: ${SPRING_DATASOURCE_USERNAME:connecteamed}
+    password: ${SPRING_DATASOURCE_PASSWORD:connecteamed}
     driver-class-name: org.postgresql.Driver
 
   jpa:

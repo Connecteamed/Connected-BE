@@ -1,4 +1,4 @@
-package com.connecteamed.server.domain.Auth.controller;
+package com.connecteamed.server.domain.auth.controller;
 
 import com.connecteamed.server.domain.member.code.MemberErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
