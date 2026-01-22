@@ -157,13 +157,23 @@ public class DocumentServiceImpl implements DocumentService {
     //문서 추가(파일)
     @Override
     @Transactional
-    public DocumentUploadRes uploadFile(Long projectId, Long projectMemberId, MultipartFile file, DocumentFileType type) {
+    public DocumentUploadRes uploadFile(Long projectId, String loginId, MultipartFile file, DocumentFileType type) {
         if (type == DocumentFileType.TEXT) {
             throw new GeneralException(GeneralErrorCode.BAD_REQUEST, "TEXT는 파일 업로드 타입이 아닙니다.");
         }
 
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> {
+                    return new GeneralException(GeneralErrorCode.UNAUTHORIZED);
+                });
+        log.info("[ProjectService] Member found: id={}, name={}", member.getId(), member.getName());
+
         Project projectRef = projectRepository.getReferenceById(projectId);
-        ProjectMember projectMemberRef = projectMemberRepository.getReferenceById(projectMemberId);
+        ProjectMember projectMember = projectMemberRepository
+                .findByProject_IdAndMember_Id(projectId, member.getId())
+                .orElseThrow(() -> {
+                    return new GeneralException(GeneralErrorCode.FORBIDDEN,"Project MemberRepository error");
+                });
 
         String fileUrl = s3StorageService.upload(file, "project-" + projectId);
 
@@ -171,7 +181,7 @@ public class DocumentServiceImpl implements DocumentService {
                 ? "file"
                 : file.getOriginalFilename();
 
-        Document d = Document.createFile(projectRef, projectMemberRef, title, type, fileUrl);
+        Document d = Document.createFile(projectRef, projectMember, title, type, fileUrl);
         documentRepository.save(d);
 
         return new DocumentUploadRes(d.getId(), title, d.getCreatedAt().toString());
@@ -180,7 +190,7 @@ public class DocumentServiceImpl implements DocumentService {
     //문서 수정(텍스트)
     @Override
     @Transactional
-    public void updateText(Long documentId, Long projectMemberId, DocumentUpdateTextReq req) {
+    public void updateText(Long documentId , DocumentUpdateTextReq req) {
         Document d = documentRepository.findByIdAndDeletedAtIsNull(documentId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "문서를 찾을 수 없습니다."));
 
@@ -194,7 +204,7 @@ public class DocumentServiceImpl implements DocumentService {
     //문서 삭제
     @Override
     @Transactional
-    public void delete(Long documentId, Long projectMemberId) {
+    public void delete(Long documentId) {
         Document d = documentRepository.findByIdAndDeletedAtIsNull(documentId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "문서를 찾을 수 없습니다."));
 
