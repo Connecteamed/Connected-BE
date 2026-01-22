@@ -11,7 +11,7 @@ public interface DocumentService {
     DocumentDetailRes detail(Long documentId);
     ResponseEntity<Resource> download(Long documentId);
 
-    DocumentCreateRes createText(Long projectId, Long projectMemberId, DocumentCreateTextReq req);
+    DocumentCreateRes createText(Long projectId, String loginId, DocumentCreateTextReq req);
     DocumentUploadRes uploadFile(Long projectId, Long projectMemberId, MultipartFile file, DocumentFileType type);
     void updateText(Long documentId, Long projectMemberId, DocumentUpdateTextReq req);
     void delete(Long documentId, Long projectMemberId);
