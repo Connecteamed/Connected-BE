@@ -57,15 +57,24 @@ public class Task extends BaseEntity {
         this.content = content;
     }
 
-    public void softDelete() {
-        this.deletedAt = java.time.Instant.now();
-    }
-
     @PrePersist
     public void prePersist(){
         if(this.publicId == null){
             this.publicId = UUID.randomUUID();
         }
+    }
+
+    public void changeStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public void changeSchedule(Instant startDate, Instant dueDate) {
+        this.startDate = startDate;
+        this.dueDate = dueDate;
+    }
+
+    public void softDelete() {
+        this.deletedAt = Instant.now();
     }
 
 }
