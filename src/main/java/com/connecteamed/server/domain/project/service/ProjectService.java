@@ -93,12 +93,15 @@ public class ProjectService {
         if (createReq.getRequiredRoleNames() != null && !createReq.getRequiredRoleNames().isEmpty()) {
             log.debug("[ProjectService] Registering required roles: {}", createReq.getRequiredRoleNames());
             for (String roleName : createReq.getRequiredRoleNames()) {
-                // 역할명으로 ProjectRole 조회
-                log.debug("[ProjectService] Finding ProjectRole: {}", roleName);
+                // 역할명으로 ProjectRole 조회, 없으면 자동 생성
+                log.debug("[ProjectService] Finding or creating ProjectRole: {}", roleName);
                 ProjectRole projectRole = projectRoleRepository.findByRoleName(roleName)
-                        .orElseThrow(() -> {
-                            log.error("[ProjectService] ProjectRole not found: {}", roleName);
-                            return new GeneralException(ProjectErrorCode.ROLE_NOT_FOUND);
+                        .orElseGet(() -> {
+                            log.info("[ProjectService] ProjectRole not found, creating new role: {}", roleName);
+                            ProjectRole newRole = ProjectRole.builder()
+                                    .roleName(roleName)
+                                    .build();
+                            return projectRoleRepository.save(newRole);
                         });
 
                 // ProjectRequiredRole 생성 및 저장
