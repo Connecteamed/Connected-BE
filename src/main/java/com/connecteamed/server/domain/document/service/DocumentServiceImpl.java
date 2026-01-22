@@ -45,6 +45,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final ProjectMemberRepository projectMemberRepository;
     private final S3StorageService s3StorageService;
 
+    //문서 목록 조회
     @Override
     @Transactional(readOnly = true)
     public DocumentListRes list(Long projectId) {
@@ -60,7 +61,7 @@ public class DocumentServiceImpl implements DocumentService {
                                 d.getId(),
                                 d.getTitle(),
                                 d.getFileType().name(),
-                                "TODO_업로더명", // 필요하면 projectMember에서 이름 꺼내서 세팅
+                                "TODO_업로더명", //TODO: 필요하면 projectMember에서 이름 꺼내서 세팅
                                 df.format(d.getCreatedAt()),
                                 (d.getFileType() != DocumentFileType.TEXT)
                                         ? "/api/documents/" + d.getId() + "/download"
@@ -71,6 +72,7 @@ public class DocumentServiceImpl implements DocumentService {
         );
     }
 
+    //문서 상세 조회
     @Override
     @Transactional(readOnly = true)
     public DocumentDetailRes detail(Long documentId) {
@@ -88,6 +90,7 @@ public class DocumentServiceImpl implements DocumentService {
         );
     }
 
+    //문서 다운로드
     @Override
     @Transactional(readOnly = true)
     public ResponseEntity<Resource> download(Long documentId) {
@@ -125,6 +128,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
     }
 
+    //문서 추가(텍스트)
     @Override
     @Transactional
     public DocumentCreateRes createText(Long projectId, Long projectMemberId, DocumentCreateTextReq req) {
@@ -137,6 +141,7 @@ public class DocumentServiceImpl implements DocumentService {
         return new DocumentCreateRes(d.getId(), d.getCreatedAt().toString());
     }
 
+    //문서 추가(파일)
     @Override
     @Transactional
     public DocumentUploadRes uploadFile(Long projectId, Long projectMemberId, MultipartFile file, DocumentFileType type) {
@@ -159,6 +164,7 @@ public class DocumentServiceImpl implements DocumentService {
         return new DocumentUploadRes(d.getId(), title, d.getCreatedAt().toString());
     }
 
+    //문서 수정(텍스트)
     @Override
     @Transactional
     public void updateText(Long documentId, Long projectMemberId, DocumentUpdateTextReq req) {
@@ -172,6 +178,7 @@ public class DocumentServiceImpl implements DocumentService {
         d.updateText(req.title(), req.content());
     }
 
+    //문서 삭제
     @Override
     @Transactional
     public void delete(Long documentId, Long projectMemberId) {
