@@ -8,6 +8,8 @@ import com.connecteamed.server.domain.meeting.repository.MeetingAgendaRepository
 import com.connecteamed.server.domain.meeting.repository.MeetingAttendeeRepository;
 import com.connecteamed.server.domain.meeting.repository.MeetingRepository;
 import com.connecteamed.server.domain.project.entity.Project;
+import com.connecteamed.server.domain.project.entity.ProjectMember;
+import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
 import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
@@ -27,45 +29,47 @@ public class MeetingService {
     private final MeetingAgendaRepository meetingAgendaRepository;
     private final MeetingAttendeeRepository meetingAttendeeRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     // 회의록 생성
     @Transactional
     public MeetingCreateRes createMeeting(Long projectId, MeetingCreateReq request) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
+
+        // Meeting 객체를 먼저 생성
         Meeting meeting = Meeting.builder()
                 .project(project)
                 .title(request.title())
                 .meetingDate(request.meetingDate())
                 .build();
-        Meeting savedMeeting = meetingRepository.save(meeting);
 
-        // 안건 저장
+        // 안건 추가
         if (request.agendas() != null) {
             List<String> agendaTitles = request.agendas();
-            List<MeetingAgenda> agendas = java.util.stream.IntStream.range(0, agendaTitles.size())
-                    .mapToObj(i -> MeetingAgenda.builder()
-                            .meeting(savedMeeting)
-                            .title(agendaTitles.get(i))
-                            .content("")
-                            .sortOrder(i)
-                            .build())
-                    .toList();
-            meetingAgendaRepository.saveAll(agendas);
+            for (int i = 0; i < agendaTitles.size(); i++) {
+                meeting.getAgendas().add(MeetingAgenda.builder()
+                        .meeting(meeting)
+                        .title(agendaTitles.get(i))
+                        .content("")
+                        .sortOrder(i)
+                        .build());
+            }
         }
 
+        // 참석자 추가
         if (request.attendeeIds() != null) {
-            List<MeetingAttendee> attendees = request.attendeeIds().stream()
-                    .map(id -> MeetingAttendee.builder()
-                            .meeting(savedMeeting)
-                            .attendeeId(id)
-                            .build())
-                    .toList();
-            meetingAttendeeRepository.saveAll(attendees);
+            request.attendeeIds().forEach(memberId -> {
+                ProjectMember member = projectMemberRepository.findById(memberId)
+                        .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
+                meeting.addAttendee(member);
+            });
         }
+
+        // 마지막에 저장
+        Meeting savedMeeting = meetingRepository.save(meeting);
 
         return new MeetingCreateRes(savedMeeting.getId(), savedMeeting.getCreatedAt());
-
     }
     // 회의록 수정
     @Transactional
@@ -104,14 +108,14 @@ public class MeetingService {
         });
 
         // 참석자 업데이트
-        meetingAttendeeRepository.deleteAllByMeeting(meeting);
-        List<MeetingAttendee> newAttendees = request.attendeeIds().stream()
-                .map(id -> MeetingAttendee.builder()
-                        .meeting(meeting)
-                        .attendeeId(id)
-                        .build())
-                .toList();
-        meetingAttendeeRepository.saveAll(newAttendees);
+        meeting.getAttendees().clear();
+        if (request.attendeeIds() != null) {
+            request.attendeeIds().forEach(memberId -> {
+                ProjectMember member = projectMemberRepository.findById(memberId)
+                        .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
+                meeting.addAttendee(member);
+            });
+        }
 
         return getMeeting(meetingId);
     }
@@ -132,7 +136,9 @@ public class MeetingService {
                         a.getCreatedAt(), a.getUpdatedAt()
                 )).toList(),
                 meeting.getAttendees().stream().map(at -> new MeetingDetailRes.AttendeeInfo(
-                        at.getId(), at.getAttendeeId(), "참석자 " + at.getAttendeeId()
+                        at.getId(),
+                        at.getAttendee().getId(),
+                        at.getAttendee().getMember().getName()
                 )).toList()
         );
     }
@@ -146,7 +152,8 @@ public class MeetingService {
                         m.getTitle(),
                         m.getMeetingDate(),
                         m.getAttendees().stream().map(at -> new MeetingListRes.AttendeeSummary(
-                                at.getAttendeeId(), "참석자"
+                                at.getAttendee().getId(),
+                                at.getAttendee().getMember().getName()
                         )).toList()
                 )).toList()
         );

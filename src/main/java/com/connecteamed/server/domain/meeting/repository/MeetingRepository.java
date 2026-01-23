@@ -15,8 +15,8 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     @Query("SELECT m FROM Meeting m " +
             "JOIN FETCH m.project p " +
-            "JOIN MeetingAttendee ma ON ma.meeting = m " +
-            "JOIN ProjectMember pm ON pm.id = ma.attendeeId " +
+            "JOIN m.attendees ma " +
+            "JOIN ma.attendee pm " +
             "JOIN pm.member mem " +
             "WHERE mem.loginId = :userId " +
             "AND m.meetingDate >= :startOfDay AND m.meetingDate < :endOfDay " +

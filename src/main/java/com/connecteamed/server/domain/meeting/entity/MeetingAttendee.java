@@ -15,7 +15,7 @@ import lombok.*;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_meeting_attendee_meeting_member",
-                        columnNames = {"meeting_id", "attendee_id"} // 조합 unique 반영
+                        columnNames = {"meeting_id", "attendee_id"}
                 )
         }
 )
@@ -29,11 +29,7 @@ public class MeetingAttendee extends BaseEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
-    // 기존 ProjectMember 대신 Long 타입 ID 필드 추가
     @Column(name = "attendee_id", nullable = false)
-    private Long attendeeId;
+    private ProjectMember attendee;
 
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "attendee_id", nullable = false)
-    //private ProjectMember projectMember;
 }

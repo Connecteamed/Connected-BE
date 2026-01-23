@@ -8,9 +8,8 @@ public record UpcomingTaskListRes (
 ) {
     public record UpcomingTaskRes (
             Long id,
-            String status,
             String title,
             String teamName,
-            Instant dueDate
+            Instant writtenDate
     ) {}
 }

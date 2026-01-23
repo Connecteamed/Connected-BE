@@ -58,7 +58,6 @@ public class DashboardService {
         List<UpcomingTaskListRes.UpcomingTaskRes> taskResList = tasks.stream()
                 .map(task -> new UpcomingTaskListRes.UpcomingTaskRes(
                         task.getId(),
-                        task.getStatus().name(),
                         task.getName(),
                         task.getProject().getName(),
                         task.getDueDate()

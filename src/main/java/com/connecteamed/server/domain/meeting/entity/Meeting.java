@@ -1,6 +1,7 @@
 package com.connecteamed.server.domain.meeting.entity;
 
 import com.connecteamed.server.domain.project.entity.Project;
+import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,9 +47,17 @@ public class Meeting extends BaseEntity {
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MeetingAttendee> attendees = new ArrayList<>();
 
-    public void update(String title, java.time.Instant meetingDate) {
+    public void update(String title, Instant meetingDate) {
         this.title = title;
         this.meetingDate = meetingDate;
+    }
+
+    public void addAttendee(ProjectMember member) {
+        MeetingAttendee attendee = MeetingAttendee.builder()
+                .meeting(this)
+                .attendee(member)
+                .build();
+        this.attendees.add(attendee);
     }
 
     @PrePersist
