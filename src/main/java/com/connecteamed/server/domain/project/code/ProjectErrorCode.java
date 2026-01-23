@@ -18,6 +18,7 @@ public enum ProjectErrorCode implements BaseErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_NOT_FOUND", "회원을 찾을 수 없습니다."),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "요청이 유효하지 않습니다."),
     PROJECT_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "PROJECT_ALREADY_DELETED", "이미 삭제된 프로젝트 입니다."),
+    PROJECT_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "PROJECT_MEMBER_NOT_FOUND", "해당 프로젝트의 멤버가 아닙니다."),
     ;
 
 
