@@ -68,7 +68,7 @@ public class DashboardService {
     }
 
     public NotificationListRes getRecentNotifications(String userId) {
-        List<Notification> notifications = notificationRepository.findAllByReceiverRecordId(userId);
+        List<Notification> notifications = notificationRepository.findAllByReceiverLoginIdOrderByCreatedAtDesc(userId);
         List<NotificationListRes.NotificationRes> resList = notifications.stream()
                 .map(n -> new NotificationListRes.NotificationRes(
                         n.getId(),
