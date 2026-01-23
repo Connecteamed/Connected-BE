@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record TaskDetailRes(
-        UUID taskId,
+        Long taskId,
         Long projectId,
         String name,
         String content,
