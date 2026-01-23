@@ -2,8 +2,11 @@ package com.connecteamed.server.domain.task.repository;
 
 import com.connecteamed.server.domain.task.entity.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import com.connecteamed.server.domain.task.enums.TaskStatus;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +18,33 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findAllByProject_IdAndDeletedAtIsNullOrderByStartDateAsc(Long projectId);
   
     List<Task> findAllByProjectIdAndStatusAndDeletedAtIsNull(Long projectId, TaskStatus status);
+
+    @Query("SELECT DISTINCT t FROM Task t " +
+            "JOIN FETCH t.project p " +
+            "JOIN t.assignees ta " +
+            "JOIN ta.projectMember pm " +
+            "JOIN pm.member m " +
+            "WHERE m.loginId = :userId " +
+            "AND t.status IN :statuses " +
+            "AND t.deletedAt IS NULL " +
+            "ORDER BY t.dueDate ASC")
+    List<Task> findUpcomingTasksByUserId(
+            @Param("userId") String userId,
+            @Param("statuses") List<TaskStatus> statuses
+    );
+
+    @Query("SELECT DISTINCT t FROM Task t " +
+            "JOIN FETCH t.project p " +
+            "JOIN t.assignees ta " +
+            "JOIN ta.projectMember pm " +
+            "JOIN pm.member m " +
+            "WHERE m.loginId = :userId " +
+            "AND t.dueDate >= :startOfDay AND t.dueDate < :endOfDay " +
+            "AND t.deletedAt IS NULL")
+    List<Task> findAllByMemberAndDate(
+            @Param("userId") String userId,
+            @Param("startOfDay") Instant startOfDay,
+            @Param("endOfDay") Instant endOfDay
+    );
+
 }

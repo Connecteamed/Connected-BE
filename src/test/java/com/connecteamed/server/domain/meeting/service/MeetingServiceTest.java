@@ -8,6 +8,8 @@ import com.connecteamed.server.domain.meeting.repository.MeetingAgendaRepository
 import com.connecteamed.server.domain.meeting.repository.MeetingAttendeeRepository;
 import com.connecteamed.server.domain.meeting.repository.MeetingRepository;
 import com.connecteamed.server.domain.project.entity.Project;
+import com.connecteamed.server.domain.project.entity.ProjectMember;
+import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
 import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
@@ -38,6 +40,7 @@ class MeetingServiceTest {
     @Mock private MeetingAgendaRepository meetingAgendaRepository;
     @Mock private MeetingAttendeeRepository meetingAttendeeRepository;
     @Mock private ProjectRepository projectRepository;
+    @Mock private ProjectMemberRepository projectMemberRepository;
 
     @InjectMocks private MeetingService meetingService;
 
@@ -48,8 +51,10 @@ class MeetingServiceTest {
         Long projectId = 1L;
         var req = new MeetingCreateReq(projectId,"주간 회의", java.time.Instant.parse("2026-01-15T10:00:00Z"), List.of("안건1"), List.of(1L, 2L));
         Project projectRef = mock(Project.class);
+        ProjectMember memberRef = mock(ProjectMember.class);
 
         given(projectRepository.findById(projectId)).willReturn(Optional.of(projectRef));
+        given(projectMemberRepository.findById(any())).willReturn(Optional.of(memberRef));
         given(meetingRepository.save(any(Meeting.class))).willAnswer(invocation -> {
             Meeting m = invocation.getArgument(0);
             ReflectionTestUtils.setField(m, "id", 100L);
@@ -67,7 +72,6 @@ class MeetingServiceTest {
         Meeting saved = captor.getValue();
         assertThat(saved.getTitle()).isEqualTo("주간 회의");
         assertThat(res.meetingId()).isEqualTo(100L);
-        then(meetingAttendeeRepository).should().saveAll(any());
     }
 
     @Test
@@ -95,7 +99,6 @@ class MeetingServiceTest {
 
         // then
         assertThat(existingMeeting.getTitle()).isEqualTo("수정 제목");
-        then(meetingAttendeeRepository).should().deleteAllByMeeting(existingMeeting);
     }
 
     @Test

@@ -1,6 +1,9 @@
 package com.connecteamed.server.domain.dashboard.controller;
 
+import com.connecteamed.server.domain.dashboard.dto.DailyScheduleListRes;
 import com.connecteamed.server.domain.dashboard.dto.DashboardRes;
+import com.connecteamed.server.domain.dashboard.dto.NotificationListRes;
+import com.connecteamed.server.domain.dashboard.dto.UpcomingTaskListRes;
 import com.connecteamed.server.domain.dashboard.service.DashboardService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
@@ -17,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+
 @RestController
-@RequestMapping("/api/retrospectives")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Tag(name = "Dashboard", description = "대시보드 관련 API")
 public class DashboardController {
@@ -32,7 +37,7 @@ public class DashboardController {
      * @param username 개발 환경 테스트용 사용자 ID (선택)
      * @return 회고 목록 응답
      */
-    @GetMapping("/recent")
+    @GetMapping("/retrospectives/recent")
     @Operation(
             summary = "최근 회고 목록 조회",
             description = "로그인한 사용자가 작성한 최근 회고 목록을 조회합니다. 개발 환경에서는 username 파라미터로 테스트 가능합니다."
@@ -50,7 +55,7 @@ public class DashboardController {
             @RequestParam(required = false) String username
     ) {
         // 1. 인증된 사용자의 userId 추출 (JWT 토큰 또는 테스트 환경)
-        String userId = (authentication != null && authentication.isAuthenticated() 
+        String userId = (authentication != null && authentication.isAuthenticated()
                         && !"anonymousUser".equals(authentication.getName()))
                         ? authentication.getName()
                         : username;
@@ -69,6 +74,50 @@ public class DashboardController {
                 response,
                 "회고 목록 조회에 성공했습니다"
         );
+    }
+
+    @GetMapping("/tasks/upcoming")
+    @Operation(
+            summary = "다가오는 업무 조회",
+            description = "로그인한 사용자의 마감 임박 업무를 조회합니다."
+    )
+    public ApiResponse<UpcomingTaskListRes> getUpcomingTasks(
+            Authentication authentication,
+            @RequestParam(required = false) String username
+    ) {
+        String userId = getUserId(authentication, username);
+        UpcomingTaskListRes response = dashboardService.getUpcomingTasks(userId);
+        return ApiResponse.onSuccess(GeneralSuccessCode._OK, response, "다가오는 업무 조회에 성공했습니다");
+    }
+
+    @GetMapping("/notifications/recent")
+    @Operation(summary = "알림 조회", description = "로그인한 사용자의 최근 알림 목록을 조회합니다.")
+    public ApiResponse<NotificationListRes> getRecentNotifications(
+            Authentication authentication,
+            @RequestParam(required = false) String username
+    ) {
+        String userId = getUserId(authentication, username);
+        NotificationListRes response = dashboardService.getRecentNotifications(userId);
+        return ApiResponse.onSuccess(GeneralSuccessCode._OK, response, "알림 목록 조회에 성공했습니다");
+    }
+
+    @GetMapping("/schedules/daily")
+    @Operation(summary = "날짜별 업무 조회", description = "특정 날짜의 업무 및 일정을 조회합니다.")
+    public ApiResponse<DailyScheduleListRes> getDailySchedules(
+            @Parameter(description = "조회 날짜", example = "2026-01-22T00:00:00Z")
+            @RequestParam("date") Instant date,
+            Authentication authentication,
+            @RequestParam(required = false) String username
+    ) {
+        String userId = getUserId(authentication, username);
+        DailyScheduleListRes response = dashboardService.getDailySchedules(userId, date);
+        return ApiResponse.onSuccess(GeneralSuccessCode._OK, response, "날짜별 업무 조회에 성공했습니다");
+    }
+
+    private String getUserId(Authentication authentication, String username) {
+        return (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getName()))
+                ? authentication.getName() : username;
     }
 }
 
