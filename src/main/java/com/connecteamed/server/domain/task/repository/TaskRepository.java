@@ -19,10 +19,12 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   
     List<Task> findAllByProjectIdAndStatusAndDeletedAtIsNull(Long projectId, TaskStatus status);
 
-    @Query("SELECT t FROM Task t " +
+    @Query("SELECT DISTINCT t FROM Task t " +
             "JOIN FETCH t.project p " +
-            "JOIN ProjectMember pm ON pm.project = p " +
-            "WHERE pm.member.loginId = :userId " +
+            "JOIN t.assignees ta " +
+            "JOIN ta.projectMember pm " +
+            "JOIN pm.member m " +
+            "WHERE m.loginId = :userId " +
             "AND t.status IN :statuses " +
             "AND t.deletedAt IS NULL " +
             "ORDER BY t.dueDate ASC")
@@ -31,10 +33,12 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             @Param("statuses") List<TaskStatus> statuses
     );
 
-    @Query("SELECT t FROM Task t " +
+    @Query("SELECT DISTINCT t FROM Task t " +
             "JOIN FETCH t.project p " +
-            "JOIN ProjectMember pm ON pm.project = p " +
-            "WHERE pm.member.loginId = :userId " +
+            "JOIN t.assignees ta " +
+            "JOIN ta.projectMember pm " +
+            "JOIN pm.member m " +
+            "WHERE m.loginId = :userId " +
             "AND t.dueDate >= :startOfDay AND t.dueDate < :endOfDay " +
             "AND t.deletedAt IS NULL")
     List<Task> findAllByMemberAndDate(

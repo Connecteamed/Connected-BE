@@ -88,7 +88,7 @@ public class DashboardServiceTest {
     void getRecentNotifications_Success() {
         Notification notification = Notification.builder()
                 .id(1L).content("새로운 메시지").project(testProject).isRead(false).build();
-        given(notificationRepository.findAllByReceiverRecordId(userId)).willReturn(List.of(notification));
+        given(notificationRepository.findAllByReceiverLoginIdOrderByCreatedAtDesc(userId)).willReturn(List.of(notification));
 
         NotificationListRes result = dashboardService.getRecentNotifications(userId);
 

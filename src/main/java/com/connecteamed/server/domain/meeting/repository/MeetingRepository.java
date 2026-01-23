@@ -13,7 +13,7 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     List<Meeting> findAllByProjectIdAndDeletedAtIsNull(Long projectId);
     Optional<Meeting> findByIdAndDeletedAtIsNull(Long meetingId);
 
-    @Query("SELECT m FROM Meeting m " +
+    @Query("SELECT DISTINCT m FROM Meeting m " +
             "JOIN FETCH m.project p " +
             "JOIN m.attendees ma " +
             "JOIN ma.attendee pm " +
