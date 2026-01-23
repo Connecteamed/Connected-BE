@@ -90,13 +90,11 @@ public class ProjectService {
         Project savedProject = projectRepository.save(project);
         log.info("[ProjectService] Project created successfully: id={}, name={}", savedProject.getId(), savedProject.getName());
 
-        projectMemberRepository.findByProject_IdAndMember_Id(savedProject.getId(), owner.getId())
-                .orElseGet(() -> projectMemberRepository.save(
-                        ProjectMember.builder()
-                                .project(savedProject)
-                                .member(owner)
-                                .build()
-                ));
+        ProjectMember projectOwnerAsMember = ProjectMember.builder()
+                .project(savedProject)
+                .member(owner)
+                .build();
+        projectMemberRepository.save(projectOwnerAsMember);
 
         // 3. 필요 역할 등록
         if (createReq.getRequiredRoleNames() != null && !createReq.getRequiredRoleNames().isEmpty()) {
