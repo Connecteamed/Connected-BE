@@ -136,17 +136,7 @@ public class DocumentServiceImpl implements DocumentService {
     public DocumentCreateRes createText(Long projectId, String loginId, DocumentCreateTextReq req) {
         Project projectRef = projectRepository.getReferenceById(projectId);
 
-        Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> {
-                    return new GeneralException(GeneralErrorCode.UNAUTHORIZED);
-                });
-        log.info("[ProjectService] Member found: id={}, name={}", member.getId(), member.getName());
-
-        ProjectMember projectMember = projectMemberRepository
-                .findByProject_IdAndMember_Id(projectId, member.getId())
-                .orElseThrow(() -> {
-                    return new GeneralException(GeneralErrorCode.FORBIDDEN,"Project MemberRepository error");
-                });
+        ProjectMember projectMember = getProjectMember(projectId, loginId);
 
         Document d = Document.createText(projectRef, projectMember, req.title(), req.content());
         documentRepository.save(d);
@@ -162,18 +152,9 @@ public class DocumentServiceImpl implements DocumentService {
             throw new GeneralException(GeneralErrorCode.BAD_REQUEST, "TEXT는 파일 업로드 타입이 아닙니다.");
         }
 
-        Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> {
-                    return new GeneralException(GeneralErrorCode.UNAUTHORIZED);
-                });
-        log.info("[ProjectService] Member found: id={}, name={}", member.getId(), member.getName());
-
         Project projectRef = projectRepository.getReferenceById(projectId);
-        ProjectMember projectMember = projectMemberRepository
-                .findByProject_IdAndMember_Id(projectId, member.getId())
-                .orElseThrow(() -> {
-                    return new GeneralException(GeneralErrorCode.FORBIDDEN,"Project MemberRepository error");
-                });
+
+        ProjectMember projectMember = getProjectMember(projectId, loginId);
 
         String fileUrl = s3StorageService.upload(file, "project-" + projectId);
 
@@ -212,5 +193,15 @@ public class DocumentServiceImpl implements DocumentService {
         // if (d.getFileType() != DocumentFileType.TEXT) { ... }
 
         d.softDelete();
+    }
+
+    private ProjectMember getProjectMember(Long projectId, String loginId) {
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.UNAUTHORIZED));
+        log.info("[DocumentService] Member found: id={}, name={}", member.getId(), member.getName());
+
+        return projectMemberRepository
+                .findByProject_IdAndMember_Id(projectId, member.getId())
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.FORBIDDEN, "해당 프로젝트의 멤버가 아닙니다."));
     }
 }
