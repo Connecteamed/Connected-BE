@@ -23,6 +23,7 @@ import com.connecteamed.server.domain.document.enums.DocumentFileType;
 import com.connecteamed.server.domain.document.service.DocumentService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
 import com.connecteamed.server.global.apiPayload.code.GeneralSuccessCode;
+import com.connecteamed.server.global.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,10 +69,10 @@ public class DocumentController {
             @RequestPart("file") MultipartFile file,
             @RequestPart("type") String type
     ) {
-        Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
+        String loginId = SecurityUtil.getCurrentLoginId();
         DocumentFileType fileType = DocumentFileType.valueOf(type);
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.uploadFile(projectId, projectMemberId, file, fileType))
+            ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.uploadFile(projectId, loginId, file, fileType))
         );
     }
 
@@ -81,9 +82,9 @@ public class DocumentController {
             @PathVariable Long projectId,
             @Valid @RequestBody DocumentCreateTextReq req
     ) {
-        Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
+        String loginId = SecurityUtil.getCurrentLoginId();
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.createText(projectId, projectMemberId, req))
+            ApiResponse.onSuccess(GeneralSuccessCode._CREATED, documentService.createText(projectId, loginId, req))
         );
     }
 
@@ -93,8 +94,7 @@ public class DocumentController {
             @PathVariable Long documentId,
             @RequestBody DocumentUpdateTextReq req
     ) {
-        Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
-        documentService.updateText(documentId, projectMemberId, req);
+        documentService.updateText(documentId, req);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(GeneralSuccessCode._OK, null)
         );
@@ -103,8 +103,7 @@ public class DocumentController {
     @Operation(summary = "문서 삭제", description = "문서삭제 API입니다.")
     @DeleteMapping("/documents/{documentId}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long documentId) {
-        Long projectMemberId = 1L; // TODO 인증에서 꺼내오기
-        documentService.delete(documentId, projectMemberId);
+        documentService.delete(documentId);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(GeneralSuccessCode._OK, null)
         );

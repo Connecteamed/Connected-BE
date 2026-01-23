@@ -59,7 +59,7 @@ public class TaskController {
     // @Operation(summary = "업무 상태 변경", description = "업무 상태 변경 API입니다.")
     // @PatchMapping("/tasks/{taskId}/status")
     // public ResponseEntity<ApiResponse<Void>> updateTaskStatus(
-    //         @PathVariable UUID taskId,
+    //         @PathVariable Long taskId,
     //         @RequestBody @Valid TaskStatusUpdateReq req
     // ) {
     //     taskService.updateTaskStatus(taskId, req);
@@ -90,7 +90,7 @@ public class TaskController {
     // @Operation(summary = "업무 삭제(soft delete)", description = "업무 삭제(soft delete) API입니다.")
     // @DeleteMapping("/tasks/{taskId}")
     // public ResponseEntity<ApiResponse<Void>> deleteTask(
-    //         @PathVariable UUID taskId
+    //         @PathVariable Long taskId
     // ) {
     //     taskService.deleteTask(taskId);
     //     return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));

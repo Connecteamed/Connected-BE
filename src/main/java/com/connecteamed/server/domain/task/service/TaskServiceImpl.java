@@ -80,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
             List<TaskAssigneeRes> assignees = toAssigneeRes(tas);
 
             result.add(new TaskSummaryRes(
-                    task.getPublicId(),
+                    task.getId(),
                     task.getName(),
                     task.getContent(),
                     task.getStatus(),
@@ -101,7 +101,7 @@ public class TaskServiceImpl implements TaskService {
         List<TaskAssigneeRes> assignees = toAssigneeRes(taskAssigneeRepository.findAllByTask(task));
 
         return new TaskDetailRes(
-                task.getPublicId(),
+                task.getId(),
                 task.getProject().getId(),
                 task.getName(),
                 task.getContent(),
@@ -198,7 +198,7 @@ public class TaskServiceImpl implements TaskService {
             UUID memberPublicId = pm.getMember() != null ? pm.getMember().getPublicId() : null;
             String memberName = pm.getMember() != null ? pm.getMember().getName() : null;
 
-            result.add(new TaskAssigneeRes(projectMemberId, memberId, memberPublicId, memberName));
+            result.add(new TaskAssigneeRes(projectMemberId, memberId , memberName));
         }
         return result;
     }
