@@ -29,7 +29,8 @@ public class MeetingAttendee extends BaseEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
-    @Column(name = "attendee_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attendee_id", nullable = false)
     private ProjectMember attendee;
 
 }
