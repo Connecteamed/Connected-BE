@@ -1,5 +1,12 @@
 package com.connecteamed.server.domain.invite.dto;
 
-public class ProjectJoinReq {
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
+public class ProjectJoinReq {
+    @NotBlank(message = "초대 코드는 필수 입력 항목입니다.")
+    private String inviteCode;
 }
