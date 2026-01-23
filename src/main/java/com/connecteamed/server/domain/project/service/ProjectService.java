@@ -7,6 +7,7 @@ import com.connecteamed.server.domain.project.dto.ProjectCreateReq;
 import com.connecteamed.server.domain.project.dto.ProjectRes;
 import com.connecteamed.server.domain.project.dto.ProjectUpdateReq;
 import com.connecteamed.server.domain.project.entity.Project;
+import com.connecteamed.server.domain.project.entity.ProjectMember;
 import com.connecteamed.server.domain.project.entity.ProjectRequiredRole;
 import com.connecteamed.server.domain.project.entity.ProjectRole;
 import com.connecteamed.server.domain.project.repository.ProjectMemberRepository;
@@ -88,6 +89,14 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
         log.info("[ProjectService] Project created successfully: id={}, name={}", savedProject.getId(), savedProject.getName());
+
+        projectMemberRepository.findByProject_IdAndMember_Id(savedProject.getId(), owner.getId())
+                .orElseGet(() -> projectMemberRepository.save(
+                        ProjectMember.builder()
+                                .project(savedProject)
+                                .member(owner)
+                                .build()
+                ));
 
         // 3. 필요 역할 등록
         if (createReq.getRequiredRoleNames() != null && !createReq.getRequiredRoleNames().isEmpty()) {
