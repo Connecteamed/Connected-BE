@@ -18,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -48,7 +47,7 @@ class AuthControllerTest {
     @DisplayName("로그인 성공 - 올바른 JSON 규격 확인")
     void login_Success() throws Exception {
         AuthReqDTO.LoginDTO request = new AuthReqDTO.LoginDTO("testId", "password123");
-        UUID testMemberId = UUID.randomUUID();
+        Long testMemberId = 1L;
         AuthResDTO.LoginDTO response = new AuthResDTO.LoginDTO(
                 testMemberId,
                 "eyJhbGci...",
@@ -64,7 +63,7 @@ class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.data.memberId").value(testMemberId.toString()))
+                .andExpect(jsonPath("$.data.memberId").value(testMemberId))
                 .andExpect(jsonPath("$.data.accessToken").value("eyJhbGci..."))
                 .andExpect(jsonPath("$.data.refreshToken").value("eyJhbGci..."))
                 .andExpect(jsonPath("$.data.grantType").value("Bearer"))
@@ -155,7 +154,7 @@ class AuthControllerTest {
                 "password123!"
         );
 
-        UUID testMemberId = UUID.randomUUID();
+        Long testMemberId = 1L;
         AuthResDTO.JoinDTO response = new AuthResDTO.JoinDTO(testMemberId,"testUser");
 
         when(authCommandService.signup(any())).thenReturn(response);
@@ -166,7 +165,7 @@ class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.data.memberId").value(testMemberId.toString()))
+                .andExpect(jsonPath("$.data.memberId").value(testMemberId))
                 .andExpect(jsonPath("$.data.name").value("testUser"))
                 .andExpect(jsonPath("$.message").value("회원가입이 완료되었습니다."))
                 .andExpect(jsonPath("$.code").value(Matchers.nullValue()));
