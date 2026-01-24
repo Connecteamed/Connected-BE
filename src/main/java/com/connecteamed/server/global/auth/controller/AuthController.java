@@ -37,7 +37,7 @@ public class AuthController {
                             mediaType = "application/json",
                             examples = @ExampleObject(
                                     name = "회원가입 성공 예시",
-                                    value = "{ \"status\": \"success\", \"data\": { \"memberId\": \"b4179fa3-ae3...\", \"name\": \"홍길동\" }, \"message\": \"회원가입이 성공적으로 완료되었습니다.\", \"code\": null }"
+                                    value = "{ \"status\": \"success\", \"data\": { \"memberId\": 1, \"name\": \"홍길동\" }, \"message\": \"회원가입이 성공적으로 완료되었습니다.\", \"code\": null }"
                             )
                     )),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 (필드 누락 등)"),
@@ -58,7 +58,7 @@ public class AuthController {
             mediaType = "application/json",
             examples = @ExampleObject(
                     name = "로그인 성공 예시",
-                    value = "{ \"status\": \"success\", \"data\": { \"memberId\": \"b4179fa3-ae3...\",\"accessToken\": \"eyJhbGci...\", \"refreshToken\": \"eyJhbGci...\",\"grantType\": \"Bearer\",\"expiresIn\": 14400 }, \"message\": \"로그인이 완료되었습니다.\", \"code\": null }"
+                    value = "{ \"status\": \"success\", \"data\": { \"memberId\": 1,\"accessToken\": \"eyJhbGci...\", \"refreshToken\": \"eyJhbGci...\",\"grantType\": \"Bearer\",\"expiresIn\": 14400 }, \"message\": \"로그인이 완료되었습니다.\", \"code\": null }"
             )
     )
             ),
