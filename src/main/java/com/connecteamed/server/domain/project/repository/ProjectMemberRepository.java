@@ -29,4 +29,8 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
             "WHERE pm.member.id = :memberId " +
             "AND p.deletedAt IS NULL")
     List<ProjectMember> findAllByMemberIdWithProject(Long memberId);
+
+    Optional<ProjectMember> findByProject_IdAndMember_Id(Long projectId, Long memberId);
+
+    boolean existsByProjectIdAndMemberId(Long projectId, Long memberId);
 }

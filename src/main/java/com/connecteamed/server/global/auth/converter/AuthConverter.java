@@ -24,7 +24,7 @@ public class AuthConverter {
     // 2. [Entity -> Response DTO] 회원가입 결과 반환용
     public static AuthResDTO.JoinDTO toJoinResultDTO(Member member) {
         return AuthResDTO.JoinDTO.builder()
-                .memberId(member.getPublicId())
+                .memberId(member.getId())
                 .name(member.getName())
                 .build();
     }
@@ -34,7 +34,7 @@ public class AuthConverter {
     //로그인
     public static AuthResDTO.LoginDTO toLoginDTO(Member member, String accessToken, String refreshToken,Long expiresIn) {
         return AuthResDTO.LoginDTO.builder()
-                .memberId(member.getPublicId()) // UUID 매핑
+                .memberId(member.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .grantType("Bearer")
