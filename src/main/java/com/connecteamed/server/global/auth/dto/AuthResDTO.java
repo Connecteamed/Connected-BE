@@ -2,8 +2,6 @@ package com.connecteamed.server.global.auth.dto;
 
 import lombok.Builder;
 
-import java.util.UUID;
-
 public class AuthResDTO {
 
     //회원가입
