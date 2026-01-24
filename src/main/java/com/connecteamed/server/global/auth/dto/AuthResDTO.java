@@ -9,7 +9,7 @@ public class AuthResDTO {
     //회원가입
     @Builder
     public record JoinDTO(
-            UUID memberId,
+            Long memberId,
             String name
     ){}
 
@@ -18,7 +18,7 @@ public class AuthResDTO {
     //로그인
     @Builder
     public record LoginDTO(
-            UUID memberId,
+            Long memberId,
             String accessToken,
             String refreshToken,
             String grantType,
