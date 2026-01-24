@@ -125,7 +125,7 @@ class InviteControllerTest {
 
     @Test
     @WithMockUser(username = "test123")
-    @DisplayName("입장 실패 - inviteCode가 비어있는 채로 전달 받앗을 때)")
+    @DisplayName("입장 실패 - inviteCode가 비어있는 채로 전달 받았을 때)")
     void joinProject_Fail_MissingInput() throws Exception {
         ProjectJoinReq request = new ProjectJoinReq("");
         mockMvc.perform(post("/api/invite/join")
