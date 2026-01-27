@@ -3,7 +3,6 @@ package com.connecteamed.server.domain.task.service;
 import com.connecteamed.server.domain.task.dto.*;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface TaskService {
 
