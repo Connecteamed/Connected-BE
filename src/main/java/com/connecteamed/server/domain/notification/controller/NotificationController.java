@@ -2,6 +2,7 @@ package com.connecteamed.server.domain.notification.controller;
 
 import com.connecteamed.server.domain.notification.dto.NotificationListRes;
 import com.connecteamed.server.domain.notification.service.NotificationService;
+import com.connecteamed.server.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,8 @@ public class NotificationController {
     // 알림 삭제
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long notificationId) {
-        notificationService.deleteNotification(notificationId);
+        String loginId = SecurityUtil.getCurrentLoginId();
+        notificationService.deleteNotification(notificationId, loginId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -4,6 +4,8 @@ import com.connecteamed.server.domain.notification.dto.NotificationListRes;
 import com.connecteamed.server.domain.notification.dto.NotificationRes;
 import com.connecteamed.server.domain.notification.entity.Notification;
 import com.connecteamed.server.domain.notification.repository.NotificationRepository;
+import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +38,15 @@ public class NotificationService {
 
     // 알림 삭제
     @Transactional
-    public void deleteNotification(Long notificationId) {
-        notificationRepository.deleteById(notificationId);
+    public void deleteNotification(Long notificationId, String loginId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
+
+        if (!notification.getReceiver().getLoginId().equals(loginId)) {
+            throw new GeneralException(GeneralErrorCode.UNAUTHORIZED);
+        }
+
+        notificationRepository.delete(notification);
     }
 
     private NotificationRes convertToResponse(Notification notification) {
