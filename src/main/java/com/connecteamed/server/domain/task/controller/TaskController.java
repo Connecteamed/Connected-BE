@@ -166,7 +166,8 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskDetailRes>> getTaskDetail(
             @PathVariable Long taskId
     ) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(TaskSuccessCode.TASK_DETAIL_GET_SUCCESS, taskService.getTaskDetail(taskId)));
+        TaskDetailRes taskDetail = taskService.getTaskDetail(taskId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(TaskSuccessCode.TASK_DETAIL_GET_SUCCESS, taskDetail));
     }
 
     //TODO: updateTaskStatus 중복-> TaskController
