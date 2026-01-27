@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,28 @@ public class TaskController {
     private final TaskService taskService;
 
     @Operation(summary = "업무 추가", description = "업무 추가 API입니다.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "업무 생성 성공",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "업무 생성 성공 예시",
+                    value = """
+                    {
+                        "status": "success",
+                        "data": {
+                            "taskId": 17
+                        },
+                        "message": "업무 생성에 성공하였습니다.",
+                        "code": null
+                    }
+                    """
+                )
+            )
+        )
+    })
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<ApiResponse<Map<String, Object>>> createTask(
             @PathVariable Long projectId,
@@ -34,6 +59,52 @@ public class TaskController {
     }
 
     @Operation(summary = "업무 목록 조회(전체)", description = "업무 목록 조회(전체) API입니다.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "업무 목록 조회 성공",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "업무 목록 조회 성공 예시",
+                    value = """
+                    {
+                        "status": "success",
+                        "data": [
+                            {
+                            "taskId": 1,
+                            "name": "string",
+                            "content": "string",
+                            "status": "TODO",
+                            "startDate": "2026-01-22T08:39:00.260Z",
+                            "dueDate": "2026-01-22T08:39:00.260Z",
+                            "assignees": [
+                                {
+                                "projectMemberId": 13,
+                                "memberId": 1,
+                                "memberName": "테스트유저"
+                                },
+                                {
+                                "projectMemberId": 14,
+                                "memberId": 2,
+                                "memberName": "string"
+                                },
+                                {
+                                "projectMemberId": 15,
+                                "memberId": 3,
+                                "memberName": "string2"
+                                }
+                            ]
+                            },
+                        ],
+                        "message": "업무 목록 조회에 성공하였습니다.",
+                        "code": null
+                    }
+                    """
+                )
+            )
+        )
+    })
     @GetMapping("/projects/{projectId}/tasks")
     public ResponseEntity<ApiResponse<List<TaskSummaryRes>>> getProjectTasks(
             @PathVariable Long projectId
@@ -42,6 +113,53 @@ public class TaskController {
     }
 
     @Operation(summary = "업무 상세 조회", description = "업무 상세 조회 API입니다.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "업무 상세 조회 성공",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "업무 상세 조회 성공 예시",
+                    value = """
+                    {
+                        "status": "success",
+                        "data": {
+                            "taskId": 11,
+                            "projectId": 1,
+                            "name": "string",
+                            "content": "string",
+                            "status": "TODO",
+                            "startDate": "2026-01-22T08:39:00.260Z",
+                            "dueDate": "2026-01-22T08:39:00.260Z",
+                            "assignees": [
+                            {
+                                "projectMemberId": 15,
+                                "memberId": 3,
+                                "memberName": "string2"
+                            },
+                            {
+                                "projectMemberId": 13,
+                                "memberId": 1,
+                                "memberName": "테스트유저"
+                            },
+                            {
+                                "projectMemberId": 14,
+                                "memberId": 2,
+                                "memberName": "string"
+                            }
+                            ],
+                            "createdAt": "2026-01-22T08:39:12.213578Z",
+                            "updatedAt": "2026-01-22T08:39:12.213578Z"
+                        },
+                        "message": "업무 상세 조회에 성공하였습니다.",
+                        "code": null
+                    }
+                    """
+                )
+            )
+        )
+    })
     @GetMapping("/tasks/{taskId}/detail")
     public ResponseEntity<ApiResponse<TaskDetailRes>> getTaskDetail(
             @PathVariable Long taskId
@@ -61,6 +179,26 @@ public class TaskController {
     // }
 
     @Operation(summary = "업무 일정 수정(시작/마감)", description = "업무 일정 수정(시작/마감) API입니다.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "업무 일정 수정 성공",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "업무 일정 수정 성공 예시",
+                    value = """
+                    {
+                        "status": "success",
+                        "data": null,
+                        "message": "업무 일정 수정에 성공하였습니다.",
+                        "code": null
+                    }
+                    """
+                )
+            )
+        )
+    })
     @PatchMapping("/tasks/{taskId}/schedule")
     public ResponseEntity<ApiResponse<Void>> updateTaskSchedule(
             @PathVariable Long taskId,
@@ -71,6 +209,26 @@ public class TaskController {
     }
 
     @Operation(summary = "담당자 변경(전체 교체)", description = "담당자 변경(전체 교체) API입니다.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "업무 담당자 변경 성공",
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(
+                    name = "업무 담당자 변경 성공 예시",
+                    value = """
+                    {
+                        "status": "success",
+                        "data": null,
+                        "message": "업무 담당자 변경에 성공하였습니다.",
+                        "code": null
+                    }
+                    """
+                )
+            )
+        )
+    })
     @PatchMapping("/tasks/{taskId}/assignees")
     public ResponseEntity<ApiResponse<Void>> updateTaskAssignees(
             @PathVariable Long taskId,
