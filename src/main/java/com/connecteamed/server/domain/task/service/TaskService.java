@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface TaskService {
 
-    UUID createTask(Long projectId, TaskCreateReq req);
+    Long createTask(Long projectId, TaskCreateReq req);
 
     List<TaskSummaryRes> getProjectTasks(Long projectId);
 
