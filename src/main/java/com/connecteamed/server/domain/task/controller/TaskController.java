@@ -1,5 +1,6 @@
 package com.connecteamed.server.domain.task.controller;
 
+import com.connecteamed.server.domain.task.code.TaskSuccessCode;
 import com.connecteamed.server.domain.task.dto.*;
 import com.connecteamed.server.domain.task.service.TaskService;
 import com.connecteamed.server.global.apiPayload.ApiResponse;
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,10 +29,8 @@ public class TaskController {
             @PathVariable Long projectId,
             @RequestBody @Valid TaskCreateReq req
     ) {
-        Long taskId = taskService.createTask(projectId, req);
         return ResponseEntity.ok(
-                ApiResponse.onSuccess(GeneralSuccessCode._OK, Map.of("taskId", taskId))
-        );
+            ApiResponse.onSuccess(TaskSuccessCode.TASK_CREATE_SUCCESS, Map.of("taskId", taskService.createTask(projectId, req))));
     }
 
     @Operation(summary = "업무 목록 조회(전체)", description = "업무 목록 조회(전체) API입니다.")
@@ -40,9 +38,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<List<TaskSummaryRes>>> getProjectTasks(
             @PathVariable Long projectId
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.onSuccess(GeneralSuccessCode._OK, taskService.getProjectTasks(projectId))
-        );
+        return ResponseEntity.ok(ApiResponse.onSuccess(TaskSuccessCode.TASK_LIST_GET_SUCCESS, taskService.getProjectTasks(projectId)));
     }
 
     @Operation(summary = "업무 상세 조회", description = "업무 상세 조회 API입니다.")
@@ -50,9 +46,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskDetailRes>> getTaskDetail(
             @PathVariable Long taskId
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.onSuccess(GeneralSuccessCode._OK, taskService.getTaskDetail(taskId))
-        );
+        return ResponseEntity.ok(ApiResponse.onSuccess(TaskSuccessCode.TASK_DETAIL_GET_SUCCESS, taskService.getTaskDetail(taskId)));
     }
 
     //TODO: updateTaskStatus 중복-> TaskController
@@ -73,7 +67,7 @@ public class TaskController {
             @RequestBody @Valid TaskScheduleUpdateReq req
     ) {
         taskService.updateTaskSchedule(taskId, req);
-        return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
+        return ResponseEntity.ok(ApiResponse.onSuccess(TaskSuccessCode.TASK_SCHEDULE_UPDATE_SUCCESS, null));
     }
 
     @Operation(summary = "담당자 변경(전체 교체)", description = "담당자 변경(전체 교체) API입니다.")
@@ -83,7 +77,7 @@ public class TaskController {
             @RequestBody @Valid TaskAssigneeUpdateReq req
     ) {
         taskService.updateTaskAssignees(taskId, req);
-        return ResponseEntity.ok(ApiResponse.onSuccess(GeneralSuccessCode._OK, null));
+        return ResponseEntity.ok(ApiResponse.onSuccess(TaskSuccessCode.TASK_ASSIGNEES_UPDATE_SUCCESS, null));
     }
 
     // TODO: 업무 삭제 CompletedTaskController 중복 해결 필요
