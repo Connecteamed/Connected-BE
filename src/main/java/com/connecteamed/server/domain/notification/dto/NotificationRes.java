@@ -1,4 +1,11 @@
 package com.connecteamed.server.domain.notification.dto;
 
-public class NotificationRes {
-}
+public record NotificationRes (
+        Long id,
+        String notificationType,
+        String title,
+        String content,
+        String createdAt,
+        boolean isRead,
+        String targetUrl
+) {}
