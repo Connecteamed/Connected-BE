@@ -29,7 +29,7 @@ public class TaskController {
             @PathVariable Long projectId,
             @RequestBody @Valid TaskCreateReq req
     ) {
-        UUID taskId = taskService.createTask(projectId, req);
+        Long taskId = taskService.createTask(projectId, req);
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(GeneralSuccessCode._OK, Map.of("taskId", taskId))
         );
