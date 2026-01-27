@@ -111,7 +111,8 @@ public class TaskController {
     public ResponseEntity<ApiResponse<List<TaskSummaryRes>>> getProjectTasks(
             @PathVariable Long projectId
     ) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(TaskSuccessCode.TASK_LIST_GET_SUCCESS, taskService.getProjectTasks(projectId)));
+        List<TaskSummaryRes> projectTasks = taskService.getProjectTasks(projectId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(TaskSuccessCode.TASK_LIST_GET_SUCCESS, projectTasks));
     }
 
     @Operation(summary = "업무 상세 조회", description = "업무 상세 조회 API입니다.")
