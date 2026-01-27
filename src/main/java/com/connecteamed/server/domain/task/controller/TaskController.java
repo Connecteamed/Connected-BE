@@ -54,8 +54,10 @@ public class TaskController {
             @PathVariable Long projectId,
             @RequestBody @Valid TaskCreateReq req
     ) {
+        Long taskId = taskService.createTask(projectId, req);
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(TaskSuccessCode.TASK_CREATE_SUCCESS, Map.of("taskId", taskService.createTask(projectId, req))));
+            ApiResponse.onSuccess(TaskSuccessCode.TASK_CREATE_SUCCESS, Map.of("taskId", taskId))
+        );
     }
 
     @Operation(summary = "업무 목록 조회(전체)", description = "업무 목록 조회(전체) API입니다.")
