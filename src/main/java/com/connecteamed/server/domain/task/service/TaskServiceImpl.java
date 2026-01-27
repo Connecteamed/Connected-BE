@@ -34,7 +34,7 @@ public class TaskServiceImpl implements TaskService {
 
     //업무 추가
     @Override
-    public UUID createTask(Long projectId, TaskCreateReq req) {
+    public Long createTask(Long projectId, TaskCreateReq req) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new TaskException(TaskErrorCode.PROJECT_NOT_FOUND));
 
@@ -55,7 +55,7 @@ public class TaskServiceImpl implements TaskService {
         List<Long> assigneeIds = req.assigneeProjectMemberIds() == null ? List.of() : req.assigneeProjectMemberIds();
         attachAssignees(saved, projectId, assigneeIds);
 
-        return saved.getPublicId();
+        return saved.getId();
     }
 
     //업무 목록 조회(전체)
