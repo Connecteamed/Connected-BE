@@ -28,7 +28,7 @@ public class RetrospectiveService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final TaskRepository taskRepository;
-    private final GeminiProvider geminiProvider;
+    private final RetrospectiveAsyncService retrospectiveAsyncService;
 
     // ai 회고 생성
     @Transactional
@@ -43,18 +43,18 @@ public class RetrospectiveService {
         List<Task> selectedTasks = taskRepository.findAllById(request.taskIds());
 
         // AI 분석 수행
-        List<String> taskNames = selectedTasks.stream().map(Task::getName).toList();
-        String aiAnalyzedResult = geminiProvider.getAnalysis(request.projectResult(), taskNames);
-
         AiRetrospective retrospective = AiRetrospective.builder()
                 .project(project)
                 .writer(writer)
                 .title(request.title())
-                .projectResult(aiAnalyzedResult)
+                .projectResult("AI 분석이 진행 중입니다. 잠시만 기다려 주세요.") // 임시 문구
                 .build();
 
         selectedTasks.forEach(retrospective::addRetrospectiveTask);
         AiRetrospective saved = aiRetrospectiveRepository.save(retrospective);
+
+        List<String> taskNames = selectedTasks.stream().map(Task::getName).toList();
+        retrospectiveAsyncService.processAiAnalysis(saved.getId(), request.projectResult(), taskNames);
 
         return new RetrospectiveCreateRes(saved.getId(), saved.getTitle());
     }
