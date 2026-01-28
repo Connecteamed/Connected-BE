@@ -33,19 +33,21 @@ public class RetrospectiveService {
     // ai 회고 생성
     @Transactional
     public RetrospectiveCreateRes createAiRetrospective(Long projectId, Long memberId, RetrospectiveCreateReq request){
-        // 데이터 조회 (프로젝트, 작성자, 업무 리스트)
-        Project project = projectRepository.findById(projectId)
+
+        Project project = projectRepository.findByIdWithDetails(projectId)
                 .orElseThrow(() -> new RuntimeException("프로젝트를 찾을 수 없습니다."));
 
-        ProjectMember writer = projectMemberRepository.findById(memberId)
+        ProjectMember writer = project.getProjectMembers().stream()
+                .filter(pm -> pm.getId().equals(memberId))
+                .findFirst()
                 .orElseThrow(() -> new RuntimeException("팀원 정보를 찾을 수 없습니다."));
 
         List<Task> selectedTasks = taskRepository.findAllById(request.taskIds());
 
         String otherTasks = project.getProjectMembers().stream()
-                .filter(member -> !member.getId().equals(writer.getId()))
-                .flatMap(member -> member.getTasks().stream())
-                .map(Task::getName) // 업무 이름만 추출
+                .filter(pm -> !pm.getId().equals(writer.getId()))
+                .flatMap(pm -> pm.getTasks().stream())
+                .map(Task::getName)
                 .distinct()
                 .collect(Collectors.joining(", "));
 
