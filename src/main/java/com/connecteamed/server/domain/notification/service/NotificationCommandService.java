@@ -36,7 +36,9 @@ public class NotificationCommandService {
 
     private String generateTargetUrl(Long projectId, Long taskId, String typeKey) {
         return switch (typeKey) {
-            case "TASK_TAGGED", "TASK_RESTARTED", "TASK_COMPLETED", "TASK_DEADLINE_APPROACHING", "TASK_MODIFIED"
+            case "TASK_COMPLETED"
+                    -> String.format("/projects/%d/completed-tasks/%d", projectId, taskId);
+            case "TASK_TAGGED", "TASK_RESTARTED", "TASK_DEADLINE_APPROACHING", "TASK_MODIFIED"
                     -> String.format("/projects/%d/tasks/%d", projectId, taskId);
             case "PROJECT_COMPLETED"
                     -> String.format("/projects/%d/retrospective", projectId);
