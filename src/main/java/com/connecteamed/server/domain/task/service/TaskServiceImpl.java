@@ -42,7 +42,7 @@ public class TaskServiceImpl implements TaskService {
 
     //업무 추가
     @Override
-    public UUID createTask(Long projectId, TaskCreateReq req) {
+    public Long createTask(Long projectId, TaskCreateReq req) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new TaskException(TaskErrorCode.PROJECT_NOT_FOUND));
 
@@ -66,7 +66,7 @@ public class TaskServiceImpl implements TaskService {
         // 알림: 업무 태그
         sendNotificationToAllAssignees(saved, "TASK_TAGGED");
 
-        return saved.getPublicId();
+        return saved.getId();
     }
 
     //업무 목록 조회(전체)
