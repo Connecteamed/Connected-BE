@@ -3,11 +3,10 @@ package com.connecteamed.server.domain.task.service;
 import com.connecteamed.server.domain.task.dto.*;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface TaskService {
 
-    UUID createTask(Long projectId, TaskCreateReq req);
+    Long createTask(Long projectId, TaskCreateReq req);
 
     List<TaskSummaryRes> getProjectTasks(Long projectId);
 
