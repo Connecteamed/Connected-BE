@@ -114,7 +114,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "https://api.connecteamed.shop"
+                "https://api.connecteamed.shop",
+                "https://connecteamed.shop"
 
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
