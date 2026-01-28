@@ -31,7 +31,11 @@ public class RetrospectiveAsyncService {
                 projectName, projectGoal, retrospectiveTitle, totalResult, role, myTaskList, otherTasks
         );
 
-        // 결과 반영
+        updateRetrospectiveResult(retrospectiveId, analyzedResult);
+        }
+
+    @Transactional
+    public void updateRetrospectiveResult(Long retrospectiveId, String analyzedResult) {
         aiRetrospectiveRepository.findById(retrospectiveId).ifPresent(retrospective -> {
             retrospective.update(retrospective.getTitle(), analyzedResult);
         });
