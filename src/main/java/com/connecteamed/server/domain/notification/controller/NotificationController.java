@@ -16,7 +16,8 @@ public class NotificationController {
 
     // 알림 목록 조회
     @GetMapping
-    public ResponseEntity<NotificationListRes> getNotifications(@RequestParam String loginId) {
+    public ResponseEntity<NotificationListRes> getNotifications() {
+        String loginId = SecurityUtil.getCurrentLoginId();
         return ResponseEntity.ok(notificationService.getNotifications(loginId));
     }
 

@@ -25,9 +25,7 @@ public class NotificationService {
     public NotificationListRes getNotifications(String loginId) {
         List<Notification> notifications = notificationRepository.findAllByReceiverLoginIdOrderByCreatedAtDesc(loginId);
 
-        long unreadCount = notifications.stream()
-                .filter(n -> !n.isRead())
-                .count();
+        long unreadCount = notificationRepository.countUnreadByReceiverLoginId(loginId);
 
         List<NotificationRes> responses = notifications.stream()
                 .map(this::convertToResponse)

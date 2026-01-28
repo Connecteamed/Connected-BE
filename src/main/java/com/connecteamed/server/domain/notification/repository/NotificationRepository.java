@@ -12,4 +12,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     @EntityGraph(attributePaths = {"project"})
     List<Notification> findAllByReceiverLoginIdOrderByCreatedAtDesc(String loginId);
+
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.receiver.loginId = :loginId AND n.isRead = false")
+    long countUnreadByReceiverLoginId(@Param("loginId") String loginId);
 }

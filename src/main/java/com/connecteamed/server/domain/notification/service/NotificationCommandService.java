@@ -52,7 +52,7 @@ public class NotificationCommandService {
             case "TASK_DEADLINE_APPROACHING" -> "업무 마감이 하루 남았어요!";
             case "TASK_MODIFIED" -> "담당 업무 내용이 수정됐어요";
             case "PROJECT_COMPLETED" -> "프로젝트가 종료됐어요. 회고를 작성해주세요!";
-            default -> "새로운 알림이 도착했습니다.";
+            default -> "새로운 알림이 도착했어요";
         };
     }
 }
