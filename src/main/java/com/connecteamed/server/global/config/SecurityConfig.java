@@ -57,6 +57,7 @@ public class SecurityConfig {
         configureCommonSecurity(http);
         http
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/", "/index.html", "/document.html",
                     "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error",
@@ -76,6 +77,7 @@ public class SecurityConfig {
         configureCommonSecurity(http);
         http
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/", "/index.html", "/document.html",
                     "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error",
@@ -111,7 +113,8 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "https://api.connecteamed.shop"
 
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -128,7 +131,7 @@ public class SecurityConfig {
     private void configureCommonSecurity(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
