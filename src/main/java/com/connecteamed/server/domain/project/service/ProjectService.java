@@ -2,6 +2,8 @@ package com.connecteamed.server.domain.project.service;
 
 import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
+import com.connecteamed.server.domain.notification.entity.NotificationType;
+import com.connecteamed.server.domain.notification.service.NotificationCommandService;
 import com.connecteamed.server.domain.project.code.ProjectErrorCode;
 import com.connecteamed.server.domain.project.dto.ProjectCreateReq;
 import com.connecteamed.server.domain.project.dto.ProjectRes;
@@ -39,6 +41,7 @@ public class ProjectService {
     private final MemberRepository memberRepository;
     private final Optional<S3Uploader> s3Uploader;
     private final ProjectMemberRepository projectMemberRepository;
+    private final NotificationCommandService  notificationCommandService;
 
     /**
      * 프로젝트 생성
@@ -246,12 +249,31 @@ public class ProjectService {
         log.info("[ProjectService] Project closed: id={}, status={}, closedAt={}",
                 project.getId(), project.getStatus(), project.getClosedAt());
 
+        // 알림: 프로젝트 종료
+        sendProjectCompletionNotification(project);
+
         // 3. 응답 반환
         return ProjectRes.CloseResponse.builder()
                 .projectId(project.getId())
                 .status(project.getStatus())
                 .closedAt(project.getClosedAt())
                 .build();
+    }
+
+    // 프로젝트 종료 알림 로직
+    private void sendProjectCompletionNotification(Project project) {
+        List<ProjectMember> members = projectMemberRepository.findAllByProjectId(project.getId());
+        NotificationType type = NotificationType.builder().typeKey("PROJECT_COMPLETED").build();
+
+        for (ProjectMember pm : members) {
+            notificationCommandService.send(
+                    pm.getMember(),
+                    null,
+                    project,
+                    null,
+                    type
+            );
+        }
     }
 }
 
