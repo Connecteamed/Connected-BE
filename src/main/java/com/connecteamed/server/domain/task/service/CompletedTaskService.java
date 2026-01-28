@@ -112,7 +112,7 @@ public class CompletedTaskService {
     public void updateCompletedTask(Long taskId, CompletedTaskUpdateReq req) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "해당 ID의 업무를 찾을 수 없습니다."));
-        task.updateInfo(req.name(), req.content());
+        task.updateInfo(req.name(), req.content(), req.noteContent());
 
         Long currentMemberId = getCurrentUserId();
 

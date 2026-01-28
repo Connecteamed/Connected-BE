@@ -16,9 +16,20 @@ public class RetrospectiveAsyncService {
 
     @Async("AsyncExecutor")
     @Transactional
-    public void processAiAnalysis(Long retrospectiveId, String userResult, List<String> taskNames) {
+    public void processAiAnalysis(
+            Long retrospectiveId,
+            String projectName,
+            String projectGoal,
+            String retrospectiveTitle,
+            String totalResult,
+            String role,
+            String myTaskList,
+            String otherTasks
+    ) {
         // AI 분석 호출
-        String analyzedResult = geminiProvider.getAnalysis(userResult, taskNames);
+        String analyzedResult = geminiProvider.getAnalysis(
+                projectName, projectGoal, retrospectiveTitle, totalResult, role, myTaskList, otherTasks
+        );
 
         // 결과 반영
         aiRetrospectiveRepository.findById(retrospectiveId).ifPresent(retrospective -> {

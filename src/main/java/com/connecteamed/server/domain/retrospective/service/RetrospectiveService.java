@@ -42,19 +42,49 @@ public class RetrospectiveService {
 
         List<Task> selectedTasks = taskRepository.findAllById(request.taskIds());
 
+        String otherTasks = project.getProjectMembers().stream()
+                .filter(member -> !member.getId().equals(writer.getId()))
+                .flatMap(member -> member.getTasks().stream())
+                .map(Task::getName) // 업무 이름만 추출
+                .distinct()
+                .collect(Collectors.joining(", "));
+
+        if (otherTasks.isEmpty()) {
+            otherTasks = "현재 등록된 다른 팀원의 업무가 없습니다";
+        }
+
+        // 내 업무 리스트 상세 포맷팅
+        String myTaskList = selectedTasks.stream()
+                .map(t -> String.format("- 업무명: %s / 내용: %s / 성과: %s", t.getName(), t.getContent(), t.getResult()))
+                .collect(Collectors.joining("\n"));
+
+        // 내 역할 정보 추출
+        String myRole = writer.getRoles().stream()
+                .map(pmr -> pmr.getRole().getRoleName())
+                .collect(Collectors.joining(", "));
+        if (myRole.isEmpty()) myRole = "팀원";
+
         // AI 분석 수행
         AiRetrospective retrospective = AiRetrospective.builder()
                 .project(project)
                 .writer(writer)
                 .title(request.title())
-                .projectResult("AI 분석이 진행 중입니다. 잠시만 기다려 주세요.") // 임시 문구
+                .projectResult("AI 분석이 진행 중입니다. 잠시만 기다려 주세요.")
                 .build();
 
         selectedTasks.forEach(retrospective::addRetrospectiveTask);
         AiRetrospective saved = aiRetrospectiveRepository.save(retrospective);
 
-        List<String> taskNames = selectedTasks.stream().map(Task::getName).toList();
-        retrospectiveAsyncService.processAiAnalysis(saved.getId(), request.projectResult(), taskNames);
+        retrospectiveAsyncService.processAiAnalysis(
+                saved.getId(),
+                project.getName(),
+                project.getGoal(),
+                request.title(),
+                request.projectResult(),
+                myRole,
+                myTaskList,
+                otherTasks
+        );
 
         return new RetrospectiveCreateRes(saved.getId(), saved.getTitle());
     }
