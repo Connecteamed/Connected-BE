@@ -240,6 +240,26 @@ class DocumentServiceImplTest {
 
         DocumentListRes res = documentService.list(projectId);
 
+        assertThat(res).isNotNull();
+        assertThat(res.documents()).hasSize(2);
+
+        // createdAt 내림차순 정렬이므로 fileDoc이 먼저 와야 합니다.
+        DocumentListRes.Item fileItem = res.documents().get(0);
+        assertThat(fileItem.documentId()).isEqualTo(2L);
+        assertThat(fileItem.title()).isEqualTo("image.png");
+        assertThat(fileItem.type()).isEqualTo(DocumentFileType.IMAGE.name());
+        assertThat(fileItem.uploaderName()).isEqualTo("멤버2");
+        assertThat(fileItem.downloadUrl()).isNotNull();
+        assertThat(fileItem.canEdit()).isFalse();
+
+        DocumentListRes.Item textItem = res.documents().get(1);
+        assertThat(textItem.documentId()).isEqualTo(1L);
+        assertThat(textItem.title()).isEqualTo("텍스트 제목");
+        assertThat(textItem.type()).isEqualTo(DocumentFileType.TEXT.name());
+        assertThat(textItem.uploaderName()).isEqualTo("멤버1");
+        assertThat(textItem.downloadUrl()).isNull();
+        assertThat(textItem.canEdit()).isTrue();
+
         then(s3StorageService).shouldHaveNoInteractions();
     }
 }
