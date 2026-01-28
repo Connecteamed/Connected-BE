@@ -4,7 +4,10 @@ import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.notification.entity.Notification;
 import com.connecteamed.server.domain.notification.entity.NotificationType;
 import com.connecteamed.server.domain.notification.repository.NotificationRepository;
+import com.connecteamed.server.domain.notification.repository.NotificationTypeRepository;
 import com.connecteamed.server.domain.project.entity.Project;
+import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
+import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -15,17 +18,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationCommandService {
 
     private final NotificationRepository notificationRepository;
+    private final NotificationTypeRepository notificationTypeRepository;
 
     @Async("AsyncExecutor")
     @Transactional
-    public void send(Member receiver, Member sender, Project project, Long taskId, NotificationType type) {
-        String typeKey = type.getTypeKey();
+    public void send(Member receiver, Member sender, Project project, Long taskId, String typeKey) {
+
+        NotificationType notificationType = notificationTypeRepository.findByTypeKey(typeKey)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND));
 
         Notification notification = Notification.builder()
                 .receiver(receiver)
                 .sender(sender)
                 .project(project)
-                .notificationType(type)
+                .notificationType(notificationType)
                 .content(generateContent(typeKey))
                 .targetUrl(generateTargetUrl(project.getId(), taskId, typeKey))
                 .isRead(false)

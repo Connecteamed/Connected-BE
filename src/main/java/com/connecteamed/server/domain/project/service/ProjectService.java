@@ -3,6 +3,7 @@ package com.connecteamed.server.domain.project.service;
 import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
 import com.connecteamed.server.domain.notification.entity.NotificationType;
+import com.connecteamed.server.domain.notification.repository.NotificationTypeRepository;
 import com.connecteamed.server.domain.notification.service.NotificationCommandService;
 import com.connecteamed.server.domain.project.code.ProjectErrorCode;
 import com.connecteamed.server.domain.project.dto.ProjectCreateReq;
@@ -16,6 +17,7 @@ import com.connecteamed.server.domain.project.repository.ProjectMemberRepository
 import com.connecteamed.server.domain.project.repository.ProjectRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRequiredRoleRepository;
 import com.connecteamed.server.domain.project.repository.ProjectRoleRepository;
+import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import com.connecteamed.server.global.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class ProjectService {
     private final MemberRepository memberRepository;
     private final Optional<S3Uploader> s3Uploader;
     private final ProjectMemberRepository projectMemberRepository;
+    private final NotificationTypeRepository notificationTypeRepository;
     private final NotificationCommandService  notificationCommandService;
 
     /**
@@ -263,7 +266,6 @@ public class ProjectService {
     // 프로젝트 종료 알림 로직
     private void sendProjectCompletionNotification(Project project) {
         List<ProjectMember> members = projectMemberRepository.findAllByProjectId(project.getId());
-        NotificationType type = NotificationType.builder().typeKey("PROJECT_COMPLETED").build();
 
         for (ProjectMember pm : members) {
             notificationCommandService.send(
@@ -271,7 +273,7 @@ public class ProjectService {
                     null,
                     project,
                     null,
-                    type
+                    "PROJECT_COMPLETED"
             );
         }
     }

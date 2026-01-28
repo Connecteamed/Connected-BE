@@ -35,13 +35,14 @@ public class NotificationCommandServiceTest {
         Member sender = Member.builder().id(2L).build();
         Project project = Project.builder().id(100L).name("Connected").build();
         Long taskId = 50L;
+        String typeKey = "TASK_TAGGED";
 
-        NotificationType type = NotificationType.builder()
-                .typeKey("TASK_TAGGED")
+        NotificationType mockType = NotificationType.builder()
+                .typeKey(typeKey)
                 .build();
 
         // when
-        notificationCommandService.send(receiver, sender, project, taskId, type);
+        notificationCommandService.send(receiver, sender, project, taskId, typeKey);
 
         // then
         verify(notificationRepository, times(1)).save(any(Notification.class));
@@ -51,7 +52,7 @@ public class NotificationCommandServiceTest {
         Notification savedNotification = captor.getValue();
 
         assertThat(savedNotification.getReceiver()).isEqualTo(receiver);
-        assertThat(savedNotification.getNotificationType().getTypeKey()).isEqualTo("TASK_TAGGED");
+        assertThat(savedNotification.getNotificationType().getTypeKey()).isEqualTo(typeKey);
         assertThat(savedNotification.getContent()).isEqualTo("새로운 업무에 태그됐어요");
         assertThat(savedNotification.getTargetUrl()).isEqualTo("/projects/100/tasks/50");
     }

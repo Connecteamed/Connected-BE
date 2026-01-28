@@ -7,6 +7,8 @@ import com.connecteamed.server.domain.notification.repository.NotificationReposi
 import com.connecteamed.server.global.apiPayload.code.GeneralErrorCode;
 import com.connecteamed.server.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +24,12 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     // 알림 목록 조회
-    public NotificationListRes getNotifications(String loginId) {
-        List<Notification> notifications = notificationRepository.findAllByReceiverLoginIdOrderByCreatedAtDesc(loginId);
+    public NotificationListRes getNotifications(String loginId, Pageable pageable) {
+        Page<Notification> notifications = notificationRepository.findAllByReceiverLoginIdOrderByCreatedAtDesc(loginId, pageable);
 
         long unreadCount = notificationRepository.countUnreadByReceiverLoginId(loginId);
 
-        List<NotificationRes> responses = notifications.stream()
+        List<NotificationRes> responses = notifications.getContent().stream()
                 .map(this::convertToResponse)
                 .toList();
 

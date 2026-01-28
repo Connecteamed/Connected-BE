@@ -14,6 +14,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +42,7 @@ public class NotificationServiceTest {
     void getNotifications_Success() {
         // given
         String loginId = "user123";
+        Pageable pageable = PageRequest.of(0, 10);
 
         NotificationType type = NotificationType.builder()
                 .typeKey("TASK_TAGGED")
@@ -53,15 +59,17 @@ public class NotificationServiceTest {
                 .isRead(false)
                 .build();
 
-        org.springframework.test.util.ReflectionTestUtils.setField(notification, "createdAt", Instant.now());
+        ReflectionTestUtils.setField(notification, "createdAt", Instant.now());
 
-        when(notificationRepository.findAllByReceiverLoginIdOrderByCreatedAtDesc(loginId))
-                .thenReturn(List.of(notification));
+        Page<Notification> notificationPage = new PageImpl<>(List.of(notification));
+
+        when(notificationRepository.findAllByReceiverLoginIdOrderByCreatedAtDesc(loginId, pageable))
+                .thenReturn(notificationPage);
         when(notificationRepository.countUnreadByReceiverLoginId(loginId))
                 .thenReturn(1L);
 
         // when
-        NotificationListRes result = notificationService.getNotifications(loginId);
+        NotificationListRes result = notificationService.getNotifications(loginId, pageable);
 
         // then
         assertThat(result.unreadCount()).isEqualTo(1);

@@ -149,13 +149,17 @@ public class CompletedTaskService {
         String currentLoginId = SecurityUtil.getCurrentLoginId();
         List<TaskAssignee> assignees = taskAssigneeRepository.findAllByTaskId(task.getId());
 
-        NotificationType type = NotificationType.builder().typeKey(typeKey).build();
-
         for (TaskAssignee ta : assignees) {
             Member receiver = ta.getProjectMember().getMember();
             // 수정한 본인이 아닌 공동 담당자에게만 전송
-            if (!receiver.getLoginId().equals(currentLoginId)) {
-                notificationCommandService.send(receiver, null, task.getProject(), task.getId(), type);
+            if (receiver != null && !receiver.getLoginId().equals(currentLoginId)) {
+                notificationCommandService.send(
+                        receiver,
+                        null,
+                        task.getProject(),
+                        task.getId(),
+                        typeKey
+                );
             }
         }
     }

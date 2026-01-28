@@ -189,12 +189,11 @@ public class TaskServiceImpl implements TaskService {
         String currentLoginId = SecurityUtil.getCurrentLoginId();
         List<TaskAssignee> assignees = taskAssigneeRepository.findAllByTask(task);
 
-        NotificationType type = NotificationType.builder().typeKey(typeKey).build();
 
         for (TaskAssignee ta : assignees) {
             Member receiver = ta.getProjectMember().getMember();
-            if (!receiver.getLoginId().equals(currentLoginId)) {
-                notificationCommandService.send(receiver, null, task.getProject(), task.getId(), type);
+            if (receiver != null && !receiver.getLoginId().equals(currentLoginId)) {
+                notificationCommandService.send(receiver, null, task.getProject(), task.getId(), typeKey);
             }
         }
     }
@@ -202,10 +201,12 @@ public class TaskServiceImpl implements TaskService {
     // 모든 담당자들에게 알림 발송 (업무 생성/태그)
     private void sendNotificationToAllAssignees(Task task, String typeKey) {
         List<TaskAssignee> assignees = taskAssigneeRepository.findAllByTask(task);
-        NotificationType type = NotificationType.builder().typeKey(typeKey).build();
 
         for (TaskAssignee ta : assignees) {
-            notificationCommandService.send(ta.getProjectMember().getMember(), null, task.getProject(), task.getId(), type);
+            Member receiver = ta.getProjectMember().getMember();
+            if (receiver != null) {
+                notificationCommandService.send(receiver, null, task.getProject(), task.getId(), typeKey);
+            }
         }
     }
 
