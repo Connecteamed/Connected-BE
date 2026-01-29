@@ -25,6 +25,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor // JwtUtil과 Service 주입을 위해 필요합니다.
@@ -51,6 +57,7 @@ public class SecurityConfig {
         configureCommonSecurity(http);
         http
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/", "/index.html", "/document.html",
                     "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error",
@@ -70,6 +77,7 @@ public class SecurityConfig {
         configureCommonSecurity(http);
         http
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/", "/index.html", "/document.html",
                     "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error",
@@ -99,11 +107,32 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "https://api.connecteamed.shop",
+                "https://connecteamed.shop"
+
+        ));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Refresh-Token", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        config.setAllowCredentials(true); 
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
     //공통 설정
     private void configureCommonSecurity(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
