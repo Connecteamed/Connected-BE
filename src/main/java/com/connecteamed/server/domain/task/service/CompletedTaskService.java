@@ -1,6 +1,9 @@
 package com.connecteamed.server.domain.task.service;
 
+import com.connecteamed.server.domain.member.entity.Member;
 import com.connecteamed.server.domain.member.repository.MemberRepository;
+import com.connecteamed.server.domain.notification.entity.NotificationType;
+import com.connecteamed.server.domain.notification.service.NotificationCommandService;
 import com.connecteamed.server.domain.task.dto.CompletedTaskDetailRes;
 import com.connecteamed.server.domain.task.dto.CompletedTaskListRes;
 import com.connecteamed.server.domain.task.dto.CompletedTaskUpdateReq;
@@ -33,6 +36,7 @@ public class CompletedTaskService {
     private final TaskAssigneeRepository taskAssigneeRepository;
     private final TaskNoteRepository taskNoteRepository;
     private final MemberRepository  memberRepository;
+    private final NotificationCommandService  notificationCommandService;
 
     // 완료한 업무 목록 조회
     public CompletedTaskListRes getCompletedTasks(Long projectId) {
@@ -79,7 +83,14 @@ public class CompletedTaskService {
     public void updateCompletedTaskStatus(Long taskId, TaskStatus taskStatus) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "해당 ID의 업무를 찾을 수 없습니다."));
+
+        TaskStatus oldStatus = task.getStatus();
         task.updateStatus(taskStatus);
+
+        // 완료한 업무 상태 변경 시 알림 발송
+        if (oldStatus == TaskStatus.DONE && taskStatus == TaskStatus.IN_PROGRESS) {
+            sendNotificationToOthers(task, "TASK_RESTARTED");
+        }
     }
 
     // 완료한 업무 상세 조회
@@ -120,6 +131,9 @@ public class CompletedTaskService {
                 .orElseGet(() -> createNewNote(task, currentMemberId));
 
         note.updateContent(req.noteContent());
+
+        // 완료한 업무 정보 수정 시 알림 발송
+        sendNotificationToOthers(task, "TASK_MODIFIED");
     }
 
     // 완료한 업무 삭제
@@ -128,6 +142,26 @@ public class CompletedTaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.NOT_FOUND, "해당 ID의 업무를 찾을 수 없습니다."));
         task.softDelete();
+    }
+
+    // 알림 발송 로직
+    private void sendNotificationToOthers(Task task, String typeKey) {
+        String currentLoginId = SecurityUtil.getCurrentLoginId();
+        List<TaskAssignee> assignees = taskAssigneeRepository.findAllByTaskId(task.getId());
+
+        for (TaskAssignee ta : assignees) {
+            Member receiver = ta.getProjectMember().getMember();
+            // 수정한 본인이 아닌 공동 담당자에게만 전송
+            if (receiver != null && !receiver.getLoginId().equals(currentLoginId)) {
+                notificationCommandService.send(
+                        receiver,
+                        null,
+                        task.getProject(),
+                        task.getId(),
+                        typeKey
+                );
+            }
+        }
     }
 
     private List<String> getAssigneeNames(Long taskId) {
